@@ -12,7 +12,6 @@ import {
     PopoverTrigger,
     PopoverContent,
     useColorModeValue,
-    useBreakpointValue,
     useDisclosure,
   } from '@chakra-ui/react';
   import {
@@ -38,7 +37,8 @@ import logo from '../images/logo.jpg';
           borderBottom={1}
           borderStyle={'solid'}
           borderColor={useColorModeValue('gray.200', 'gray.900')}
-          align={'center'}>
+          align={'center'}
+          >
           <Flex
             flex={{ base: 1, md: 'auto' }}
             ml={{ base: -2 }}
@@ -53,7 +53,7 @@ import logo from '../images/logo.jpg';
             />
           </Flex>
           <Flex flex={{ base: 1 }} justify={{ base: 'center', md: 'start' }}>
-          <div><img src={logo} alt="logo" width={70} height={70}/></div>
+          <img src={logo} alt="logo" width={70} height={70}/>
             <Flex display={{ base: 'none', md: 'flex' }} ml={10}>
               <DesktopNav />
             </Flex>
@@ -77,10 +77,10 @@ import logo from '../images/logo.jpg';
               fontSize={'sm'}
               fontWeight={600}
               color={'white'}
-              bg={'pink.400'}
+              bg={'purple.400'}
               href={'#'}
               _hover={{
-                bg: 'pink.300',
+                bg: 'purple.300',
               }}>
               Sign Up
             </Button>
@@ -149,12 +149,12 @@ import logo from '../images/logo.jpg';
         display={'block'}
         p={2}
         rounded={'md'}
-        _hover={{ bg: useColorModeValue('pink.50', 'gray.900') }}>
+        _hover={{ bg: useColorModeValue('purple.50', 'gray.900') }}>
         <Stack direction={'row'} align={'center'}>
           <Box>
             <Text
               transition={'all .3s ease'}
-              _groupHover={{ color: 'pink.400' }}
+              _groupHover={{ color: 'purple.400' }}
               fontWeight={500}>
               {label}
             </Text>
@@ -168,7 +168,7 @@ import logo from '../images/logo.jpg';
             justify={'flex-end'}
             align={'center'}
             flex={1}>
-            <Icon color={'pink.400'} w={5} h={5} as={ChevronRightIcon} />
+            <Icon color={'purple.400'} w={5} h={5} as={ChevronRightIcon} />
           </Flex>
         </Stack>
       </Link>
