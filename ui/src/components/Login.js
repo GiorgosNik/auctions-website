@@ -9,6 +9,7 @@ import {
     Heading,
     CloseButton,
   } from '@chakra-ui/react';
+
 import { useState, useCallback } from 'react';
 
 export default function LoginCard({ onLoginChange }) {
@@ -29,14 +30,23 @@ export default function LoginCard({ onLoginChange }) {
     const submitHandler = (event) => {
         event.preventDefault();
     
-        // const data = {
-        //   username: username,
-        //   password: username,
-        // };
+        const body = {
+          username,
+          password
+        };
     
-        //props.onSaveUser(data);
-        setUsername('');
-        setPassword('');
+        try {
+          fetch('http://localhost:5000/login', {
+            method: 'POST',
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(body)
+          });
+          setUsername('');
+          setPassword('');
+        } catch (err) {
+          console.error(err.message);
+        }
+        
       };
   
     return (
@@ -52,7 +62,7 @@ export default function LoginCard({ onLoginChange }) {
                 <Heading fontSize={'4xl'} paddingBottom={7}>Sign in</Heading>
             </Stack>
             <Stack spacing={4}>
-                <FormControl id="username">
+                <FormControl id="username" isRequired>
                     <FormLabel>Username</FormLabel>
                     <Input 
                         type="username" 
@@ -60,7 +70,7 @@ export default function LoginCard({ onLoginChange }) {
                         onChange={usernameChangeHandler}
                     />
                 </FormControl>
-                <FormControl id="password">
+                <FormControl id="password" isRequired>
                     <FormLabel>Password</FormLabel>
                     <Input 
                         type="password" 
@@ -76,10 +86,10 @@ export default function LoginCard({ onLoginChange }) {
                     </Stack>
                     <Button
                     onClick={submitHandler}
-                    bg={'blue.400'}
+                    bg={'purple.400'}
                     color={'white'}
                     _hover={{
-                        bg: 'blue.500',
+                        bg: 'purple.500',
                     }}>
                     Sign in
                     </Button>

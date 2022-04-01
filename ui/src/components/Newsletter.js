@@ -10,8 +10,52 @@ import {
     createIcon,
   } from '@chakra-ui/react';
   
+import { useState } from 'react';
+
   export default function CardWithIllustration() {
+
+    const [email, setEmail] = useState('');
+    const [errorMessage, setErrorMessage] = useState('');
+    const [successMessage, setSuccessMessage] = useState('');
+
+
+    const emailChangeHandler = (event) => {
+        setEmail(event.target.value);
+    };
+
+    const submitHandler = (event) => {
+        event.preventDefault();
+        
+        const body = {
+          email
+        };
+
+          fetch('http://localhost:5000/newsletter', {
+            method: 'POST',
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(body)
+          })
+          .then(async res => {
+            console.log(res.status);
+            if (res.status === 400) {
+              setSuccessMessage("");   
+              document.getElementById('input').value = ''   
+              setErrorMessage("Invalid email");
+            } else if (res.status === 409) {
+              setSuccessMessage("");      
+              document.getElementById('input').value = ''   
+              setErrorMessage("You have already subscribed");
+            } else if (res.status === 201) {
+              setErrorMessage("");
+              document.getElementById('input').value = ''   
+              setSuccessMessage("Thank you!");      
+            }
+            console.log(errorMessage);
+          });
+    };
+
     return (
+
       <Flex
         minH={'100vh'}
         align={'center'}
@@ -37,8 +81,13 @@ import {
               Subscribe to our newsletter & stay up to date!
             </Text>
           </Stack>
+          { errorMessage !== '' &&  <span id="message" style={{color: "red", fontSize: "15px"}}>{errorMessage}</span> }
+          { successMessage !== '' &&  <span id="message" style={{color: "green", fontSize: "15px"}}>{successMessage}</span> }
           <Stack spacing={4} direction={{ base: 'column', md: 'row' }} w={'full'}>
             <Input
+              id="input"
+              isRequired
+              onChange={emailChangeHandler}
               type={'text'}
               placeholder={'john@doe.net'}
               color={useColorModeValue('gray.800', 'gray.200')}
@@ -50,13 +99,15 @@ import {
                 outline: 'none',
               }}
             />
+           
             <Button
-              bg={'blue.400'}
+              onClick={submitHandler}
+              bg={'purple.400'}
               rounded={'full'}
               color={'white'}
               flex={'1 0 auto'}
-              _hover={{ bg: 'blue.500' }}
-              _focus={{ bg: 'blue.500' }}>
+              _hover={{ bg: 'purple.500' }}
+              _focus={{ bg: 'purple.500' }}>
               Subscribe
             </Button>
           </Stack>

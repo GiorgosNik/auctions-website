@@ -2,6 +2,10 @@ const express = require("express");
 const app = express();
 const cors = require("cors");
 const client = require("./database");
+const { encode } = require('./modules/Hashing.js');
+const { validateEmail, validatePhoneNumber, validateName } = require('./modules/Validation.js');
+const jwt = require("jsonwebtoken");
+
 client.connect();
 
 // MIDDLEWARE
@@ -12,11 +16,26 @@ app.use(express.json());
 // add newsletter email
 app.post("/newsletter", async(req, res) => {
     try {
-        const email = req.body.email;
-        const newEmail = await client.query("INSERT INTO newsletter (email) VALUES($1) RETURNING *", [email]);
-        res.json(newEmail.rows[0]);
+        const { email } = req.body;
+        if (!email) {
+            return res.status(400).json({ error: 'Field cannot be blank' });
+        }
+        if (!validateEmail(email)) {
+            return res.status(400).json({ error: 'You should provide a valid email address' });
+        }
+        if (email.length > 20) {
+            return res.status(400).json({ error: 'Email length is too long' });
+        }
+        await client.query("SELECT * FROM newsletter WHERE email = $1", [email], function(err, result) {
+            if (result.rows.length != 0) {
+                return res.status(409).json({ error: 'You have subscribed before' });
+            } else {
+                const newEmail = client.query("INSERT INTO newsletter (email) VALUES($1) RETURNING *", [email]);
+                return res.status(201).json(newEmail);
+            }
+        });
     } catch (err) {
-        console.error(err.message);
+        console.error(err);
     }
 })
 
@@ -43,22 +62,43 @@ app.delete("/newsletter", async(req, res) => {
 // create user
 app.post("/register", async(req, res) => {
     try {
-        const account = req.body;
-        const username = account.username;
-        const password = account.password;
-        const firstname = account.firstname;
-        const lastname = account.lastname;
-        const email = account.email;
-        const phone = account.phone;
-        const country = account.country;
-        const address = account.address;
-        const postcode = account.postcode;
-        const taxcode = account.taxcode;
-        const visitor = account.visitor;
-        const approved = account.approved;
+        const { username, 
+                password, 
+                firstname, 
+                lastname,
+                email,
+                phone,
+                country,
+                address,
+                postcode,
+                taxcode,
+                visitor
+            } = req.body;
 
-        const newUser = await client.query("INSERT INTO account (username, password, firstname, lastname, email, phone, country, address, postcode, taxcode, visitor, approved) VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12 ) RETURNING *",[username, password, firstname, lastname, email, phone, country, address, postcode, taxcode, visitor, approved]);
-        res.json(newUser.rows[0]);
+        if (!(username && password && firstname && lastname && email && phone && country && address && postcode && taxcode && visitor)) {
+            res.status(400).send("Fields cannot be blank");
+        }
+        if (!(validateEmail(email) && validateName(firstname) && validateName(lastname) && validatePhoneNumber(phone))) {
+            res.status(400).send("Invalid input");
+        }
+
+        await client.query("SELECT * FROM account WHERE username = $1)", [username], function(err, result) {
+            if (result.rows.length != 0) {
+                return res.status(409).send("Username taken. Please type an other username");
+            } else {
+                const newUser = client.query("INSERT INTO account (username, password, firstname, lastname, email, phone, country, address, postcode, taxcode, visitor, approved) VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) RETURNING *",[username, password, firstname, lastname, email.toLowerCase(), phone, country, address, postcode, taxcode, visitor, 0]);
+                const token = jwt.sign(
+                    { user_id: newUser.id, username },
+                    process.env.SECRET_KEY,
+                    {
+                      expiresIn: "2h",
+                    }
+                );
+                newUser.token = token;
+                
+                res.status(201).json(newUser.rows[0]);
+            }
+        });
     } catch (err) {
         console.error(err.message);
     }
@@ -67,11 +107,28 @@ app.post("/register", async(req, res) => {
 // login
 app.post("/login", async(req, res) => {
     try {
-        const account = req.body;
-        const username = account.username;
-        const password = account.password;
+        const { username, password } = req.body;
 
-        await client.query("SELECT * FROM account WHERE username = $1 AND password = $2)", [username, password]);
+        if (!(username && password)) {
+            res.status(400).send("Fields cannot be blank");
+        }
+        
+        const user = await client.query("SELECT * FROM account WHERE username = $1 AND password = $2)", [username, encode(password)], function(err, result) {
+            if (result.rows.length != 0) {
+                const token = jwt.sign(
+                    { user_id: user.id, username },
+                    process.env.SECRET_KEY,
+                    {
+                      expiresIn: "2h",
+                    }
+                );
+                user.token = token;
+                res.status(200).json(user);
+            } else {
+                res.status(400).send("Invalid Credentials");
+            }
+        });
+        await client.query("SELECT * FROM account WHERE username = $1 AND password = $2)", [username, encode(password)]);
         res.json("User is logged in");
     } catch (err) {
         console.error(err.message);
@@ -104,6 +161,16 @@ app.delete("/users/:id", async(req, res) => {
         const id = req.params.id;
         await client.query("DELETE FROM account WHERE id = $1", [id]);
         res.json("User was deleted");
+    } catch (error) {
+        console.error(err.message);
+    } 
+})
+
+// delete accounts
+app.delete("/users", async(req, res) => {
+    try {
+        await client.query("DELETE FROM account");
+        res.json("Accounts were deleted");
     } catch (error) {
         console.error(err.message);
     } 

@@ -15,8 +15,7 @@ CREATE TABLE account(
     visitor boolean,
     approved boolean
 );
-
 CREATE TABLE newsletter(
-    newsletter_id SERIAL PRIMARY KEY,
+    id SERIAL PRIMARY KEY,
     email VARCHAR(20)
 );
