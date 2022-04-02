@@ -112,11 +112,9 @@ export default function SignupCard({ onRegisterChange }) {
         .then(async (res) => {
           if (res?.error) {
             setSuccessMessage("");
-            document.getElementById("input").value = "";
             setErrorMessage(res?.error);
           } else {
             setErrorMessage("");
-            document.getElementById("input").value = "";
             setSuccessMessage("Thank you!");
             window.location.href = "/waitingroom";
           }

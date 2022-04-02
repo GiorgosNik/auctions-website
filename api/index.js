@@ -2,7 +2,6 @@ const express = require("express");
 const app = express();
 const cors = require("cors");
 const client = require("./database");
-const encode = require("./modules/Hashing.js");
 const { validateEmail, validateName } = require("./modules/Validation.js");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
@@ -210,39 +209,43 @@ app.post("/login", async (req, res) => {
   try {
     const { username, password } = req.body;
 
-    if (!(username && password)) {
-      return res.status(400).json({ error: "Fields cannot be blank" });
+    if (!username) {
+      return res.status(400).json({ error: "Username cannot be blank" });
     }
-    if (username.length > 30 && password.length > 30) {
-      return res.status(400).json({ error: "Input length is too long" });
+    if (!password) {
+      return res.status(400).json({ error: "Password cannot be blank" });
     }
-    // const getAccounts = () => client.query("SELECT * FROM account WHERE username = $1 AND password = $2", [username]);
-    // const {rows} = await getAccounts();
 
-    const user = await client.query(
-      "SELECT * FROM account WHERE username = $1 AND password = $2)",
-      [username, encode(password)],
+    await client.query(
+      "SELECT * FROM account WHERE username = $1",
+      [username],
       function (err, result) {
-        if (result.rows.length != 0) {
-          const token = jwt.sign(
-            { user_id: user.id, username },
-            process.env.SECRET_KEY,
-            {
-              expiresIn: "2h",
+        const user = result.rows[0];
+        if (result.rowCount != 0) {
+          bcrypt.compare(
+            password,
+            result.rows[0].password,
+            function (err, compare) {
+              if (compare == true) {
+                const token = jwt.sign(
+                  { user_id: user.id, username },
+                  process.env.SECRET_KEY,
+                  {
+                    expiresIn: "2h",
+                  }
+                );
+                user.token = token;
+                return res.status(200).json(user);
+              } else {
+                return res.status(401).json({ error: "Wrong password" });
+              }
             }
           );
-          user.token = token;
-          res.status(200).json(user);
         } else {
-          res.status(400).send("Invalid Credentials");
+          return res.status(401).json({ error: "Wrong username" });
         }
       }
     );
-    await client.query(
-      "SELECT * FROM account WHERE username = $1 AND password = $2)",
-      [username, encode(password)]
-    );
-    res.json("User is logged in");
   } catch (err) {
     console.error(err.message);
   }
@@ -289,6 +292,17 @@ app.delete("/users", async (req, res) => {
   } catch (error) {
     console.error(err.message);
   }
+});
+
+app.put("/logout", async (req, res) => {
+  const authHeader = req.headers["authorization"];
+  jwt.sign(authHeader, "", { expiresIn: 1 }, (logout, err) => {
+    if (logout) {
+      res.send({ msg: "You have been logged out" });
+    } else {
+      res.send({ msg: "Error" });
+    }
+  });
 });
 
 app.listen(5000, () => {

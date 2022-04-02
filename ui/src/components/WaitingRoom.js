@@ -13,7 +13,6 @@ export default function CallToActionWithIllustration() {
   return (
     <Container maxW={"5xl"}>
       <Stack
-        style={{ zIndex: "0" }}
         textAlign={"center"}
         align={"center"}
         spacing={{ base: 8, md: 10 }}
@@ -37,7 +36,8 @@ export default function CallToActionWithIllustration() {
         </Text>
         <Stack spacing={6} direction={"row"}>
           <Button
-            style={{height: '50px', width : '180px', fontSize:'20px'}}
+            zIndex={"0"}
+            style={{ height: "50px", width: "180px", fontSize: "20px" }}
             rounded={"full"}
             px={8}
             colorScheme={"purple"}
