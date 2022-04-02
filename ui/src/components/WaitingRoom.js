@@ -13,6 +13,7 @@ export default function CallToActionWithIllustration() {
   return (
     <Container maxW={"5xl"}>
       <Stack
+        style={{ zIndex: "0" }}
         textAlign={"center"}
         align={"center"}
         spacing={{ base: 8, md: 10 }}

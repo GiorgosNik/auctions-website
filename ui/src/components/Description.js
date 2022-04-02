@@ -47,7 +47,7 @@ import {
           <Stack spacing={4}>
             <Heading>Online auctions website</Heading>
             <Text color={'gray.500'} fontSize={'lg'}>
-              Get the product you want at a bargain price
+            Join millions of users around the world in one of the fastest growing trading communities. Looking to sell? Bid It provides the simplest and safest way to offer your products to an ever growing pool of consumers.
             </Text>
             <Stack
               spacing={4}

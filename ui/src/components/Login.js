@@ -52,6 +52,7 @@ export default function LoginCard({ onLoginChange }) {
     return (
         <Stack  mx={'auto'} maxW={'lg'} px={6}>
           <Box 
+            style={{ zIndex: "1" }}
             position={"absolute"}
             rounded={'lg'}
             bg={useColorModeValue('white', 'gray.700')}
