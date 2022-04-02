@@ -34,23 +34,23 @@ export default function SimpleThreeColumns() {
       <SimpleGrid padding={20} columns={{ base: 1, md: 3 }} spacing={2}>
         <Feature
           icon={<Icon as={FcAssistant} w={10} h={10} />}
-          title={'Lifetime Support'}
+          title={'Secure communication'}
           text={
-            'Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore...'
+            'Our live buyer-seller chatting platform guarantees flexibility and security for every purchase.'
           }
         />
         <Feature
           icon={<Icon as={FcDonate} w={10} h={10} />}
-          title={'Unlimited Donations'}
+          title={'No hidden fees'}
           text={
-            'Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore...'
+            'Shop through our expansive catalog, being sure that for each price tag, we guarantee that what you see is what you get.'
           }
         />
         <Feature
           icon={<Icon as={FcInTransit} w={10} h={10} />}
           title={'Instant Delivery'}
           text={
-            'Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore...'
+            'We work hand in hand with the leading courier companies and offer flexible shipping solutions on all items.'
           }
         />
       </SimpleGrid>
