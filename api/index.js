@@ -195,8 +195,7 @@ app.post("/register", async (req, res) => {
             expiresIn: "2h",
           }
         );
-        newUser.token = token;
-        return res.status(201).json(newUser);
+        return res.status(201).json({ token });
       });
     }
   } catch (err) {
@@ -234,8 +233,7 @@ app.post("/login", async (req, res) => {
                     expiresIn: "2h",
                   }
                 );
-                user.token = token;
-                return res.status(200).json(user);
+                return res.status(200).json({ token });
               } else {
                 return res.status(401).json({ error: "Wrong password" });
               }

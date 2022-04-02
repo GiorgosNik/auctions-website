@@ -7,7 +7,6 @@ import {
   FormControl,
   FormLabel,
   Input,
-  NumberInput,
   InputLeftElement,
   InputRightAddon,
   InputGroup,
@@ -16,14 +15,10 @@ import {
   StackDivider,
   useColorModeValue,
   Textarea,
-  List,
-  ListItem,
 } from "@chakra-ui/react";
-import React, { useState } from "react";
-import { MdLocalShipping } from "react-icons/md";
+import React from "react";
 
 export default function Simple() {
-  const [val, setVal] = useState(0);
   return (
     <Container maxW={"7xl"}>
       <Stack>

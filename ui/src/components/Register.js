@@ -17,16 +17,13 @@ import {
   RadioGroup,
 } from "@chakra-ui/react";
 
-import { useState, useCallback } from "react";
+import { useState, useContext } from "react";
 import { ViewIcon, ViewOffIcon } from "@chakra-ui/icons";
+import { UserContext } from "./UserProvider";
+import jwt_decode from "jwt-decode";
 
-export default function SignupCard({ onRegisterChange }) {
-  const closeModal = useCallback(
-    (event) => {
-      onRegisterChange(event.target.value);
-    },
-    [onRegisterChange]
-  );
+export default function SignupCard({ onClose }) {
+  const { setUser } = useContext(UserContext);
 
   const [showPassword, setShowPassword] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
@@ -116,7 +113,15 @@ export default function SignupCard({ onRegisterChange }) {
           } else {
             setErrorMessage("");
             setSuccessMessage("Thank you!");
+            setUser(res?.user);
+            localStorage.setItem("user", res?.token);
+            var decoded = jwt_decode(res.token);
+            console.log(decoded.username);
+            if (decoded.username === "admin") {
+              window.location.href = "/users";
+            }
             window.location.href = "/waitingroom";
+            onClose();
           }
           console.log(errorMessage);
         });
@@ -135,7 +140,7 @@ export default function SignupCard({ onRegisterChange }) {
         boxShadow={"lg"}
         p={9}
       >
-        <CloseButton style={{ float: "right" }} onClick={closeModal} />
+        <CloseButton style={{ float: "right" }} onClick={onClose} />
         <Stack align={"center"}>
           <Heading fontSize={"4xl"} textAlign={"center"}>
             Sign up

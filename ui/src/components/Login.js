@@ -12,22 +12,18 @@ import {
   InputRightElement,
 } from "@chakra-ui/react";
 
-import { useState, useCallback } from "react";
+import { useState, useContext } from "react";
 import { ViewIcon, ViewOffIcon } from "@chakra-ui/icons";
+import { UserContext } from "./UserProvider";
+import jwt_decode from "jwt-decode";
 
-export default function LoginCard({ onLoginChange }) {
-  const closeModal = useCallback(
-    (event) => {
-      onLoginChange(event.target.value);
-    },
-    [onLoginChange]
-  );
-  const [loggedIn, setLoggedIn] = useState(false);
+export default function LoginCard({ onClose }) {
+  const { setUser } = useContext(UserContext);
+
   const [showPassword, setShowPassword] = useState(false);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
-  const [successMessage, setSuccessMessage] = useState("");
 
   const usernameChangeHandler = (event) => {
     setUsername(event.target.value);
@@ -53,20 +49,20 @@ export default function LoginCard({ onLoginChange }) {
         .then((res) => res.json())
         .then(async (res) => {
           if (res?.error) {
-            setSuccessMessage("");
             setErrorMessage(res?.error);
           } else {
             setErrorMessage("");
-            setSuccessMessage("Thank you!");
-            console.log(res);
-            if (res.approved !== true) {
-              window.location.href = "/waitingroom";
+            setUser(res?.user);
+            localStorage.setItem("user", res?.token);
+            var decoded = jwt_decode(res.token);
+            console.log(decoded.username);
+            if (decoded.username === "admin") {
+              window.location.href = "/users";
             } else {
-              setLoggedIn(true);
-              window.location.reload();
+              window.location.href = "/";
             }
+            onClose();
           }
-          console.log(errorMessage);
         });
     } catch (err) {
       console.error(err.message);
@@ -83,7 +79,7 @@ export default function LoginCard({ onLoginChange }) {
         boxShadow={"lg"}
         p={70}
       >
-        <CloseButton style={{ float: "right" }} onClick={closeModal} />
+        <CloseButton style={{ float: "right" }} onClick={onClose} />
         <Stack align={"center"}>
           <Heading fontSize={"4xl"} paddingBottom={7}>
             Sign in
@@ -130,11 +126,7 @@ export default function LoginCard({ onLoginChange }) {
                 {errorMessage}
               </span>
             )}
-            {successMessage !== "" && (
-              <span id="message" style={{ color: "green", fontSize: "15px" }}>
-                {successMessage}
-              </span>
-            )}
+
             <Button
               onClick={submitHandler}
               bg={"purple.400"}
