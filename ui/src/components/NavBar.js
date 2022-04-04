@@ -53,7 +53,7 @@ export default function NavBar() {
         borderBottom={1}
         borderStyle={"solid"}
         borderColor={useColorModeValue("gray.200", "gray.900")}
-        align={"center"}
+        align={""}
       >
         <Flex
           flex={{ base: 1, md: "auto" }}
@@ -69,7 +69,7 @@ export default function NavBar() {
             aria-label={"Toggle Navigation"}
           />
         </Flex>
-        <Flex flex={{ base: 1 }} justify={{ base: "center", md: "start" }}>
+        <Flex flex={{ base: 1 }} justify={{ base: "", md: "start" }}>
           <Link href={"/"}>
             <img src={logo} alt="logo" width={70} height={70} />
           </Link>
@@ -195,7 +195,7 @@ const MobileNavItem = ({ label, href }: NavItem) => {
         as={Link}
         href={href ?? "#"}
         justify={"space-between"}
-        align={"center"}
+        align={""}
         _hover={{
           textDecoration: "none",
         }}

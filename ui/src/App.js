@@ -14,6 +14,7 @@ import {
   Newsletter,
   UserContext,
   UserProvider,
+  UserPage,
 } from "./components";
 
 function App() {
@@ -62,6 +63,14 @@ const AppHelper = () => {
             element={
               <>
                 <UsersList />
+              </>
+            }
+          />
+          <Route
+            path="/users/:userId"
+            element={
+              <>
+                <UserPage />
               </>
             }
           />

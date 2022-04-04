@@ -10,10 +10,18 @@ import {
   TableCaption,
   TableContainer,
   Stack,
+  Box,
+  Button,
 } from "@chakra-ui/react";
+
+import { CheckIcon, CloseIcon, ArrowForwardIcon } from "@chakra-ui/icons";
 
 export default function UsersList() {
   const [users, setUsers] = useState([]);
+
+  const goToUserPage = (id) => {
+    window.location.href = "/users/" + id;
+  };
 
   const fetchUsers = async () => {
     const { data } = await Axios.get("http://localhost:5000/users");
@@ -29,33 +37,64 @@ export default function UsersList() {
   return (
     <Stack>
       <br></br>
-      <TableContainer>
-        <Table variant="simple" colorScheme="purple">
-          <TableCaption placement="top" fontSize={20}>
-            Users
-          </TableCaption>
-          <Thead>
-            <Tr>
-              <Th>Index</Th>
-              <Th>Username</Th>
-              <Th>Approved</Th>
-            </Tr>
-          </Thead>
-          <Tbody>
-            {users.map((user, index) => {
-              console.log(user);
-
-              return (
-                <Tr>
-                  <Td>{index}</Td>
-                  <Td>{user.username}</Td>
-                  <Td>{user.approved}</Td>
-                </Tr>
-              );
-            })}
-          </Tbody>
-        </Table>
-      </TableContainer>
+      <Box p={50} align={"center"}>
+        <TableContainer
+          bg={"purple.100"}
+          borderRadius={30}
+          maxWidth={800}
+          border={"1px solid"}
+        >
+          <Table variant="simple">
+            <TableCaption placement="top" fontSize={20}>
+              Users
+            </TableCaption>
+            <Thead>
+              <Tr>
+                <Th>#</Th>
+                <Th>Username</Th>
+                <Th>Approved</Th>
+                <Th></Th>
+              </Tr>
+            </Thead>
+            <Tbody>
+              {users.map((user, index) => {
+                console.log(user);
+                const username = user.username;
+                console.log(username);
+                if (username !== "admin") {
+                  return (
+                    <Tr>
+                      <Td>{index}</Td>
+                      <Td>{user.username}</Td>
+                      {user.approved && (
+                        <Td>
+                          <CheckIcon w={3} h={3} color={"green"} />
+                        </Td>
+                      )}
+                      {!user.approved && (
+                        <Td>
+                          <CloseIcon w={3} h={3} color={"red"} />
+                        </Td>
+                      )}
+                      <Td>
+                        <Button
+                          rightIcon={<ArrowForwardIcon />}
+                          colorScheme="purple"
+                          variant="outline"
+                          onClick={() => goToUserPage(user.id)}
+                        >
+                          Details
+                        </Button>
+                      </Td>
+                    </Tr>
+                  );
+                }
+                return null;
+              })}
+            </Tbody>
+          </Table>
+        </TableContainer>
+      </Box>
     </Stack>
   );
 }

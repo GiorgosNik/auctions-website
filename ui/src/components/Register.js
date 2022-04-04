@@ -13,8 +13,6 @@ import {
   Heading,
   CloseButton,
   Checkbox,
-  Radio,
-  RadioGroup,
 } from "@chakra-ui/react";
 
 import { useState, useContext } from "react";
@@ -40,7 +38,6 @@ export default function SignupCard({ onClose }) {
   const [address, setAddress] = useState("");
   const [postcode, setPostcode] = useState("");
   const [taxcode, setTaxcode] = useState("");
-  const [visitor, setVisitor] = useState("0");
 
   const usernameChangeHandler = (event) => {
     setUsername(event.target.value);
@@ -75,9 +72,6 @@ export default function SignupCard({ onClose }) {
   const taxcodeChangeHandler = (event) => {
     setTaxcode(event.target.value);
   };
-  const visitorChangeHandler = (event) => {
-    setVisitor(event.target.value);
-  };
   const submitHandler = (event) => {
     event.preventDefault();
 
@@ -96,7 +90,6 @@ export default function SignupCard({ onClose }) {
       address,
       postcode,
       taxcode,
-      visitor,
     };
 
     try {
@@ -158,24 +151,6 @@ export default function SignupCard({ onClose }) {
                 <Input type="text" onChange={usernameChangeHandler} />
               </FormControl>
             </Box>
-            <RadioGroup defaultValue="0" id="visitor">
-              <Stack spacing={5} direction="row">
-                <Radio
-                  colorScheme="purple"
-                  value="0"
-                  onChange={visitorChangeHandler}
-                >
-                  as Bidder
-                </Radio>
-                <Radio
-                  colorScheme="purple"
-                  value="1"
-                  onChange={visitorChangeHandler}
-                >
-                  as Seller
-                </Radio>
-              </Stack>
-            </RadioGroup>
           </HStack>
           <HStack>
             <Box>
