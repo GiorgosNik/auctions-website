@@ -9,6 +9,7 @@ import {
   Input,
   InputLeftElement,
   InputRightAddon,
+  Select,
   InputGroup,
   Heading,
   SimpleGrid,
@@ -16,9 +17,12 @@ import {
   useColorModeValue,
   Textarea,
 } from "@chakra-ui/react";
-import React from "react";
+import React, { useState } from "react";
+import DatePicker from "react-date-picker";
 
 export default function Simple() {
+  const [val, setVal] = useState(0);
+  const [value, onChange] = useState(new Date());
   return (
     <Container maxW={"7xl"}>
       <Stack>
@@ -96,6 +100,14 @@ export default function Simple() {
                       resize="none"
                     />
                   </FormControl>
+                  <Stack direction={["column", "row"]}>
+                    <Select placeholder="Select Category">
+                      <option value="option1">Option 1</option>
+                      <option value="option2">Option 2</option>
+                      <option value="option3">Option 3</option>
+                    </Select>
+                  </Stack>
+                  
                 </Stack>
               </Stack>
             </Stack>
@@ -201,6 +213,9 @@ export default function Simple() {
                       </Box>
                     </Stack>
                   </FormControl>
+                  {/*<Box>
+                  <DatePicker  onChange={onChange} value={value} />
+                  </Box>*/}
                 </Stack>
               </Stack>
             </Stack>

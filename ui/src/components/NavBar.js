@@ -44,10 +44,11 @@ export default function NavBar() {
         <SignupCard onClose={() => setShowRegister(false)} />
       )}
       <Flex
-        className="navbar"
-        bg={useColorModeValue("white", "gray.800")}
-        color={useColorModeValue("gray.600", "white")}
-        minH={"60px"}
+        className='navbar'
+        zIndex={'1'}
+        bg={useColorModeValue('white', 'gray.800')}
+        color={useColorModeValue('gray.600', 'white')}
+        minH={'60px'}
         py={{ base: 2 }}
         px={{ base: 4 }}
         borderBottom={1}

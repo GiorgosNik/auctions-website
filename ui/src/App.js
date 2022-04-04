@@ -15,6 +15,7 @@ import {
   UserProvider,
   UsersList,
   UserPage,
+  AuctionPage,
   AuctionsList,
 } from "./components";
 
@@ -88,6 +89,14 @@ const AppHelper = () => {
             element={
               <>
                 <AuctionsList />
+              </>
+            }
+          />
+          <Route
+            path="/productPage"
+            element={
+              <>
+                <AuctionPage />
               </>
             }
           />
