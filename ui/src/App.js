@@ -9,12 +9,13 @@ import {
   Features,
   Description,
   WaitingRoom,
-  UsersList,
   AuctionCreationForm,
   Newsletter,
   UserContext,
   UserProvider,
+  UsersList,
   UserPage,
+  AuctionsList,
 } from "./components";
 
 function App() {
@@ -79,6 +80,14 @@ const AppHelper = () => {
             element={
               <>
                 <AuctionCreationForm />
+              </>
+            }
+          />
+          <Route
+            path="/auctions"
+            element={
+              <>
+                <AuctionsList />
               </>
             }
           />

@@ -9,4 +9,5 @@ export { default as LoginCard } from "./Login";
 export { default as SignupCard } from "./Register";
 export { default as UsersList } from "./UsersList";
 export { default as UserPage } from "./UserPage";
+export { default as AuctionsList } from "./AuctionsList";
 export * from "./UserProvider";
