@@ -7,7 +7,6 @@ import {
   FormControl,
   FormLabel,
   Input,
-  NumberInput,
   InputLeftElement,
   InputRightAddon,
   Select,

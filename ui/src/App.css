@@ -1,4 +1,9 @@
 .navbar {
   position: fixed;
-  width: 100%; 
+  width: 100%;
+}
+
+#input::placeholder {
+  color: grey;
+  opacity: 1;
 }
