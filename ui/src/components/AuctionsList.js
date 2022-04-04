@@ -20,11 +20,11 @@ export default function AuctionsList() {
   const [auctions, setAuctions] = useState([]);
 
   const goToAuctionPage = (id) => {
-    window.location.href = "/auctions/" + id;
+    window.location.href = "/myauctions/" + id;
   };
 
   const fetchAuctions = async () => {
-    const { data } = await Axios.get("http://localhost:5000/auctions");
+    const { data } = await Axios.get("http://localhost:5000/myauctions");
     const auctions = data;
     setAuctions(auctions);
     console.log(auctions);

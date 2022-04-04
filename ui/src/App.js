@@ -9,12 +9,12 @@ import {
   Features,
   Description,
   WaitingRoom,
-  AuctionCreationForm,
   Newsletter,
   UserContext,
   UserProvider,
   UsersList,
   UserPage,
+  AuctionCreation,
   AuctionPage,
   AuctionsList,
 } from "./components";
@@ -77,15 +77,15 @@ const AppHelper = () => {
             }
           />
           <Route
-            path="/creationForm"
+            path="/createauction"
             element={
               <>
-                <AuctionCreationForm />
+                <AuctionCreation />
               </>
             }
           />
           <Route
-            path="/auctions"
+            path="/myauctions"
             element={
               <>
                 <AuctionsList />
@@ -93,7 +93,7 @@ const AppHelper = () => {
             }
           />
           <Route
-            path="/productPage"
+            path="/productpage"
             element={
               <>
                 <AuctionPage />

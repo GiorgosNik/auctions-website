@@ -107,7 +107,6 @@ export default function Simple() {
                       <option value="option3">Option 3</option>
                     </Select>
                   </Stack>
-                  
                 </Stack>
               </Stack>
             </Stack>
@@ -221,7 +220,6 @@ export default function Simple() {
             </Stack>
 
             <Button
-              rounded={"none"}
               w={"full"}
               mt={8}
               size={"lg"}
@@ -233,6 +231,7 @@ export default function Simple() {
                 bg: "purple.400",
                 boxShadow: "lg",
               }}
+              borderRadius={10}
             >
               Create Listing
             </Button>

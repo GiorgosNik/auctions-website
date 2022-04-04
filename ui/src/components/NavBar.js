@@ -20,6 +20,12 @@ import { UserContext } from "./UserProvider";
 import logo from "../images/logo.jpg";
 import "../App.css";
 
+interface NavItem {
+  label: string;
+  subLabel?: string;
+  href?: string;
+}
+
 export default function NavBar() {
   const { user, setUser } = React.useContext(UserContext);
   const [loggedIn, setLoggedIn] = React.useState(false);
@@ -35,6 +41,21 @@ export default function NavBar() {
     );
   }, [user]);
 
+  const itemsMap: Array<NavItem> = [
+    {
+      label: "Browse Auctions",
+      href: "#",
+    },
+    {
+      label: "Create an Auction",
+      href: "/createauction",
+    },
+    {
+      label: "My Auctions",
+      href: "/myauctions",
+    },
+  ];
+
   return (
     <Box>
       {!loggedIn && showLogin && (
@@ -44,11 +65,11 @@ export default function NavBar() {
         <SignupCard onClose={() => setShowRegister(false)} />
       )}
       <Flex
-        className='navbar'
-        zIndex={'1'}
-        bg={useColorModeValue('white', 'gray.800')}
-        color={useColorModeValue('gray.600', 'white')}
-        minH={'60px'}
+        className="navbar"
+        zIndex={"1"}
+        bg={useColorModeValue("white", "gray.800")}
+        color={useColorModeValue("gray.600", "white")}
+        minH={"60px"}
         py={{ base: 2 }}
         px={{ base: 4 }}
         borderBottom={1}
@@ -75,7 +96,8 @@ export default function NavBar() {
             <img src={logo} alt="logo" width={70} height={70} />
           </Link>
           <Flex display={{ base: "none", md: "flex" }} ml={10}>
-            <DesktopNav />
+            {loggedIn && <DesktopNav itemsMap={itemsMap} />}
+            {!loggedIn && <DesktopNav itemsMap={[]} />}
           </Flex>
         </Flex>
 
@@ -103,7 +125,6 @@ export default function NavBar() {
                 fontWeight={600}
                 color={"white"}
                 bg={"purple.400"}
-                href={"#"}
                 _hover={{
                   bg: "purple.300",
                 }}
@@ -118,7 +139,6 @@ export default function NavBar() {
               fontWeight={600}
               color={"white"}
               bg={"purple.400"}
-              href={"#"}
               _hover={{
                 bg: "purple.300",
               }}
@@ -133,7 +153,8 @@ export default function NavBar() {
         </Stack>
       </Flex>
       <Collapse in={isOpen} animateOpacity>
-        <MobileNav />
+        {loggedIn && <MobileNav itemsMap={itemsMap} />}
+        {!loggedIn && <MobileNav itemsMap={[]} />}
       </Collapse>
       <br></br>
       <br></br>
@@ -141,13 +162,13 @@ export default function NavBar() {
   );
 }
 
-const DesktopNav = () => {
+const DesktopNav = ({ itemsMap }) => {
   const linkColor = useColorModeValue("gray.600", "gray.200");
   const linkHoverColor = useColorModeValue("gray.800", "white");
 
   return (
     <Stack direction={"row"} spacing={4}>
-      {NAV_ITEMS.map((navItem) => (
+      {itemsMap.map((navItem) => (
         <Box key={navItem.label}>
           <Popover trigger={"hover"} placement={"bottom-start"}>
             <PopoverTrigger>
@@ -172,14 +193,14 @@ const DesktopNav = () => {
   );
 };
 
-const MobileNav = () => {
+const MobileNav = ({ itemsMap }) => {
   return (
     <Stack
       bg={useColorModeValue("white", "gray.800")}
       p={4}
       display={{ md: "none" }}
     >
-      {NAV_ITEMS.map((navItem) => (
+      {itemsMap.map((navItem) => (
         <MobileNavItem key={navItem.label} {...navItem} />
       ))}
     </Stack>
@@ -222,28 +243,3 @@ const MobileNavItem = ({ label, href }: NavItem) => {
     </Stack>
   );
 };
-
-interface NavItem {
-  label: string;
-  subLabel?: string;
-  href?: string;
-}
-
-const NAV_ITEMS: Array<NavItem> = [
-  // {
-  //   label: 'Browse Bids',
-  //   href: '#',
-  // },
-  // {
-  //   label: 'Create Bids',
-  //   href: '#',
-  // },
-  // {
-  //   label: 'My Bids',
-  //   href: '#',
-  // },
-  // {
-  //   label: 'Hire Designers',
-  //   href: '#',
-  // },
-];
