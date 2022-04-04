@@ -7,6 +7,7 @@ import Features from "./components/Features";
 import Description from "./components/Description";
 import WaitingRoom from "./components/WaitingRoom";
 import AuctionCreationForm from "./components/AuctionCreationForm";
+import AuctionPage from "./components/AuctionPage";
 import Newsletter from "./components/Newsletter";
 import { useState } from "react";
 import LoginCard from "./components/Login";
@@ -30,6 +31,7 @@ function App() {
           <Route path="/" element={<><Description/><Features/><Newsletter/></>} />
           <Route path="/waitingroom" element={<><WaitingRoom/></>} />
           <Route path="/creationForm" element={<><AuctionCreationForm/></>} />
+          <Route path="/productPage" element={<><AuctionPage/></>} />
         </Routes>
         <Footer/>
       </ChakraProvider>

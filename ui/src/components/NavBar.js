@@ -26,6 +26,7 @@ export default function NavBar({ setShowLogin, setShowRegister }) {
     <Box>
       <Flex
         className='navbar'
+        zIndex={'1'}
         bg={useColorModeValue('white', 'gray.800')}
         color={useColorModeValue('gray.600', 'white')}
         minH={'60px'}
