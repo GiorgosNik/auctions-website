@@ -11,4 +11,6 @@ export { default as UserPage } from "./UserPage";
 export { default as AuctionCreation } from "./AuctionCreation";
 export { default as AuctionsList } from "./AuctionsList";
 export { default as AuctionPage } from "./AuctionPage";
+export { default as Messaging } from "./Messaging";
+export { default as MessagePage } from "./MessagePage";
 export * from "./UserProvider";

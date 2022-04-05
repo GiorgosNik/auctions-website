@@ -54,6 +54,10 @@ export default function NavBar() {
       label: "My Auctions",
       href: "/myauctions",
     },
+    {
+      label: "Messaging",
+      href: "/messaging/" + user.user_id,
+    },
   ];
 
   return (
