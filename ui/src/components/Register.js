@@ -126,7 +126,7 @@ export default function SignupCard({ onClose }) {
   return (
     <Stack spacing={8} mx={"auto"} maxW={"lg"} px={6}>
       <Box
-        style={{ zIndex: "1" }}
+        style={{ zIndex: "2" }}
         position={"absolute"}
         rounded={"lg"}
         bg={useColorModeValue("white", "gray.700")}
