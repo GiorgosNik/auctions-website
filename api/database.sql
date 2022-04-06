@@ -50,11 +50,5 @@ CREATE TABLE auction_category(
 
 CREATE TABLE newsletter(
     id SERIAL PRIMARY KEY,
-    email VARCHAR(30) NOT NULL
+    email VARCHAR(30)
 );
-
-INSERT INTO auction_category(auction_id, category_id)
-SELECT f.fruit_id, c.country_id
-FROM   everything
-JOIN   fruit   f USING (fruit)     -- matching row guaranteed now
-JOIN   country c USING (country);  -- matching row guaranteed now

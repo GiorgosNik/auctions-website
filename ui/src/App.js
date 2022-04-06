@@ -9,13 +9,16 @@ import {
   Features,
   Description,
   WaitingRoom,
-  UsersList,
-  AuctionCreationForm,
   Newsletter,
   UserContext,
   UserProvider,
+  UsersList,
   UserPage,
+  AuctionCreation,
   AuctionPage,
+  AuctionsList,
+  Messaging,
+  MessagePage,
 } from "./components";
 
 function App() {
@@ -76,18 +79,42 @@ const AppHelper = () => {
             }
           />
           <Route
-            path="/creationForm"
+            path="/createauction"
             element={
               <>
-                <AuctionCreationForm />
+                <AuctionCreation />
               </>
             }
           />
           <Route
-            path="/productPage"
+            path="/myauctions"
             element={
               <>
-                <AuctionPage/>
+                <AuctionsList />
+              </>
+            }
+          />
+          <Route
+            path="/productpage"
+            element={
+              <>
+                <AuctionPage />
+              </>
+            }
+          />
+          <Route
+            path="/messaging/:userId"
+            element={
+              <>
+                <Messaging />
+              </>
+            }
+          />
+          <Route
+            path="/message/:messageId"
+            element={
+              <>
+                <MessagePage />
               </>
             }
           />
