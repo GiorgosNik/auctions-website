@@ -333,11 +333,9 @@ app.post("/category", async (req, res) => {
       client.query("SELECT * FROM category WHERE name = $1", [name]);
     const { rows } = await getCategories();
     if (rows.length != 0) {
-      return res
-        .status(409)
-        .json({
-          error: "Category exists already. Please type an other category name",
-        });
+      return res.status(409).json({
+        error: "Category exists already. Please type an other category name",
+      });
     } else {
       const newCat = await client.query(
         "INSERT INTO category (name) VALUES($1) RETURNING *",
@@ -363,9 +361,10 @@ app.get("/category", async (req, res) => {
 app.get("/category/:id", async (req, res) => {
   try {
     const id = req.params.id;
-    const category = await client.query("SELECT * FROM category WHERE id =  $1", [
-      id,
-    ]);
+    const category = await client.query(
+      "SELECT * FROM category WHERE id =  $1",
+      [id]
+    );
     res.json(category.rows);
   } catch (err) {
     console.error(err.message);
@@ -397,21 +396,21 @@ app.delete("/category/:id", async (req, res) => {
 app.post("/auction", async (req, res) => {
   try {
     const {
-      itemName,
+      item_name,
       account_id,
       description,
       category,
-      priceStart,
-      priceInstant,
+      price_start,
+      price_inst,
       started,
       ends,
     } = req.body;
 
     ////////////////// validate input //////////////////
-    if (!itemName) {
+    if (!item_name) {
       return res.status(400).json({ error: "Product Name cannot be blank" });
     }
-    if (itemName.length > 30) {
+    if (item_name.length > 30) {
       return res.status(400).json({ error: "Product Name length is too long" });
     }
     if (!account_id) {
@@ -426,7 +425,7 @@ app.post("/auction", async (req, res) => {
     if (!category) {
       return res.status(400).json({ error: "Category list cannot be blank" });
     }
-    if (!priceStart) {
+    if (!price_start) {
       return res.status(400).json({ error: "Price cannot be blank" });
     }
     if (!started) {
@@ -435,7 +434,21 @@ app.post("/auction", async (req, res) => {
     if (!ends) {
       return res.status(400).json({ error: "Start time cannot be blank" });
     }
-    
+
+    //Check Categories Exist
+    for (let i = 0; i < category.length; i++) {
+      try {
+        const categories = await client.query(
+          "SELECT * FROM category WHERE name = $1",
+          [category[i]]
+        );
+        if (categories.rows.length == 0) {
+          return res.status(409).json({ error: "Category does not exist" });
+        }
+      } catch (err) {
+        console.error(err.message);
+      }
+    }
 
     const getUser = () =>
       client.query("SELECT * FROM account WHERE id = $1", [account_id]);
@@ -444,24 +457,30 @@ app.post("/auction", async (req, res) => {
       return res.status(409).json({ error: "No such user" });
     } else {
       const newAuction = await client.query(
-        "INSERT INTO auction (itemName,account_id,description,priceStart,priceCur,priceInstant,numberOfBids,started,ends) VALUES($1,$2,$3,$4,$4,$5,$6,$7,$8) RETURNING *",
+        "INSERT INTO auction (item_name,account_id,description,price_start,price_curr,price_inst,num_of_bids,started,ends) VALUES($1,$2,$3,$4,$4,$5,$6,$7,$8) RETURNING *",
         [
-          itemName,
+          item_name,
           account_id,
           description,
-          priceStart,
-          priceInstant,
+          price_start,
+          price_inst,
           0,
           started,
           ends,
         ]
       );
-      newAuction.rows[0]['category']=[];
+      newAuction.rows[0]["category"] = category;
       for (let i = 0; i < category.length; i++) {
         try {
-          const categories = await client.query("SELECT * FROM category WHERE name = $1",[category[i]]);
+          const categories = await client.query(
+            "SELECT * FROM category WHERE name = $1",
+            [category[i]]
+          );
           try {
-            await client.query("INSERT INTO auction_category (auction_id,category_id) VALUES($1,$2)",[newAuction.rows[0]['id'],categories.rows[0]['id']]);
+            await client.query(
+              "INSERT INTO auction_category (auction_id,category_id) VALUES($1,$2)",
+              [newAuction.rows[0]["id"], categories.rows[0]["id"]]
+            );
           } catch (err) {
             console.error(err.message);
           }
@@ -501,9 +520,7 @@ app.get("/auction/:id", async (req, res) => {
 app.delete("/auction/:id", async (req, res) => {
   try {
     const id = req.params.id;
-    await client.query("DELETE FROM auction WHERE id =  $1", [
-      id,
-    ]);
+    await client.query("DELETE FROM auction WHERE id =  $1", [id]);
     res.json("Auction Deleted");
   } catch (err) {
     console.error(err.message);
@@ -522,12 +539,7 @@ app.delete("/auction", async (req, res) => {
 //Bid
 app.post("/bid", async (req, res) => {
   try {
-    const {
-      account_id,
-      auction_id,
-      time,
-      amount
-    } = req.body;
+    const { account_id, auction_id, time, amount } = req.body;
 
     ////////////////// validate input //////////////////
     if (!account_id) {
@@ -542,25 +554,35 @@ app.post("/bid", async (req, res) => {
     if (!amount) {
       return res.status(400).json({ error: "amount cannot be blank" });
     }
-    if (amount<=0) {
-      return res.status(400).json({ error: "amount must be a positibe number" });
+    if (amount <= 0) {
+      return res
+        .status(400)
+        .json({ error: "amount must be a positibe number" });
     }
-    
+
     const getUser = () =>
       client.query("SELECT * FROM account WHERE id = $1", [account_id]);
-    const { rows } = await getUser();
-    if (rows.length == 0) {
+    const user = await getUser();
+    const getAuction = () =>
+      client.query("SELECT * FROM auction WHERE id = $1", [auction_id]);
+    const auction = await getAuction();
+    if (user.rows.length == 0) {
       return res.status(409).json({ error: "No such user" });
+    } else if (auction.rows.length == 0) {
+      return res.status(409).json({ error: "No such auction" });
+    } else if (auction.rows[0]["price_curr"] >= amount) {
+      return res.status(409).json({ error: "Offer lower than current price" });
     } else {
+      console.log(auction.rows[0]["price_curr"]);
       const newBid = await client.query(
         "INSERT INTO bid (account_id,auction_id,amount,time) VALUES($1,$2,$3,$4) RETURNING *",
-        [
-          account_id,
-          auction_id,
-          amount,
-          time
-        ]
+        [account_id, auction_id, amount, time]
       );
+      await client.query("UPDATE auction SET price_curr = $1, num_of_bids = $2 WHERE id = $3", [
+        amount,
+        auction.rows[0]["num_of_bids"]+1,
+        auction_id,
+      ]);
       console.log(newBid.rows[0]);
       return res.status(201).json(newBid.rows[0]);
     }
@@ -581,9 +603,7 @@ app.delete("/bid", async (req, res) => {
 app.delete("/bid/:id", async (req, res) => {
   try {
     const id = req.params.id;
-    await client.query("DELETE FROM bid WHERE id =  $1", [
-      id,
-    ]);
+    await client.query("DELETE FROM bid WHERE id =  $1", [id]);
     res.json("Bid Deleted");
   } catch (err) {
     console.error(err.message);
@@ -602,9 +622,7 @@ app.get("/bid", async (req, res) => {
 app.get("/bid/:id", async (req, res) => {
   try {
     const id = req.params.id;
-    const bid = await client.query("SELECT * FROM bid WHERE id =  $1", [
-      id,
-    ]);
+    const bid = await client.query("SELECT * FROM bid WHERE id =  $1", [id]);
     res.json(bid.rows);
   } catch (err) {
     console.error(err.message);

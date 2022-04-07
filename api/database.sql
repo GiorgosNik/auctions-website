@@ -12,19 +12,18 @@ CREATE TABLE account(
     address VARCHAR(30) NOT NULL,
     postcode VARCHAR(5) NOT NULL,
     taxcode VARCHAR(15) NOT NULL,
-    visitor boolean NOT NULL,
     approved boolean NOT NULL
 );
 
 CREATE TABLE auction(
     id SERIAL PRIMARY KEY,
-    itemName VARCHAR(30) NOT NULL,
+    item_name VARCHAR(30) NOT NULL,
     account_id INT REFERENCES account(id),
     description VARCHAR(500) NOT NULL,
-    priceStart NUMERIC NOT NULL,
-    priceCur NUMERIC NOT NULL,
-    priceInstant NUMERIC,
-    numberOfBids NUMERIC NOT NULL,
+    price_start NUMERIC NOT NULL,
+    price_curr NUMERIC NOT NULL,
+    price_inst NUMERIC,
+    num_of_bids NUMERIC NOT NULL,
     started DATE NOT NULL,
     ends    DATE NOT NULL
 );
