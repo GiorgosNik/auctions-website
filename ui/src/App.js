@@ -18,7 +18,6 @@ import {
   AuctionPage,
   AuctionsList,
   Messaging,
-  MessagePage,
 } from "./components";
 
 function App() {
@@ -107,14 +106,6 @@ const AppHelper = () => {
             element={
               <>
                 <Messaging />
-              </>
-            }
-          />
-          <Route
-            path="/message/:messageId"
-            element={
-              <>
-                <MessagePage />
               </>
             }
           />

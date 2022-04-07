@@ -75,10 +75,6 @@ export default function SignupCard({ onClose }) {
   const submitHandler = (event) => {
     event.preventDefault();
 
-    if (password !== confirm) {
-      setErrorMessage("Passwords should match");
-      return;
-    }
     const body = {
       username,
       password,
@@ -90,6 +86,7 @@ export default function SignupCard({ onClose }) {
       address,
       postcode,
       taxcode,
+      confirm,
     };
 
     try {

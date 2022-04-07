@@ -18,3 +18,12 @@ CREATE TABLE newsletter(
     id SERIAL PRIMARY KEY,
     email VARCHAR(30)
 );
+
+CREATE TABLE message(
+    id SERIAL PRIMARY KEY,
+    sender INT REFERENCES account(id),
+    receiver INT REFERENCES account(id),
+    text VARCHAR(500) NOT NULL,
+    subject VARCHAR(100),
+    date TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
