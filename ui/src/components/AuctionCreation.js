@@ -17,12 +17,8 @@ import {
   useColorModeValue,
   Textarea,
 } from "@chakra-ui/react";
-import React, { useState } from "react";
-import DatePicker from "react-date-picker";
 
 export default function Simple() {
-  const [val, setVal] = useState(0);
-  const [value, onChange] = useState(new Date());
   return (
     <Container maxW={"7xl"}>
       <Stack>
