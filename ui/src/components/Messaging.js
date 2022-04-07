@@ -25,6 +25,9 @@ import {
   Textarea,
   Text,
   TableCaption,
+  Stack,
+  Alert,
+  AlertIcon,
 } from "@chakra-ui/react";
 
 import { FiHome, FiSend, FiPlus } from "react-icons/fi";
@@ -43,19 +46,29 @@ const LinkItems: Array<LinkItemProps> = [
   { name: "Sent", icon: FiSend },
 ];
 
-export default function SimpleSidebar({ children }: { children: ReactNode }) {
+export default function Messaging({ children }: { children: ReactNode }) {
   const { isOpen, onClose } = useDisclosure();
   const [sentMessages, setSentMessages] = useState([]);
   const [receivedMessages, setReceivedMessages] = useState([]);
   const [newMessage, setNewMessage] = useState(false);
   const [inbox, setInbox] = useState(true);
   const [sent, setSent] = useState(false);
+  const [messageDetails, setMessageDetails] = useState(false);
   const location = useLocation();
-  let [message, setMessage] = useState("");
-  let [subject, setSubject] = useState("");
-  let [receiver, setReceiver] = useState("");
+  const [message, setMessage] = useState("");
+  const [subject, setSubject] = useState("");
+  const [receiver, setReceiver] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
-  const [username, setUsername] = useState("");
+  const [openedMessage, setOpenMessage] = useState("");
+  const [inboxLength, setInboxLength] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      fetchSentMessages();
+      fetchReceivedMessages();
+    }, 1000);
+    return () => clearInterval(interval);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   let handleMessageChange = (e) => {
     setMessage(e.target.value);
@@ -74,7 +87,11 @@ export default function SimpleSidebar({ children }: { children: ReactNode }) {
     window.location.href = location.pathname;
   };
   const openMessage = async (id) => {
-    window.location.href = "/message/" + id;
+    setOpenMessage(id);
+    setInbox(false);
+    setSent(false);
+    setNewMessage(false);
+    setMessageDetails(true);
   };
 
   const SendMessage = (event) => {
@@ -105,13 +122,6 @@ export default function SimpleSidebar({ children }: { children: ReactNode }) {
     }
   };
 
-  const fetchUsername = async (id) => {
-    let { data } = await Axios.get("http://localhost:5000/users/" + id);
-    const user = data;
-    console.log(user[0].username);
-    setUsername(user[0].username);
-  };
-
   const fetchSentMessages = async () => {
     let { data } = await Axios.get(
       "http://localhost:5000" + location.pathname + "/sent"
@@ -125,16 +135,14 @@ export default function SimpleSidebar({ children }: { children: ReactNode }) {
       "http://localhost:5000" + location.pathname + "/inbox"
     );
     const received = data;
+    Notification();
+
+    if (received.length > inboxLength) {
+      setInboxLength(received.length - inboxLength);
+      Notification();
+    }
     setReceivedMessages(received);
   };
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      fetchSentMessages();
-      fetchReceivedMessages();
-    }, 1000);
-    return () => clearInterval(interval);
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <Box
@@ -143,10 +151,12 @@ export default function SimpleSidebar({ children }: { children: ReactNode }) {
       display="flex"
     >
       <SidebarContent
+        inboxLength={inboxLength}
         onClose={() => onClose}
         setNewMessage={setNewMessage}
         setInbox={setInbox}
         setSent={setSent}
+        setMessageDetails={setMessageDetails}
         display={{ base: "none", md: "block" }}
         minH="100vh"
       />
@@ -161,13 +171,19 @@ export default function SimpleSidebar({ children }: { children: ReactNode }) {
       >
         <DrawerContent>
           <SidebarContent
+            inboxLength={inboxLength}
             onClose={onClose}
             setNewMessage={setNewMessage}
             setInbox={setInbox}
             setSent={setSent}
+            setMessageDetails={setMessageDetails}
           />
         </DrawerContent>
       </Drawer>
+
+      {messageDetails && (
+        <MessageDetails openedMessage={openedMessage}></MessageDetails>
+      )}
 
       {inbox && (
         <TableContainer w={1000} p={10}>
@@ -188,33 +204,13 @@ export default function SimpleSidebar({ children }: { children: ReactNode }) {
               </Thead>
               <Tbody>
                 {receivedMessages.map((message, index) => {
-                  //fetchUsername(message.sender);
                   return (
-                    <Tr>
-                      <Td>{username}</Td>
-                      {message.subject === "" && <Td>(no subject)</Td>}
-                      {message.subject !== "" && <Td>{message.subject}</Td>}
-
-                      <Td>{message.date}</Td>
-                      <Td>
-                        <Button
-                          colorScheme="red"
-                          variant="outline"
-                          onClick={() => deleteMessage(message.id)}
-                        >
-                          Delete
-                        </Button>
-                      </Td>
-                      <Td>
-                        <Button
-                          colorScheme="green"
-                          variant="outline"
-                          onClick={() => openMessage(message.id)}
-                        >
-                          Open
-                        </Button>
-                      </Td>
-                    </Tr>
+                    <InboxMessage
+                      message={message}
+                      index={index}
+                      openMessage={openMessage}
+                      deleteMessage={deleteMessage}
+                    ></InboxMessage>
                   );
                 })}
               </Tbody>
@@ -240,33 +236,13 @@ export default function SimpleSidebar({ children }: { children: ReactNode }) {
               </Thead>
               <Tbody>
                 {sentMessages.map((message, index) => {
-                  fetchUsername(message.receiver);
                   return (
-                    <Tr>
-                      <Td>{username}</Td>
-                      {message.subject === "" && <Td>(no subject)</Td>}
-                      {message.subject !== "" && <Td>{message.subject}</Td>}
-
-                      <Td>{message.date}</Td>
-                      <Td>
-                        <Button
-                          colorScheme="red"
-                          variant="outline"
-                          onClick={() => deleteMessage(message.id)}
-                        >
-                          Delete
-                        </Button>
-                      </Td>
-                      <Td>
-                        <Button
-                          colorScheme="green"
-                          variant="outline"
-                          onClick={() => openMessage(message.id)}
-                        >
-                          Open
-                        </Button>
-                      </Td>
-                    </Tr>
+                    <SentMessage
+                      message={message}
+                      index={index}
+                      openMessage={openMessage}
+                      deleteMessage={deleteMessage}
+                    ></SentMessage>
                   );
                 })}
               </Tbody>
@@ -339,6 +315,89 @@ export default function SimpleSidebar({ children }: { children: ReactNode }) {
   );
 }
 
+const InboxMessage = ({ message, index, openMessage, deleteMessage }) => {
+  const [senderUsername, setSenderUsername] = useState("");
+
+  const fetchUsername = async (id) => {
+    let { data } = await Axios.get("http://localhost:5000/users/" + id);
+    const user = data;
+    setSenderUsername(user[0].username);
+  };
+
+  useEffect(() => {
+    fetchUsername(message.sender);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  return (
+    <Tr key={index}>
+      <Td>{senderUsername}</Td>
+      {message.subject === "" && <Td>(no subject)</Td>}
+      {message.subject !== "" && <Td>{message.subject}</Td>}
+      <Td>{message.date}</Td>
+      <Td>
+        <Button
+          colorScheme="red"
+          variant="outline"
+          onClick={() => deleteMessage(message.id)}
+        >
+          Delete
+        </Button>
+      </Td>
+      <Td>
+        <Button
+          colorScheme="green"
+          variant="outline"
+          onClick={() => openMessage(message.id)}
+        >
+          Open
+        </Button>
+      </Td>
+    </Tr>
+  );
+};
+
+const SentMessage = ({ message, index, openMessage, deleteMessage }) => {
+  const [receiverUsername, setReceiverUsername] = useState("");
+
+  const fetchUsername = async (id) => {
+    let { data } = await Axios.get("http://localhost:5000/users/" + id);
+    const user = data;
+    console.log(id);
+    setReceiverUsername(user[0].username);
+  };
+
+  useEffect(() => {
+    fetchUsername(message.receiver);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  return (
+    <Tr key={index}>
+      <Td>{receiverUsername}</Td>
+      {message.subject === "" && <Td>(no subject)</Td>}
+      {message.subject !== "" && <Td>{message.subject}</Td>}
+      <Td>{message.date}</Td>
+      <Td>
+        <Button
+          colorScheme="red"
+          variant="outline"
+          onClick={() => deleteMessage(message.id)}
+        >
+          Delete
+        </Button>
+      </Td>
+      <Td>
+        <Button
+          colorScheme="green"
+          variant="outline"
+          onClick={() => openMessage(message.id)}
+        >
+          Open
+        </Button>
+      </Td>
+    </Tr>
+  );
+};
+
 interface SidebarProps extends BoxProps {
   onClose: () => void;
 }
@@ -348,6 +407,8 @@ const SidebarContent = ({
   setNewMessage,
   setInbox,
   setSent,
+  setMessageDetails,
+  inboxLength,
   ...rest
 }: SidebarProps) => {
   return (
@@ -370,6 +431,7 @@ const SidebarContent = ({
         setNewMessage={setNewMessage}
         setInbox={setInbox}
         setSent={setSent}
+        setMessageDetails={setMessageDetails}
       >
         New
       </NavItem>
@@ -380,6 +442,7 @@ const SidebarContent = ({
           setNewMessage={setNewMessage}
           setInbox={setInbox}
           setSent={setSent}
+          setMessageDetails={setMessageDetails}
         >
           {link.name}
         </NavItem>
@@ -398,23 +461,27 @@ const NavItem = ({
   setNewMessage,
   setInbox,
   setSent,
+  setMessageDetails,
   ...rest
 }: NavItemProps) => {
   const createMessage = () => {
     setNewMessage(true);
     setInbox(false);
     setSent(false);
+    setMessageDetails(false);
   };
   const showInbox = () => {
     setInbox(true);
     setNewMessage(false);
     setSent(false);
+    setMessageDetails(false);
   };
 
   const showSent = () => {
     setSent(true);
     setNewMessage(false);
     setInbox(false);
+    setMessageDetails(false);
   };
   var functionToCall;
   if (children === "New") {
@@ -458,3 +525,113 @@ const NavItem = ({
     </Link>
   );
 };
+
+function MessageDetails({ openedMessage }) {
+  const [message, setMessage] = useState("");
+  const [senderUsername, setSenderUsername] = useState("");
+  const [receiverUsername, setReceiverUsername] = useState("");
+
+  useEffect(() => {
+    fetchMessage(openedMessage);
+    fetchUsername(message.sender, "sender");
+    fetchUsername(message.receiver, "receiver");
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const fetchUsername = async (id, type) => {
+    let { data } = await Axios.get("http://localhost:5000/users/" + id);
+    const user = data;
+    console.log(user, type);
+    if (type === "sender") {
+      setSenderUsername(user[0].username);
+    } else {
+      setReceiverUsername(user[0].username);
+    }
+  };
+
+  const fetchMessage = async (id) => {
+    const { data } = await Axios.get("http://localhost:5000/message/" + id);
+    const message = data[0];
+    if (message.subject === "") {
+      message.subject = "(no subject)";
+    }
+
+    setMessage(message);
+  };
+
+  return (
+    <Box
+      minH="100vh"
+      bg={useColorModeValue("gray.100", "gray.900")}
+      display="flex"
+    >
+      <Box w={1000} p={10}>
+        <HStack>
+          <FormControl>
+            <FormLabel htmlFor="sender">From:</FormLabel>
+            <Input
+              id="input"
+              placeholder={senderUsername}
+              bg={"white"}
+              readOnly
+            />
+          </FormControl>
+          <FormControl>
+            <FormLabel htmlFor="receiver">To:</FormLabel>
+            <Input
+              id="input"
+              placeholder={receiverUsername}
+              bg={"white"}
+              readOnly
+            />
+          </FormControl>
+        </HStack>
+        <br></br>
+        <HStack>
+          <FormControl>
+            <FormLabel htmlFor="subject">Subject:</FormLabel>
+            <Input
+              id="input"
+              placeholder={message.subject}
+              bg={"white"}
+              readOnly
+            />
+          </FormControl>
+
+          <FormControl>
+            <FormLabel htmlFor="date">Date:</FormLabel>
+            <Input
+              id="input"
+              placeholder={message.date}
+              bg={"white"}
+              readOnly
+            />
+          </FormControl>
+        </HStack>
+
+        <>
+          <br></br>
+          <Text mb="8px">Message:</Text>
+          <Textarea
+            id="input"
+            borderRadius={10}
+            bg={"white"}
+            placeholder={message.text}
+            size="sm"
+            readOnly
+          />
+        </>
+      </Box>
+    </Box>
+  );
+}
+
+function Notification() {
+  return (
+    <Stack spacing={3}>
+      <Alert status="info">
+        <AlertIcon />
+        Chakra is going live on August 30th. Get ready!
+      </Alert>
+    </Stack>
+  );
+}
