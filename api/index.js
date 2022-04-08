@@ -5,6 +5,8 @@ const client = require("./database");
 const { validateEmail, validateName } = require("./modules/Validation.js");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
+const moment = require("moment");
+
 
 client.connect();
 
@@ -543,6 +545,16 @@ app.post("/auction", async (req, res) => {
         console.error(err.message);
       }
     }
+    
+    //Check Start and End Date are correct
+    var time = moment(Date.now()).format('YYYY-MM-DD HH:mm:ss');
+    if(time>started){
+      return res.status(409).json({ error: "Cant have auction start in the past" });
+    }
+    if(ends<started){
+      return res.status(409).json({ error: "Cant have auction end before it starts" });
+    }
+    
 
     const getUser = () =>
       client.query("SELECT * FROM account WHERE id = $1", [account_id]);
@@ -633,7 +645,7 @@ app.delete("/auction", async (req, res) => {
 //Bid
 app.post("/bid", async (req, res) => {
   try {
-    const { account_id, auction_id, time, amount } = req.body;
+    const { account_id, auction_id, amount } = req.body;
 
     ////////////////// validate input //////////////////
     if (!account_id) {
@@ -641,9 +653,6 @@ app.post("/bid", async (req, res) => {
     }
     if (!auction_id) {
       return res.status(400).json({ error: "auction_id cannot be blank" });
-    }
-    if (!time) {
-      return res.status(400).json({ error: "Start time cannot be blank" });
     }
     if (!amount) {
       return res.status(400).json({ error: "amount cannot be blank" });
@@ -654,6 +663,7 @@ app.post("/bid", async (req, res) => {
         .json({ error: "amount must be a positibe number" });
     }
 
+    const time = moment(Date.now()).format('YYYY-MM-DD HH:mm:ss');
     const getUser = () =>
       client.query("SELECT * FROM account WHERE id = $1", [account_id]);
     const user = await getUser();
@@ -666,17 +676,19 @@ app.post("/bid", async (req, res) => {
       return res.status(409).json({ error: "No such auction" });
     } else if (auction.rows[0]["price_curr"] >= amount) {
       return res.status(409).json({ error: "Offer lower than current price" });
-    } else {
-      console.log(auction.rows[0]["price_curr"]);
+    }else if(auction.rows[0]["started"] > time){
+      return res.status(409).json({ error: "Cannot create bid in auction that has not started" });
+    }else if(auction.rows[0]["ends"] < time){
+      return res.status(409).json({ error: "Cannot create bid in auction that has ended" });
+    }else {
       const newBid = await client.query(
         "INSERT INTO bid (account_id,auction_id,amount,time) VALUES($1,$2,$3,$4) RETURNING *",
         [account_id, auction_id, amount, time]
       );
-      await client.query("UPDATE auction SET price_curr = $1, num_of_bids = $2 WHERE id = $3", [
-        amount,
-        auction.rows[0]["num_of_bids"]+1,
-        auction_id,
-      ]);
+      await client.query(
+        "UPDATE auction SET price_curr = $1, num_of_bids = $2 WHERE id = $3",
+        [amount, auction.rows[0]["num_of_bids"] + 1, auction_id]
+      );
       console.log(newBid.rows[0]);
       return res.status(201).json(newBid.rows[0]);
     }
