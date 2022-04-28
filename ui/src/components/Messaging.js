@@ -307,30 +307,14 @@ export default function Messaging({ children }: { children: ReactNode }) {
           </Button>
         </Box>
       )}
-
-      <Box ml={{ base: 0, md: 60 }} p="4">
-        {children}
-      </Box>
     </Box>
   );
 }
 
 const InboxMessage = ({ message, index, openMessage, deleteMessage }) => {
-  const [senderUsername, setSenderUsername] = useState("");
-
-  const fetchUsername = async (id) => {
-    let { data } = await Axios.get("http://localhost:5000/users/" + id);
-    const user = data;
-    setSenderUsername(user[0].username);
-  };
-
-  useEffect(() => {
-    fetchUsername(message.sender);
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
-
   return (
     <Tr key={index}>
-      <Td>{senderUsername}</Td>
+      <Td>{message.sender}</Td>
       {message.subject === "" && <Td>(no subject)</Td>}
       {message.subject !== "" && <Td>{message.subject}</Td>}
       <Td>{message.date}</Td>
@@ -357,22 +341,9 @@ const InboxMessage = ({ message, index, openMessage, deleteMessage }) => {
 };
 
 const SentMessage = ({ message, index, openMessage, deleteMessage }) => {
-  const [receiverUsername, setReceiverUsername] = useState("");
-
-  const fetchUsername = async (id) => {
-    let { data } = await Axios.get("http://localhost:5000/users/" + id);
-    const user = data;
-    console.log(id);
-    setReceiverUsername(user[0].username);
-  };
-
-  useEffect(() => {
-    fetchUsername(message.receiver);
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
-
   return (
     <Tr key={index}>
-      <Td>{receiverUsername}</Td>
+      <Td>{message.receiver}</Td>
       {message.subject === "" && <Td>(no subject)</Td>}
       {message.subject !== "" && <Td>{message.subject}</Td>}
       <Td>{message.date}</Td>
@@ -528,25 +499,10 @@ const NavItem = ({
 
 function MessageDetails({ openedMessage }) {
   const [message, setMessage] = useState("");
-  const [senderUsername, setSenderUsername] = useState("");
-  const [receiverUsername, setReceiverUsername] = useState("");
 
   useEffect(() => {
     fetchMessage(openedMessage);
-    fetchUsername(message.sender, "sender");
-    fetchUsername(message.receiver, "receiver");
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
-
-  const fetchUsername = async (id, type) => {
-    let { data } = await Axios.get("http://localhost:5000/users/" + id);
-    const user = data;
-    console.log(user, type);
-    if (type === "sender") {
-      setSenderUsername(user[0].username);
-    } else {
-      setReceiverUsername(user[0].username);
-    }
-  };
 
   const fetchMessage = async (id) => {
     const { data } = await Axios.get("http://localhost:5000/messaging/" + id);
@@ -570,7 +526,7 @@ function MessageDetails({ openedMessage }) {
             <FormLabel htmlFor="sender">From:</FormLabel>
             <Input
               id="input"
-              placeholder={senderUsername}
+              placeholder={message.sender}
               bg={"white"}
               readOnly
             />
@@ -579,7 +535,7 @@ function MessageDetails({ openedMessage }) {
             <FormLabel htmlFor="receiver">To:</FormLabel>
             <Input
               id="input"
-              placeholder={receiverUsername}
+              placeholder={message.receiver}
               bg={"white"}
               readOnly
             />

@@ -2,7 +2,7 @@ CREATE DATABASE bidit;
 \c bidit
 CREATE TABLE account(
     id SERIAL PRIMARY KEY,
-    username VARCHAR(30) NOT NULL,
+    username VARCHAR(30) NOT NULL UNIQUE,
     password VARCHAR(500) NOT NULL,
     firstname VARCHAR(30) NOT NULL,
     lastname VARCHAR(30) NOT NULL,
@@ -54,8 +54,8 @@ CREATE TABLE newsletter(
 
 CREATE TABLE message(
     id SERIAL PRIMARY KEY,
-    sender INT REFERENCES account(id),
-    receiver INT REFERENCES account(id),
+    sender VARCHAR(30) REFERENCES account(username),
+    receiver VARCHAR(30) REFERENCES account(username),
     text VARCHAR(500) NOT NULL,
     subject VARCHAR(100),
     date TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP

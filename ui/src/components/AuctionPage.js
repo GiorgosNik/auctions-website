@@ -9,7 +9,6 @@ import {
   Input,
   InputGroup,
   Flex,
-  VStack,
   Button,
   Heading,
   SimpleGrid,
@@ -20,10 +19,8 @@ import {
   List,
   ListItem,
 } from "@chakra-ui/react";
-import { MdLocalShipping } from "react-icons/md";
 
 export default function Simple() {
-  const position = [51.505, -0.09]
   return (
     <Container maxW={"7xl"}>
       <SimpleGrid
@@ -185,7 +182,6 @@ export default function Simple() {
                   <ListItem>Return Policy</ListItem>
                 </List>
               </SimpleGrid>
-
             </Box>
           </Stack>
         </Stack>

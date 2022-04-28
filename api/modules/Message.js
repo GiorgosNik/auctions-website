@@ -6,6 +6,7 @@ const client = require("../database.js");
 app.post("/:id", async (req, res) => {
   try {
     const senderId = req.params.id;
+
     const { subject, receiver, message } = req.body;
     if (!receiver) {
       return res.status(400).json({ error: "Receiver cannot be blank" });
@@ -13,7 +14,6 @@ app.post("/:id", async (req, res) => {
     if (!message) {
       return res.status(400).json({ error: "Message cannot be blank" });
     }
-
     if (receiver.length > 30) {
       return res.status(400).json({ error: "Receiver's username is too long" });
     }
@@ -24,14 +24,14 @@ app.post("/:id", async (req, res) => {
       return res.status(400).json({ error: "Subject is too long" });
     }
     await client.query(
-      "SELECT * FROM account WHERE username = $1",
-      [receiver],
+      "SELECT * FROM account WHERE id = $1",
+      [senderId],
       function (err, result) {
         if (result.rows.length != 0) {
-          let receiverId = result.rows[0].id;
+          let sender = result.rows[0].username;
           const newMessage = client.query(
-            "INSERT INTO message (subject, receiver, sender, text) VALUES($1, $2, $3, $4) RETURNING *",
-            [subject, receiverId, senderId, message]
+            "INSERT INTO message (subject, sender, receiver, text) VALUES($1, $2, $3, $4) RETURNING *",
+            [subject, sender, receiver, message]
           );
           return res.status(201).json(newMessage);
         } else {
@@ -46,13 +46,24 @@ app.post("/:id", async (req, res) => {
 
 app.get("/:id/inbox", async (req, res) => {
   try {
-    const id = req.params.id;
+    const receiverId = req.params.id;
 
-    const received = await client.query(
-      "SELECT * FROM message WHERE receiver = $1",
-      [id]
+    await client.query(
+      "SELECT * FROM account WHERE id = $1",
+      [receiverId],
+      function (err, result) {
+        if (result.rows.length != 0) {
+          let receiver = result.rows[0].username;
+          client.query(
+            "SELECT * FROM message WHERE receiver = $1",
+            [receiver],
+            function (err, result) {
+              return res.json(result.rows);
+            }
+          );
+        }
+      }
     );
-    res.json(received.rows);
   } catch (err) {
     console.error(err.message);
   }
@@ -60,11 +71,24 @@ app.get("/:id/inbox", async (req, res) => {
 
 app.get("/:id/sent", async (req, res) => {
   try {
-    const id = req.params.id;
-    const sent = await client.query("SELECT * FROM message WHERE sender = $1", [
-      id,
-    ]);
-    res.json(sent.rows);
+    const senderId = req.params.id;
+
+    await client.query(
+      "SELECT * FROM account WHERE id = $1",
+      [senderId],
+      function (err, result) {
+        if (result.rows.length != 0) {
+          let sender = result.rows[0].username;
+          client.query(
+            "SELECT * FROM message WHERE sender = $1",
+            [sender],
+            function (err, result) {
+              return res.json(result.rows);
+            }
+          );
+        }
+      }
+    );
   } catch (err) {
     console.error(err.message);
   }
