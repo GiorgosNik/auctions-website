@@ -41,6 +41,24 @@ export default function NavBar() {
     );
   }, [user]);
 
+  const submitHandler = (event) => {
+    event.preventDefault();
+    try {
+      fetch("http://localhost:5000/auth/logout", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+      })
+        .then((res) => res.json())
+        .then(async (res) => {
+          setUser({});
+          localStorage.removeItem("user");
+          window.location.href = "/";
+        });
+    } catch (err) {
+      console.error(err.message);
+    }
+  };
+
   const itemsMap: Array<NavItem> = [
     {
       label: "Browse Auctions",
@@ -146,10 +164,7 @@ export default function NavBar() {
               _hover={{
                 bg: "purple.300",
               }}
-              onClick={() => {
-                setUser({});
-                localStorage.removeItem("user");
-              }}
+              onClick={submitHandler}
             >
               Logout
             </Button>
