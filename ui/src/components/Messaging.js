@@ -549,7 +549,7 @@ function MessageDetails({ openedMessage }) {
   };
 
   const fetchMessage = async (id) => {
-    const { data } = await Axios.get("http://localhost:5000/message/" + id);
+    const { data } = await Axios.get("http://localhost:5000/messaging/" + id);
     const message = data[0];
     if (message.subject === "") {
       message.subject = "(no subject)";

@@ -24,7 +24,7 @@ export default function UsersList() {
   };
 
   const fetchUsers = async () => {
-    const { data } = await Axios.get("http://localhost:5000/users");
+    const { data } = await Axios.get("http://localhost:5000/auth/users");
     const users = data;
     setUsers(users);
     console.log(users);

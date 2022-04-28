@@ -90,7 +90,7 @@ export default function SignupCard({ onClose }) {
     };
 
     try {
-      fetch("http://localhost:5000/register", {
+      fetch("http://localhost:5000/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),

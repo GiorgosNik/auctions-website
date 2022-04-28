@@ -6,21 +6,21 @@ const client = require("../database.js");
 app.post("/", async (req, res) => {
   try {
     const {
-      itemName,
+      item_name,
       account_id,
       description,
       category,
-      priceStart,
-      priceInstant,
+      price_start,
+      price_inst,
       started,
       ends,
     } = req.body;
 
     ////////////////// validate input //////////////////
-    if (!itemName) {
+    if (!item_name) {
       return res.status(400).json({ error: "Product Name cannot be blank" });
     }
-    if (itemName.length > 30) {
+    if (item_name.length > 30) {
       return res.status(400).json({ error: "Product Name length is too long" });
     }
     if (!account_id) {
@@ -35,7 +35,7 @@ app.post("/", async (req, res) => {
     if (!category) {
       return res.status(400).json({ error: "Category list cannot be blank" });
     }
-    if (!priceStart) {
+    if (!price_start) {
       return res.status(400).json({ error: "Price cannot be blank" });
     }
     if (!started) {
@@ -45,6 +45,34 @@ app.post("/", async (req, res) => {
       return res.status(400).json({ error: "Start time cannot be blank" });
     }
 
+    //Check Categories Exist
+    for (let i = 0; i < category.length; i++) {
+      try {
+        const categories = await client.query(
+          "SELECT * FROM category WHERE name = $1",
+          [category[i]]
+        );
+        if (categories.rows.length == 0) {
+          return res.status(409).json({ error: "Category does not exist" });
+        }
+      } catch (err) {
+        console.error(err.message);
+      }
+    }
+
+    //Check Start and End Date are correct
+    var time = moment(Date.now()).format("YYYY-MM-DD HH:mm:ss");
+    if (time > started) {
+      return res
+        .status(409)
+        .json({ error: "Cant have auction start in the past" });
+    }
+    if (ends < started) {
+      return res
+        .status(409)
+        .json({ error: "Cant have auction end before it starts" });
+    }
+
     const getUser = () =>
       client.query("SELECT * FROM account WHERE id = $1", [account_id]);
     const { rows } = await getUser();
@@ -52,19 +80,19 @@ app.post("/", async (req, res) => {
       return res.status(409).json({ error: "No such user" });
     } else {
       const newAuction = await client.query(
-        "INSERT INTO auction (itemName,account_id,description,priceStart,priceCur,priceInstant,numberOfBids,started,ends) VALUES($1,$2,$3,$4,$4,$5,$6,$7,$8) RETURNING *",
+        "INSERT INTO auction (item_name,account_id,description,price_start,price_curr,price_inst,num_of_bids,started,ends) VALUES($1,$2,$3,$4,$4,$5,$6,$7,$8) RETURNING *",
         [
-          itemName,
+          item_name,
           account_id,
           description,
-          priceStart,
-          priceInstant,
+          price_start,
+          price_inst,
           0,
           started,
           ends,
         ]
       );
-      newAuction.rows[0]["category"] = [];
+      newAuction.rows[0]["category"] = category;
       for (let i = 0; i < category.length; i++) {
         try {
           const categories = await client.query(

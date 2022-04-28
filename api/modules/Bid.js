@@ -5,7 +5,7 @@ const client = require("../database.js");
 //Bid
 app.post("/", async (req, res) => {
   try {
-    const { account_id, auction_id, time, amount } = req.body;
+    const { account_id, auction_id, amount } = req.body;
 
     ////////////////// validate input //////////////////
     if (!account_id) {
@@ -13,9 +13,6 @@ app.post("/", async (req, res) => {
     }
     if (!auction_id) {
       return res.status(400).json({ error: "auction_id cannot be blank" });
-    }
-    if (!time) {
-      return res.status(400).json({ error: "Start time cannot be blank" });
     }
     if (!amount) {
       return res.status(400).json({ error: "amount cannot be blank" });
@@ -26,15 +23,35 @@ app.post("/", async (req, res) => {
         .json({ error: "amount must be a positibe number" });
     }
 
+    const time = moment(Date.now()).format("YYYY-MM-DD HH:mm:ss");
     const getUser = () =>
       client.query("SELECT * FROM account WHERE id = $1", [account_id]);
-    const { rows } = await getUser();
-    if (rows.length == 0) {
+    const user = await getUser();
+    const getAuction = () =>
+      client.query("SELECT * FROM auction WHERE id = $1", [auction_id]);
+    const auction = await getAuction();
+    if (user.rows.length == 0) {
       return res.status(409).json({ error: "No such user" });
+    } else if (auction.rows.length == 0) {
+      return res.status(409).json({ error: "No such auction" });
+    } else if (auction.rows[0]["price_curr"] >= amount) {
+      return res.status(409).json({ error: "Offer lower than current price" });
+    } else if (auction.rows[0]["started"] > time) {
+      return res
+        .status(409)
+        .json({ error: "Cannot create bid in auction that has not started" });
+    } else if (auction.rows[0]["ends"] < time) {
+      return res
+        .status(409)
+        .json({ error: "Cannot create bid in auction that has ended" });
     } else {
       const newBid = await client.query(
         "INSERT INTO bid (account_id,auction_id,amount,time) VALUES($1,$2,$3,$4) RETURNING *",
         [account_id, auction_id, amount, time]
+      );
+      await client.query(
+        "UPDATE auction SET price_curr = $1, num_of_bids = $2 WHERE id = $3",
+        [amount, auction.rows[0]["num_of_bids"] + 1, auction_id]
       );
       console.log(newBid.rows[0]);
       return res.status(201).json(newBid.rows[0]);
