@@ -121,7 +121,6 @@ app.get("/", async (req, res) => {
 
 app.get("/myauctions/:id", async (req, res) => {
   try {
-    console.log("TEST");
     const id = req.params.id;
     const auction = await client.query("SELECT * FROM auction WHERE account_id =  $1", [
       id,
@@ -139,9 +138,19 @@ app.get("/:id", async (req, res) => {
     const auction = await client.query("SELECT * FROM auction WHERE id =  $1", [
       id,
     ]);
+    const categories = await client.query("SELECT name FROM auction_category INNER JOIN category ON (category.id = auction_category.category_id) WHERE auction_id =  $1", [
+      id,
+    ]);
+    auction.rows[0].categories = [];
+    for(let category of categories.rows){
+      auction.rows[0].categories.push(category.name);
+    }
+    const user = await client.query("SELECT * FROM account WHERE id =  $1", [
+      auction.rows[0].account_id,
+    ]);
+    auction.rows[0].user = user.rows[0];
     res.json(auction.rows);
   } catch (err) {
-    console.error(err.message);
   }
 });
 

@@ -19,8 +19,68 @@ import {
   List,
   ListItem,
 } from "@chakra-ui/react";
+import Axios from "axios";
+import jwt from "jwt-decode";
+import React, { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 
-export default function Simple() {
+export default function AuctionPage() {
+  const [errorMessage, setErrorMessage] = useState("");
+  const location = useLocation();
+  const [amount, setBidAmount] = useState("");
+  const [auction, setAuction] = useState([]);
+  const [seller, setSeller] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [auction_id, setAuctionId] = useState("");
+  const account_id = jwt(localStorage.getItem("user")).user_id;
+  const fetchAuction = async () => {
+    const { data } = await Axios.get(
+      "http://localhost:5000" + location.pathname
+    );
+
+    const auction = data;
+    setAuction(auction[0]);
+    setAuctionId(auction[0].id);
+    setCategories(auction[0].categories);
+    setSeller(auction[0].user);
+  };
+  const bidAmountChangeHandler = (event) => {
+    setBidAmount(event.target.value);
+  };
+
+  const submitHandler = (event) => {
+    event.preventDefault();
+
+    const body = {
+      amount,
+      auction_id,
+      account_id,
+    };
+    console.log(body);
+    try {
+      fetch("http://localhost:5000/bid", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      })
+        .then((res) => res.json())
+        .then(async (res) => {
+          if (res?.error) {
+            setErrorMessage(res?.error);
+          } else {
+            setErrorMessage("");
+            window.location.href = "";
+          }
+          console.log(res);
+        });
+    } catch (err) {
+      console.error(err.message);
+    }
+  };
+
+  useEffect(() => {
+    fetchAuction();
+  });
   return (
     <Container maxW={"7xl"}>
       <SimpleGrid
@@ -32,9 +92,7 @@ export default function Simple() {
           <Image
             rounded={"md"}
             alt={"product image"}
-            src={
-              "https://images.unsplash.com/photo-1596516109370-29001ec8ec36?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=MnwyODE1MDl8MHwxfGFsbHx8fHx8fHx8fDE2Mzg5MzY2MzE&ixlib=rb-1.2.1&q=80&w=1080"
-            }
+            src={auction.image}
             fit={"cover"}
             align={"center"}
             w={"100%"}
@@ -48,7 +106,7 @@ export default function Simple() {
               fontWeight={600}
               fontSize={{ base: "2xl", sm: "4xl", lg: "5xl" }}
             >
-              Automatic Watch
+              {auction.item_name}
             </Heading>
             <Stack>
               <Text
@@ -56,25 +114,24 @@ export default function Simple() {
                 fontWeight={400}
                 fontSize={"2xl"}
               >
-                Current Price: $350.00 USD
+                {"Current Price: " + auction.price_curr}
               </Text>
             </Stack>
+            {auction.price_inst !== "" && (
+              <Text fontWeight={200} fontSize={"lg"}>
+                {"Buyout Price " + auction.price_inst}
+              </Text>
+            )}
+
             <Text
               color={useColorModeValue("gray.900", "gray.400")}
               fontWeight={200}
               fontSize={"lg"}
             >
-              Buyout Price at: $400.00 USD
-            </Text>
-            <Text
-              color={useColorModeValue("gray.900", "gray.400")}
-              fontWeight={200}
-              fontSize={"lg"}
-            >
-              Started at: $200.00 USD
+              {"Starting Price " + auction.price_start}
             </Text>
           </Box>
-          <FormControl id="bid_form">
+          <FormControl id="bid_form" isRequired>
             <Stack direction={["column", "row"]}>
               <Box>
                 <FormLabel
@@ -95,6 +152,7 @@ export default function Simple() {
                       htmlSize={17}
                       width="auto"
                       type="text"
+                      onChange={bidAmountChangeHandler}
                       onKeyPress={(event) => {
                         if (!/[0-9]/.test(event.key)) {
                           event.preventDefault();
@@ -114,10 +172,16 @@ export default function Simple() {
                     colorScheme={"purple"}
                     bg={"purple.400"}
                     _hover={{ bg: "purple.500" }}
+                    onClick={submitHandler}
                   >
                     Place Bid
                   </Button>
                 </Stack>
+                {errorMessage !== "" && (
+                  <span id="message" style={{ color: "red", fontSize: "15px" }}>
+                    {errorMessage}
+                  </span>
+                )}
               </Box>
             </Stack>
           </FormControl>
@@ -139,12 +203,7 @@ export default function Simple() {
               >
                 Item Description
               </Text>
-              <Text fontSize={"lg"}>
-                Lorem ipsum dolor sit amet, consectetur adipisicing elit. Ad
-                aliquid amet at delectus doloribus dolorum expedita hic, ipsum
-                maxime modi nam officiis porro, quae, quisquam quos
-                reprehenderit velit? Natus, totam.
-              </Text>
+              <Text fontSize={"lg"}>{auction.description}</Text>
               <Text
                 color={useColorModeValue("purple.500")}
                 fontSize={"xl"}
@@ -154,9 +213,13 @@ export default function Simple() {
                 Categories
               </Text>
               <Stack direction={["column", "row"]}>
-                <Text fontSize={"lg"}>Category 1</Text>
-                <Text fontSize={"lg"}>Category 2</Text>
-                <Text fontSize={"lg"}>Category 3</Text>
+                {categories.map((category, index) => {
+                  return (
+                    <Text key={index} fontSize={"lg"}>
+                      {category}
+                    </Text>
+                  );
+                })}
               </Stack>
             </Stack>
             <Box>
@@ -172,14 +235,12 @@ export default function Simple() {
 
               <SimpleGrid columns={{ base: 1, md: 2 }} spacing={10}>
                 <List spacing={2}>
-                  <ListItem>Name</ListItem>
+                  <ListItem>{seller.username}</ListItem>
                   <ListItem>Review Score</ListItem>{" "}
-                  <ListItem>Review Number</ListItem>
                 </List>
                 <List spacing={2}>
-                  <ListItem>Country</ListItem>
-                  <ListItem>City</ListItem>
-                  <ListItem>Return Policy</ListItem>
+                  <ListItem>{seller.country}</ListItem>
+                  <ListItem>{seller.city}</ListItem>
                 </List>
               </SimpleGrid>
             </Box>

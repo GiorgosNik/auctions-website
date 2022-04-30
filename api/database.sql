@@ -12,7 +12,11 @@ CREATE TABLE account(
     address VARCHAR(30) NOT NULL,
     postcode VARCHAR(5) NOT NULL,
     taxcode VARCHAR(15) NOT NULL,
-    approved boolean NOT NULL
+    approved boolean NOT NULL,
+    sellerScore FLOAT,
+    bidderScore FLOAT,
+    sellerReviewCount INT,
+    bidderReviewCount INT
 );
 
 CREATE TABLE auction(
@@ -25,7 +29,8 @@ CREATE TABLE auction(
     price_inst NUMERIC,
     num_of_bids NUMERIC NOT NULL,
     started timestamp,
-    ends    timestamp
+    ends    timestamp,
+    image VARCHAR(500)
 );
 
 

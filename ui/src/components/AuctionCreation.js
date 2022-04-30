@@ -9,23 +9,23 @@ import {
   Input,
   InputLeftElement,
   InputRightAddon,
-  Select,
   InputGroup,
   Heading,
   SimpleGrid,
   StackDivider,
   useColorModeValue,
   Checkbox,
-  CheckboxGroup,
   Textarea,
+  Icon,
 } from "@chakra-ui/react";
+
+import FileUpload from "./FileUpload";
 import React, { useState, useEffect } from "react";
 import Axios from "axios";
 import jwt from "jwt-decode";
 
 export default function AuctionMain() {
   const [errorMessage, setErrorMessage] = useState("");
-  const [successMessage, setSuccessMessage] = useState("");
   const [categories, setCategories] = useState([]);
   const [productCategories, setProductCategories] = useState([]);
   const [productName, setProductName] = useState("");
@@ -33,6 +33,7 @@ export default function AuctionMain() {
   const [startingPrice, setStartingPrice] = useState("");
   const [buyOutPrice, setBuyoutPrice] = useState("");
   const accountId = jwt(localStorage.getItem("user")).user_id;
+  const [selectedFile, setSelectedFile] = useState(null);
   const productNameChangeHandler = (event) => {
     setProductName(event.target.value);
   };
@@ -62,9 +63,11 @@ export default function AuctionMain() {
     setCategories(categories);
   };
 
+  
+
   const submitHandler = (event) => {
     event.preventDefault();
-
+    console.log(selectedFile);
     const body = {
       productName,
       productDescription,
@@ -86,7 +89,7 @@ export default function AuctionMain() {
             setErrorMessage(res?.error);
           } else {
             setErrorMessage("");
-            window.location.href = "/myauctions";
+            window.location.href = "/myauctions/"+accountId;
           }
           console.log(res);
         });
@@ -300,6 +303,22 @@ export default function AuctionMain() {
                       </Box>
                     </FormControl>
                   </Stack>
+                  <FormControl id="imageUploader">
+                    <Box>
+                      <Stack direction={["column"]}>
+                        <FormLabel
+                          color={useColorModeValue("gray.600", "gray.500")}
+                          fontWeight={"600"}
+                        >
+                          Upload Image
+                        </FormLabel>
+                          <Input
+                            type="file"
+                            onChange={(e) => setSelectedFile(e.target.files[0])}
+                          />
+                      </Stack>
+                    </Box>
+                  </FormControl>
                 </Stack>
               </Stack>
             </Stack>

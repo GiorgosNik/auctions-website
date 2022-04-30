@@ -94,7 +94,7 @@ const AppHelper = () => {
             }
           />
           <Route
-            path="/productpage"
+            path="/auction/:id"
             element={
               <>
                 <AuctionPage />

@@ -20,7 +20,7 @@ export default function AuctionsList() {
   const [auctions, setAuctions] = useState([]);
   const accountId = jwt(localStorage.getItem("user")).user_id;
   const goToAuctionPage = (id) => {
-    window.location.href = "/myauctions/" + accountId + "/" + id;
+    window.location.href = "/auction/" + id;
   };
 
   const fetchAuctions = async () => {
