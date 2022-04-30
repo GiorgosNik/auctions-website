@@ -13,18 +13,20 @@ import {
   Box,
   Button,
 } from "@chakra-ui/react";
-
-import { ArrowForwardIcon } from "@chakra-ui/icons";
+import jwt from "jwt-decode";
+import { ArrowForwardIcon,CheckIcon, CloseIcon } from "@chakra-ui/icons";
 
 export default function AuctionsList() {
   const [auctions, setAuctions] = useState([]);
-
+  const accountId = jwt(localStorage.getItem("user")).user_id;
   const goToAuctionPage = (id) => {
-    window.location.href = "/myauctions/" + id;
+    window.location.href = "/myauctions/" + accountId + "/" + id;
   };
 
   const fetchAuctions = async () => {
-    const { data } = await Axios.get("http://localhost:5000/myauctions");
+    const { data } = await Axios.get(
+      "http://localhost:5000/auction/myauctions/" + accountId
+    );
     const auctions = data;
     setAuctions(auctions);
     console.log(auctions);
@@ -41,7 +43,7 @@ export default function AuctionsList() {
         <TableContainer
           bg={"purple.100"}
           borderRadius={30}
-          maxWidth={800}
+          maxWidth={1000}
           border={"1px solid"}
         >
           <Table variant="simple">
@@ -50,10 +52,11 @@ export default function AuctionsList() {
             </TableCaption>
             <Thead>
               <Tr>
-                <Th></Th>
-                <Th></Th>
-                <Th></Th>
-                <Th></Th>
+                <Th>Product Name</Th>
+                <Th>Current Price</Th>
+                <Th>Ends</Th>
+                <Th>Bids</Th>
+                <Th>Started</Th>
               </Tr>
             </Thead>
             <Tbody>
@@ -61,9 +64,20 @@ export default function AuctionsList() {
                 console.log(auction);
                 return (
                   <Tr>
-                    <Td>{index}</Td>
-                    <Td></Td>
-                    <Td></Td>
+                    <Td>{auction.item_name}</Td>
+                    <Td>{auction.price_curr}</Td>
+                    <Td>{auction.ends}</Td>
+                    <Td>{auction.num_of_bids}</Td>
+                    {auction.started !== "" && (
+                      <Td>
+                        <CheckIcon w={3} h={3} color={"green"} />
+                      </Td>
+                    )}
+                    {auction.started === "" && (
+                      <Td>
+                        <CloseIcon w={3} h={3} color={"red"} />
+                      </Td>
+                    )}
                     <Td>
                       <Button
                         rightIcon={<ArrowForwardIcon />}

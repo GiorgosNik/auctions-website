@@ -24,8 +24,8 @@ CREATE TABLE auction(
     price_curr NUMERIC NOT NULL,
     price_inst NUMERIC,
     num_of_bids NUMERIC NOT NULL,
-    started timestamp NOT NULL,
-    ends    timestamp NOT NULL
+    started timestamp,
+    ends    timestamp
 );
 
 

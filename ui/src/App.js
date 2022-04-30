@@ -86,7 +86,7 @@ const AppHelper = () => {
             }
           />
           <Route
-            path="/myauctions"
+            path="/myauctions/:userId"
             element={
               <>
                 <AuctionsList />
