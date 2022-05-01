@@ -16,6 +16,7 @@ app.post("/register", async (req, res) => {
       email,
       phone,
       country,
+      city,
       address,
       postcode,
       taxcode,
@@ -43,6 +44,9 @@ app.post("/register", async (req, res) => {
     }
     if (!country) {
       return res.status(400).json({ error: "Country cannot be blank" });
+    }
+    if (!city) {
+      return res.status(400).json({ error: "City cannot be blank" });
     }
     if (!address) {
       return res.status(400).json({ error: "Address cannot be blank" });
@@ -92,6 +96,9 @@ app.post("/register", async (req, res) => {
     if (country.length > 30) {
       return res.status(400).json({ error: "Country name is too long" });
     }
+    if (city.length > 30) {
+      return res.status(400).json({ error: "City name is too long" });
+    }
     if (address.length > 30) {
       return res.status(400).json({ error: "Address length is too long" });
     }
@@ -112,8 +119,8 @@ app.post("/register", async (req, res) => {
         .json({ error: "Username taken. Please type an other username" });
     } else {
       bcrypt.hash(password, 10, function (err, hash) {
-        const newUser = client.query(
-          "INSERT INTO account (username, password, firstname, lastname, email, phone, country, address, postcode, taxcode, approved) VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING *",
+        client.query(
+          "INSERT INTO account (username, password, firstname, lastname, email, phone, country, city, address, postcode, taxcode, approved) VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) RETURNING *",
           [
             username,
             hash,
@@ -122,20 +129,23 @@ app.post("/register", async (req, res) => {
             email.toLowerCase(),
             phone,
             country,
+            city,
             address,
             postcode,
             taxcode,
             0,
-          ]
-        );
-        const token = jwt.sign(
-          { user_id: newUser.id, username },
-          process.env.SECRET_KEY,
-          {
-            expiresIn: "2h",
+          ],
+          function (err, newUser) {
+            const token = jwt.sign(
+              { user_id: newUser.rows[0].id, username },
+              process.env.SECRET_KEY,
+              {
+                expiresIn: "2h",
+              }
+            );
+            return res.status(201).json({ token });
           }
         );
-        return res.status(201).json({ token });
       });
     }
   } catch (err) {

@@ -1,25 +1,63 @@
-/* global google */
-import { MapContainer, TileLayer, useMap, Marker, Popup } from "react-leaflet";
+import { MapContainer, TileLayer, Marker } from "react-leaflet";
+import Axios from "axios";
+import React, { useState, useEffect } from "react";
+import "leaflet/dist/leaflet.css";
+import L from "leaflet";
 
-export default function Map() {
-  var address = "new york";
-  var geocoder = new window.google.maps.Geocoder();
-  //   geocoder.geocode({ address: address }, function (results, status) {
-  // if (status == google.maps.GeocoderStatus.OK) {
-  //   var latitude = results[0].geometry.location.lat();
-  //   var longitude = results[0].geometry.location.lng();
-  //   console.log(latitude);
-  //   console.log(longitude);
-  //   var myLatLng = { lat: latitude, lng: longitude };
-  //   var map = new google.maps.Map(document.getElementById("map"), {
-  //     zoom: 4,
-  //     center: myLatLng,
-  //   });
-  //   var marker = new google.maps.Marker({
-  //     position: myLatLng,
-  //     map: map,
-  //     title: "Hello World!",
-  //   });
-  // }
-  //   });
+const defaultMarker = new L.icon({
+  iconUrl: "https://unpkg.com/leaflet@1.4.0/dist/images/marker-icon.png",
+  iconSize: [25, 41],
+  iconAnchor: [13, 0],
+});
+
+export default function OpenStreetMap({ address, city }) {
+  const [position, setPosition] = useState([]);
+  if (address) {
+    const addressArray = address.split(" ");
+    var addressString = "";
+    for (let index = 0; index < addressArray.length; index++) {
+      if (index === 0) {
+        addressString += addressArray[index];
+      } else {
+        addressString += "+";
+        addressString += addressArray[index];
+      }
+    }
+  }
+
+  const fetchCoordinates = async () => {
+    const { data } = await Axios.get(
+      "https://nominatim.openstreetmap.org/search?q=" +
+        addressString +
+        ",+" +
+        city +
+        "&format=json&polygon=1&addressdetails=1"
+    );
+    const latitude = parseFloat(data[0].lat);
+    const longitude = parseFloat(data[0].lon);
+    setPosition([latitude, longitude]);
+  };
+  useEffect(() => {
+    fetchCoordinates();
+  }, []);
+
+  useEffect(() => {
+    console.log(position);
+  }, [position]);
+
+  if (position.length !== 0) {
+    return (
+      <MapContainer
+        style={{ width: "100%", height: "100vh" }}
+        center={position}
+        zoom={13}
+      >
+        <TileLayer
+          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+        />
+        <Marker position={position} icon={defaultMarker}></Marker>
+      </MapContainer>
+    );
+  }
 }

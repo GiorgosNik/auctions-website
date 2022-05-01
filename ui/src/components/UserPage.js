@@ -114,7 +114,7 @@ export default function UserProfileEdit(): JSX.Element {
             <Input
               id="input"
               type="address"
-              placeholder={user.address}
+              placeholder={user.address + ", " + user.city}
               readOnly
             />
           </FormControl>

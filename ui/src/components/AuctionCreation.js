@@ -18,8 +18,7 @@ import {
   Textarea,
   Icon,
 } from "@chakra-ui/react";
-
-import FileUpload from "./FileUpload";
+import Dropzone, { useDropzone } from "react-dropzone";
 import React, { useState, useEffect } from "react";
 import Axios from "axios";
 import jwt from "jwt-decode";
@@ -32,8 +31,9 @@ export default function AuctionMain() {
   const [productDescription, setProductDescription] = useState("");
   const [startingPrice, setStartingPrice] = useState("");
   const [buyOutPrice, setBuyoutPrice] = useState("");
-  const accountId = jwt(localStorage.getItem("user")).user_id;
   const [selectedFile, setSelectedFile] = useState(null);
+  const accountId = jwt(localStorage.getItem("user")).user_id;
+
   const productNameChangeHandler = (event) => {
     setProductName(event.target.value);
   };
@@ -63,8 +63,6 @@ export default function AuctionMain() {
     setCategories(categories);
   };
 
-  
-
   const submitHandler = (event) => {
     event.preventDefault();
     console.log(selectedFile);
@@ -89,7 +87,7 @@ export default function AuctionMain() {
             setErrorMessage(res?.error);
           } else {
             setErrorMessage("");
-            window.location.href = "/myauctions/"+accountId;
+            window.location.href = "/myauctions/" + accountId;
           }
           console.log(res);
         });
@@ -303,7 +301,7 @@ export default function AuctionMain() {
                       </Box>
                     </FormControl>
                   </Stack>
-                  <FormControl id="imageUploader">
+                  {/* <FormControl id="imageUploader">
                     <Box>
                       <Stack direction={["column"]}>
                         <FormLabel
@@ -312,13 +310,14 @@ export default function AuctionMain() {
                         >
                           Upload Image
                         </FormLabel>
-                          <Input
-                            type="file"
-                            onChange={(e) => setSelectedFile(e.target.files[0])}
-                          />
+                        <Dropzone
+                          style={{ position: "relative" }}
+                          accept="image/*"
+                          name="avatar"
+                        ></Dropzone>
                       </Stack>
                     </Box>
-                  </FormControl>
+                  </FormControl> */}
                 </Stack>
               </Stack>
             </Stack>

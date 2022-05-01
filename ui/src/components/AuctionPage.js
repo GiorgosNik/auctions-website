@@ -23,6 +23,7 @@ import Axios from "axios";
 import jwt from "jwt-decode";
 import React, { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
+import OpenStreetMap from "./Map";
 
 export default function AuctionPage() {
   const [errorMessage, setErrorMessage] = useState("");
@@ -240,13 +241,14 @@ export default function AuctionPage() {
                 </List>
                 <List spacing={2}>
                   <ListItem>{seller.country}</ListItem>
-                  <ListItem>{seller.city}</ListItem>
+                  <ListItem>{seller.address + ", " + seller.city}</ListItem>
                 </List>
               </SimpleGrid>
             </Box>
           </Stack>
         </Stack>
       </SimpleGrid>
+      <OpenStreetMap address={seller.address} city={seller.city} />
     </Container>
   );
 }

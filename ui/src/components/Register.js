@@ -35,6 +35,7 @@ export default function SignupCard({ onClose }) {
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [country, setCountry] = useState("");
+  const [city, setCity] = useState("");
   const [address, setAddress] = useState("");
   const [postcode, setPostcode] = useState("");
   const [taxcode, setTaxcode] = useState("");
@@ -63,6 +64,9 @@ export default function SignupCard({ onClose }) {
   const countryChangeHandler = (event) => {
     setCountry(event.target.value);
   };
+  const cityChangeHandler = (event) => {
+    setCity(event.target.value);
+  };
   const addressChangeHandler = (event) => {
     setAddress(event.target.value);
   };
@@ -83,6 +87,7 @@ export default function SignupCard({ onClose }) {
       email,
       phone,
       country,
+      city,
       address,
       postcode,
       taxcode,
@@ -106,7 +111,8 @@ export default function SignupCard({ onClose }) {
             setUser(res?.user);
             localStorage.setItem("user", res?.token);
             var decoded = jwt_decode(res.token);
-            console.log(decoded.username);
+            console.log(decoded);
+            // console.log(decoded.username);
             if (decoded.username === "admin") {
               window.location.href = "/users";
             }
@@ -148,6 +154,12 @@ export default function SignupCard({ onClose }) {
                 <Input type="text" onChange={usernameChangeHandler} />
               </FormControl>
             </Box>
+            <Box>
+              <FormControl id="email" isRequired>
+                <FormLabel>Email address</FormLabel>
+                <Input type="email" onChange={emailChangeHandler} />
+              </FormControl>
+            </Box>
           </HStack>
           <HStack>
             <Box>
@@ -163,26 +175,27 @@ export default function SignupCard({ onClose }) {
               </FormControl>
             </Box>
           </HStack>
-          <HStack>
-            <Box>
-              <FormControl id="email" isRequired>
-                <FormLabel>Email address</FormLabel>
-                <Input type="email" onChange={emailChangeHandler} />
-              </FormControl>
-            </Box>
-            <Box>
-              <FormControl id="phone" isRequired>
-                <FormLabel>Phone number</FormLabel>
-                <Input type="tel" onChange={phoneChangeHandler} />
-              </FormControl>
-            </Box>
-          </HStack>
 
           <HStack>
             <Box>
               <FormControl id="country" isRequired>
                 <FormLabel>Country</FormLabel>
                 <Input type="text" onChange={countryChangeHandler} />
+              </FormControl>
+            </Box>
+            <Box>
+              <FormControl id="city" isRequired>
+                <FormLabel>City</FormLabel>
+                <Input type="text" onChange={cityChangeHandler} />
+              </FormControl>
+            </Box>
+          </HStack>
+
+          <HStack>
+            <Box>
+              <FormControl id="phone" isRequired>
+                <FormLabel>Phone number</FormLabel>
+                <Input type="tel" onChange={phoneChangeHandler} />
               </FormControl>
             </Box>
             <Box>

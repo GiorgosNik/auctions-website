@@ -55,6 +55,7 @@ export default function LoginCard({ onClose }) {
             setUser(res?.user);
             localStorage.setItem("user", res?.token);
             var decoded = jwt_decode(res.token);
+            console.log(decoded);
             console.log(decoded.username);
             if (decoded.username === "admin") {
               window.location.href = "/users";

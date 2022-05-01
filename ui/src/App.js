@@ -19,7 +19,6 @@ import {
   AuctionsList,
   Messaging,
   Notification,
-  Map,
 } from "./components";
 
 function App() {
@@ -44,7 +43,7 @@ const AppHelper = () => {
     <Router>
       <ChakraProvider>
         <NavBar />
-        <Notification />
+        {/* <Notification /> */}
         <Routes>
           <Route
             path="/"
@@ -109,14 +108,6 @@ const AppHelper = () => {
             element={
               <>
                 <Messaging />
-              </>
-            }
-          />
-          <Route
-            path="/map"
-            element={
-              <>
-                <Map />
               </>
             }
           />

@@ -1,7 +1,13 @@
 const express = require("express");
 const app = express.Router();
 const client = require("../database.js");
-const moment= require('moment');
+const moment = require("moment");
+// const multer = require("multer");
+// const bodyParser = require("body-parser");
+
+// app.use(bodyParser.urlencoded({ extended: true }));
+// app.use(multer({ dest: "public/images" }));
+// app.use(express.static(path.join(__dirname, "bower_components")));
 
 //Auction
 app.post("/", async (req, res) => {
@@ -40,10 +46,10 @@ app.post("/", async (req, res) => {
     }
     if (buyOutPrice === "") {
       buyOut = "0";
-    }else{
+    } else {
       buyOut = buyOutPrice;
     }
-    
+
     //Check Categories Exist
     for (let i = 0; i < productCategories.length; i++) {
       try {
@@ -61,8 +67,7 @@ app.post("/", async (req, res) => {
 
     //Check Start and End Date are correct
     var started = moment(Date.now()).format("YYYY-MM-DD HH:mm:ss");
-    var ends = moment(Date.now()).add(5, 'days').format("YYYY-MM-DD HH:mm:ss");
-
+    var ends = moment(Date.now()).add(5, "days").format("YYYY-MM-DD HH:mm:ss");
 
     const getUser = () =>
       client.query("SELECT * FROM account WHERE id = $1", [accountId]);
@@ -122,9 +127,10 @@ app.get("/", async (req, res) => {
 app.get("/myauctions/:id", async (req, res) => {
   try {
     const id = req.params.id;
-    const auction = await client.query("SELECT * FROM auction WHERE account_id =  $1", [
-      id,
-    ]);
+    const auction = await client.query(
+      "SELECT * FROM auction WHERE account_id =  $1",
+      [id]
+    );
     console.log(auction.rows);
     res.json(auction.rows);
   } catch (err) {
@@ -138,11 +144,12 @@ app.get("/:id", async (req, res) => {
     const auction = await client.query("SELECT * FROM auction WHERE id =  $1", [
       id,
     ]);
-    const categories = await client.query("SELECT name FROM auction_category INNER JOIN category ON (category.id = auction_category.category_id) WHERE auction_id =  $1", [
-      id,
-    ]);
+    const categories = await client.query(
+      "SELECT name FROM auction_category INNER JOIN category ON (category.id = auction_category.category_id) WHERE auction_id =  $1",
+      [id]
+    );
     auction.rows[0].categories = [];
-    for(let category of categories.rows){
+    for (let category of categories.rows) {
       auction.rows[0].categories.push(category.name);
     }
     const user = await client.query("SELECT * FROM account WHERE id =  $1", [
@@ -150,8 +157,7 @@ app.get("/:id", async (req, res) => {
     ]);
     auction.rows[0].user = user.rows[0];
     res.json(auction.rows);
-  } catch (err) {
-  }
+  } catch (err) {}
 });
 
 app.delete("/:id", async (req, res) => {

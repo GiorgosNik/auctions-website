@@ -9,6 +9,7 @@ CREATE TABLE account(
     email VARCHAR(30) NOT NULL,
     phone VARCHAR(15) NOT NULL,
     country VARCHAR(30) NOT NULL,
+    city VARCHAR(30) NOT NULL,
     address VARCHAR(30) NOT NULL,
     postcode VARCHAR(5) NOT NULL,
     taxcode VARCHAR(15) NOT NULL,
