@@ -62,17 +62,16 @@ export default function AuctionsList() {
               {auctions.map((auction, index) => {
                 return (
                   <Tr key={index}>
-                    
                     <Td>{auction.item_name}</Td>
                     <Td>{auction.price_curr}</Td>
                     <Td>{auction.ends}</Td>
                     <Td>{auction.num_of_bids}</Td>
-                    {(auction.started !== null) && (
+                    {auction.started !== null && (
                       <Td>
                         <CheckIcon w={3} h={3} color={"green"} />
                       </Td>
                     )}
-                    {(auction.started === null)  && (
+                    {auction.started === null && (
                       <Td>
                         <CloseIcon w={3} h={3} color={"red"} />
                       </Td>

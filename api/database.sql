@@ -17,7 +17,8 @@ CREATE TABLE account(
     sellerScore FLOAT,
     bidderScore FLOAT,
     sellerReviewCount INT,
-    bidderReviewCount INT
+    bidderReviewCount INT,
+    messageCount INT NOT NULL
 );
 
 CREATE TABLE auction(

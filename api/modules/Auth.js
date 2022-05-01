@@ -120,7 +120,7 @@ app.post("/register", async (req, res) => {
     } else {
       bcrypt.hash(password, 10, function (err, hash) {
         client.query(
-          "INSERT INTO account (username, password, firstname, lastname, email, phone, country, city, address, postcode, taxcode, approved) VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) RETURNING *",
+          "INSERT INTO account (username, password, firstname, lastname, email, phone, country, city, address, postcode, taxcode, approved, messagecount) VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13) RETURNING *",
           [
             username,
             hash,
@@ -133,6 +133,7 @@ app.post("/register", async (req, res) => {
             address,
             postcode,
             taxcode,
+            0,
             0,
           ],
           function (err, newUser) {
@@ -227,6 +228,21 @@ app.put("/users/:id", async (req, res) => {
   try {
     const id = req.params.id;
     await client.query("UPDATE account SET approved = true WHERE id = $1;", [
+      id,
+    ]);
+    res.json("User was updated");
+  } catch (err) {
+    console.error(err.message);
+  }
+});
+
+// update a user
+app.put("/users/:id/messages", async (req, res) => {
+  try {
+    const id = req.params.id;
+    const { receivedLength } = req.body;
+    await client.query("UPDATE account SET messageCount = $1 WHERE id = $2", [
+      receivedLength,
       id,
     ]);
     res.json("User was updated");

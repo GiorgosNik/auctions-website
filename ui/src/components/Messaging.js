@@ -33,6 +33,7 @@ import Axios from "axios";
 import { IconType } from "react-icons";
 import { ReactText } from "react";
 import { useLocation } from "react-router-dom";
+import jwt from "jwt-decode";
 
 interface LinkItemProps {
   name: string;
@@ -58,6 +59,29 @@ export default function Messaging({ children }: { children: ReactNode }) {
   const [errorMessage, setErrorMessage] = useState("");
   const [openedMessage, setOpenMessage] = useState("");
   const [inboxLength, setInboxLength] = useState(0);
+
+  useEffect(() => {
+    if (receivedMessages.length === 0) {
+      return;
+    }
+    var receivedLength = receivedMessages.length;
+    const body = {
+      receivedLength,
+    };
+
+    fetch(
+      "http://localhost:5000/auth/users/" +
+        jwt(localStorage.getItem("user")).user_id +
+        "/messages",
+      {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      }
+    )
+      .then((res) => console.log(res))
+      .catch((err) => console.error(err));
+  }, [receivedMessages]);
 
   useEffect(() => {
     const interval = setInterval(() => {

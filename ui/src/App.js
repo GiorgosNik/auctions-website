@@ -44,7 +44,7 @@ const AppHelper = () => {
     <Router>
       <ChakraProvider>
         <NavBar />
-        {/* <Notification /> */}
+        <Notification />
         <Routes>
           <Route
             path="/"

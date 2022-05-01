@@ -5,7 +5,8 @@ import jwt from "jwt-decode";
 
 export default function Notification() {
   const [newMessages, setNewMessages] = useState(false);
-  const [inboxLength, setInboxLength] = useState(0);
+  const [user, setUser] = useState(null);
+  const [receivedLength, setReceivedLength] = useState(0);
 
   const fetchReceivedMessages = async () => {
     let { data } = await Axios.get(
@@ -14,13 +15,13 @@ export default function Notification() {
         "/inbox"
     );
     const received = data;
-    console.log(received.length, inboxLength);
-    // if (inboxLength !== 0 && received.length > inboxLength) {
-    //   setNewMessages(true);
-    // } else {
-    //   setNewMessages(false);
-    // }
-    // setInboxLength(received.length);
+    setReceivedLength(received.length);
+
+    let { data: user_data } = await Axios.get(
+      "http://localhost:5000/auth/users/" +
+        jwt(localStorage.getItem("user")).user_id
+    );
+    setUser(user_data[0]);
   };
 
   useEffect(() => {
@@ -30,10 +31,22 @@ export default function Notification() {
     return () => clearInterval(interval);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // useEffect(() => console.log({ inboxLength }), [inboxLength]);
+  useEffect(() => {
+    if (receivedLength === 0 || user == null) {
+      setNewMessages(false);
+      return;
+    }
+    if (receivedLength > user.messagecount) {
+      setNewMessages(true);
+
+      console.log(receivedLength, user.messagecount);
+    } else {
+      setNewMessages(false);
+    }
+  }, [user, receivedLength]);
 
   return (
-    <Stack top={100} position={"absolute"} right={100}>
+    <Stack top={20} position={"absolute"} right={100}>
       {newMessages && <NotificationCode />}
     </Stack>
   );

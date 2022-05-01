@@ -33,6 +33,7 @@ app.post("/:id", async (req, res) => {
             "INSERT INTO message (subject, sender, receiver, text) VALUES($1, $2, $3, $4) RETURNING *",
             [subject, sender, receiver, message]
           );
+
           return res.status(201).json(newMessage);
         } else {
           return res.status(400).json({ error: "No such user exists" });
