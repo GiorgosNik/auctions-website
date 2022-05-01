@@ -20,6 +20,7 @@ import {
   Messaging,
   EditAuction,
   Notification,
+  Browse,
 } from "./components";
 
 function App() {
@@ -117,6 +118,14 @@ const AppHelper = () => {
             element={
               <>
                 <EditAuction />
+              </>
+            }
+          />
+          <Route
+            path="/browse"
+            element={
+              <>
+                <Browse />
               </>
             }
           />

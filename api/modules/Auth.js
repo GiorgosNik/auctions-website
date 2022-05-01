@@ -210,6 +210,18 @@ app.get("/users", async (req, res) => {
   }
 });
 
+// get users
+app.get("/locations", async (req, res) => {
+  try {
+    const users = await client.query(
+      "SELECT address,city,country FROM account"
+    );
+    res.json(users.rows);
+  } catch (err) {
+    console.error(err.message);
+  }
+});
+
 // get a user
 app.get("/users/:id", async (req, res) => {
   try {

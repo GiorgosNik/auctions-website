@@ -58,7 +58,7 @@ export default function Messaging({ children }: { children: ReactNode }) {
   const [receiver, setReceiver] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [openedMessage, setOpenMessage] = useState("");
-  const [inboxLength, setInboxLength] = useState(0);
+  const [inboxLength] = useState(0);
 
   useEffect(() => {
     if (receivedMessages.length === 0) {

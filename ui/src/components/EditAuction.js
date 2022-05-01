@@ -13,10 +13,8 @@ import {
   Heading,
   SimpleGrid,
   StackDivider,
-  useColorModeValue,
   Checkbox,
   Textarea,
-  Icon,
 } from "@chakra-ui/react";
 
 import React, { useState, useEffect } from "react";
@@ -36,7 +34,6 @@ export default function AuctionMain() {
   const [buyOutPrice, setBuyoutPrice] = useState("");
   const [auction, setAuction] = useState([]);
   const [auction_id, setAuctionId] = useState("");
-  const [seller, setSeller] = useState([]);
   const accountId = jwt(localStorage.getItem("user")).user_id;
   const [selectedFile, setSelectedFile] = useState(null);
   const splitLocation = location.pathname.split("/");
@@ -49,7 +46,6 @@ export default function AuctionMain() {
     setAuction(auction[0]);
     setAuctionId(auction[0].id);
     setAuctionCategories(auction[0].categories);
-    setSeller(auction[0].user);
     setProductCategories(auction[0].categories);
     setProductName(auction[0].item_name);
     setStartingPrice(auction[0].price_start);
@@ -185,11 +181,7 @@ export default function AuctionMain() {
                 <Stack
                   spacing={{ base: 4, sm: 6 }}
                   direction={"column"}
-                  divider={
-                    <StackDivider
-                      borderColor={"gray"}
-                    />
-                  }
+                  divider={<StackDivider borderColor={"gray"} />}
                 >
                   <Stack spacing={{ base: 2, md: 2 }}>
                     <Text
@@ -202,10 +194,7 @@ export default function AuctionMain() {
                     </Text>
 
                     <FormControl id="product_name" isRequired>
-                      <FormLabel
-                        color={"gray"}
-                        fontWeight={"600"}
-                      >
+                      <FormLabel color={"gray"} fontWeight={"600"}>
                         Product Name
                       </FormLabel>
                       <Input
@@ -218,10 +207,7 @@ export default function AuctionMain() {
                       />
                     </FormControl>
                     <FormControl id="product_description" isRequired>
-                      <FormLabel
-                        color={"gray"}
-                        fontWeight={"600"}
-                      >
+                      <FormLabel color={"gray"} fontWeight={"600"}>
                         Product Description
                       </FormLabel>
                       <Textarea
@@ -268,11 +254,7 @@ export default function AuctionMain() {
                 <Stack
                   spacing={{ base: 4, sm: 6 }}
                   direction={"column"}
-                  divider={
-                    <StackDivider
-                      borderColor={"gray"}
-                    />
-                  }
+                  divider={<StackDivider borderColor={"gray"} />}
                 >
                   <Stack spacing={{ base: 2, md: 2 }}>
                     <Text
@@ -288,10 +270,7 @@ export default function AuctionMain() {
                       <FormControl id="starting_price" isRequired>
                         <Box>
                           <Stack direction={["column"]}>
-                            <FormLabel
-                              color={"gray"}
-                              fontWeight={"600"}
-                            >
+                            <FormLabel color={"gray"} fontWeight={"600"}>
                               Starting Price
                             </FormLabel>
                             <InputGroup>
@@ -324,10 +303,7 @@ export default function AuctionMain() {
                       <FormControl id="buyOutPrice">
                         <Box>
                           <Stack direction={["column"]}>
-                            <FormLabel
-                              color={"gray"}
-                              fontWeight={"600"}
-                            >
+                            <FormLabel color={"gray"} fontWeight={"600"}>
                               Buyout Price
                             </FormLabel>
                             <InputGroup>
@@ -361,10 +337,7 @@ export default function AuctionMain() {
                     <FormControl id="imageUploader">
                       <Box>
                         <Stack direction={["column"]}>
-                          <FormLabel
-                            color={"gray"}
-                            fontWeight={"600"}
-                          >
+                          <FormLabel color={"gray"} fontWeight={"600"}>
                             Upload Image
                           </FormLabel>
                           <Input
@@ -465,11 +438,7 @@ export default function AuctionMain() {
                 <Stack
                   spacing={{ base: 4, sm: 6 }}
                   direction={"column"}
-                  divider={
-                    <StackDivider
-                      borderColor={"gray"}
-                    />
-                  }
+                  divider={<StackDivider borderColor={"gray"} />}
                 >
                   <Stack spacing={{ base: 2, md: 2 }}>
                     <Text
@@ -482,10 +451,7 @@ export default function AuctionMain() {
                     </Text>
 
                     <FormControl id="product_name" isRequired>
-                      <FormLabel
-                        color={"gray"}
-                        fontWeight={"600"}
-                      >
+                      <FormLabel color={"gray"} fontWeight={"600"}>
                         Product Name
                       </FormLabel>
                       <Input
@@ -497,10 +463,7 @@ export default function AuctionMain() {
                       />
                     </FormControl>
                     <FormControl id="product_description" isRequired>
-                      <FormLabel
-                        color={"gray"}
-                        fontWeight={"600"}
-                      >
+                      <FormLabel color={"gray"} fontWeight={"600"}>
                         Product Description
                       </FormLabel>
                       <Textarea
@@ -524,11 +487,7 @@ export default function AuctionMain() {
                             {category.name}
                           </Checkbox>
                         ) : (
-                          <Checkbox
-                            colorScheme="purple"
-                            key={index}
-                            isReadOnly
-                          >
+                          <Checkbox colorScheme="purple" key={index} isReadOnly>
                             {category.name}
                           </Checkbox>
                         );
@@ -543,11 +502,7 @@ export default function AuctionMain() {
                 <Stack
                   spacing={{ base: 4, sm: 6 }}
                   direction={"column"}
-                  divider={
-                    <StackDivider
-                      borderColor={"gray"}
-                    />
-                  }
+                  divider={<StackDivider borderColor={"gray"} />}
                 >
                   <Stack spacing={{ base: 2, md: 2 }}>
                     <Text
@@ -563,10 +518,7 @@ export default function AuctionMain() {
                       <FormControl id="starting_price" isRequired>
                         <Box>
                           <Stack direction={["column"]}>
-                            <FormLabel
-                              color={"gray"}
-                              fontWeight={"600"}
-                            >
+                            <FormLabel color={"gray"} fontWeight={"600"}>
                               Starting Price
                             </FormLabel>
                             <InputGroup>
@@ -599,10 +551,7 @@ export default function AuctionMain() {
                       <FormControl id="buyOutPrice">
                         <Box>
                           <Stack direction={["column"]}>
-                            <FormLabel
-                              color={"gray"}
-                              fontWeight={"600"}
-                            >
+                            <FormLabel color={"gray"} fontWeight={"600"}>
                               Buyout Price
                             </FormLabel>
                             <InputGroup>

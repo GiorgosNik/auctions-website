@@ -68,7 +68,7 @@ export default function NavBar() {
   const itemsMap: Array<NavItem> = [
     {
       label: "Browse Auctions",
-      href: "#",
+      href: "/browse",
     },
     {
       label: "Create an Auction",
