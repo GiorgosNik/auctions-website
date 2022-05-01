@@ -52,7 +52,7 @@ app.get("/:id/inbox", async (req, res) => {
       "SELECT * FROM account WHERE id = $1",
       [receiverId],
       function (err, result) {
-        if (result.rows.length != 0) {
+        if (result && result.rows.length != 0) {
           let receiver = result.rows[0].username;
           client.query(
             "SELECT * FROM message WHERE receiver = $1",
@@ -77,7 +77,7 @@ app.get("/:id/sent", async (req, res) => {
       "SELECT * FROM account WHERE id = $1",
       [senderId],
       function (err, result) {
-        if (result.rows.length != 0) {
+        if (result && result.rows.length != 0) {
           let sender = result.rows[0].username;
           client.query(
             "SELECT * FROM message WHERE sender = $1",

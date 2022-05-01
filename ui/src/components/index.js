@@ -13,4 +13,7 @@ export { default as AuctionsList } from "./AuctionsList";
 export { default as AuctionPage } from "./AuctionPage";
 export { default as Messaging } from "./Messaging";
 export { default as EditAuction } from "./EditAuction";
+export { default as Notification } from "./Notification";
+export { default as Map } from "./Map";
+
 export * from "./UserProvider";

@@ -1,5 +1,5 @@
 import "./App.css";
-import React from "react";
+import React, { useState, useEffect } from "react";
 import jwt from "jwt-decode";
 import { ChakraProvider } from "@chakra-ui/react";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
@@ -19,6 +19,8 @@ import {
   AuctionsList,
   Messaging,
   EditAuction,
+  Notification,
+  Map,
 } from "./components";
 
 function App() {
@@ -32,7 +34,7 @@ function App() {
 const AppHelper = () => {
   const { setUser } = React.useContext(UserContext);
 
-  React.useEffect(() => {
+  useEffect(() => {
     const token = localStorage.getItem("user");
     try {
       setUser(jwt(token));
@@ -43,6 +45,7 @@ const AppHelper = () => {
     <Router>
       <ChakraProvider>
         <NavBar />
+        <Notification />
         <Routes>
           <Route
             path="/"
@@ -111,10 +114,17 @@ const AppHelper = () => {
             }
           />
           <Route
+<<<<<<< HEAD
             path="/editauction/:id"
             element={
               <>
                 <EditAuction />
+=======
+            path="/map"
+            element={
+              <>
+                <Map />
+>>>>>>> 96b34aa473be34eaf625f39f44f5170d51ebba17
               </>
             }
           />
