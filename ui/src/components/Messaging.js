@@ -25,9 +25,6 @@ import {
   Textarea,
   Text,
   TableCaption,
-  Stack,
-  Alert,
-  AlertIcon,
 } from "@chakra-ui/react";
 
 import { FiHome, FiSend, FiPlus } from "react-icons/fi";
@@ -135,12 +132,6 @@ export default function Messaging({ children }: { children: ReactNode }) {
       "http://localhost:5000" + location.pathname + "/inbox"
     );
     const received = data;
-    Notification();
-
-    if (received.length > inboxLength) {
-      setInboxLength(received.length - inboxLength);
-      Notification();
-    }
     setReceivedMessages(received);
   };
 
@@ -192,29 +183,27 @@ export default function Messaging({ children }: { children: ReactNode }) {
               Inbox
             </TableCaption>
 
-            <Box borderRadius={30} border={"1px solid #E0E0E0"}>
-              <Thead>
-                <Tr>
-                  <Th>Sender</Th>
-                  <Th>Subject</Th>
-                  <Th>Date</Th>
-                  <Th></Th>
-                  <Th></Th>
-                </Tr>
-              </Thead>
-              <Tbody>
-                {receivedMessages.map((message, index) => {
-                  return (
-                    <InboxMessage
-                      message={message}
-                      index={index}
-                      openMessage={openMessage}
-                      deleteMessage={deleteMessage}
-                    ></InboxMessage>
-                  );
-                })}
-              </Tbody>
-            </Box>
+            <Thead>
+              <Tr>
+                <Th>Sender</Th>
+                <Th>Subject</Th>
+                <Th>Date</Th>
+                <Th></Th>
+                <Th></Th>
+              </Tr>
+            </Thead>
+            <Tbody>
+              {receivedMessages.map((message, index) => {
+                return (
+                  <InboxMessage
+                    message={message}
+                    index={index}
+                    openMessage={openMessage}
+                    deleteMessage={deleteMessage}
+                  ></InboxMessage>
+                );
+              })}
+            </Tbody>
           </Table>
         </TableContainer>
       )}
@@ -224,29 +213,27 @@ export default function Messaging({ children }: { children: ReactNode }) {
             <TableCaption placement="top" fontSize={30}>
               Sent Messages
             </TableCaption>
-            <Box borderRadius={30} border={"1px solid #E0E0E0"}>
-              <Thead>
-                <Tr>
-                  <Th>Sender</Th>
-                  <Th>Subject</Th>
-                  <Th>Date</Th>
-                  <Th></Th>
-                  <Th></Th>
-                </Tr>
-              </Thead>
-              <Tbody>
-                {sentMessages.map((message, index) => {
-                  return (
-                    <SentMessage
-                      message={message}
-                      index={index}
-                      openMessage={openMessage}
-                      deleteMessage={deleteMessage}
-                    ></SentMessage>
-                  );
-                })}
-              </Tbody>
-            </Box>
+            <Thead>
+              <Tr>
+                <Th>Sender</Th>
+                <Th>Subject</Th>
+                <Th>Date</Th>
+                <Th></Th>
+                <Th></Th>
+              </Tr>
+            </Thead>
+            <Tbody>
+              {sentMessages.map((message, index) => {
+                return (
+                  <SentMessage
+                    message={message}
+                    index={index}
+                    openMessage={openMessage}
+                    deleteMessage={deleteMessage}
+                  ></SentMessage>
+                );
+              })}
+            </Tbody>
           </Table>
         </TableContainer>
       )}
@@ -578,16 +565,5 @@ function MessageDetails({ openedMessage }) {
         </>
       </Box>
     </Box>
-  );
-}
-
-function Notification() {
-  return (
-    <Stack spacing={3}>
-      <Alert status="info">
-        <AlertIcon />
-        Chakra is going live on August 30th. Get ready!
-      </Alert>
-    </Stack>
   );
 }
