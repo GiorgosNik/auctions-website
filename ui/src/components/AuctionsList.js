@@ -14,13 +14,13 @@ import {
   Button,
 } from "@chakra-ui/react";
 import jwt from "jwt-decode";
-import { ArrowForwardIcon,CheckIcon, CloseIcon } from "@chakra-ui/icons";
+import { ArrowForwardIcon, CheckIcon, CloseIcon } from "@chakra-ui/icons";
 
 export default function AuctionsList() {
   const [auctions, setAuctions] = useState([]);
   const accountId = jwt(localStorage.getItem("user")).user_id;
   const goToAuctionPage = (id) => {
-    window.location.href = "/auction/" + id;
+    window.location.href = "/editauction/" + id;
   };
 
   const fetchAuctions = async () => {
@@ -29,7 +29,6 @@ export default function AuctionsList() {
     );
     const auctions = data;
     setAuctions(auctions);
-    console.log(auctions);
   };
 
   useEffect(() => {
@@ -61,19 +60,19 @@ export default function AuctionsList() {
             </Thead>
             <Tbody>
               {auctions.map((auction, index) => {
-                console.log(auction);
                 return (
-                  <Tr>
+                  <Tr key={index}>
+                    
                     <Td>{auction.item_name}</Td>
                     <Td>{auction.price_curr}</Td>
                     <Td>{auction.ends}</Td>
                     <Td>{auction.num_of_bids}</Td>
-                    {auction.started !== "" && (
+                    {(auction.started !== null) && (
                       <Td>
                         <CheckIcon w={3} h={3} color={"green"} />
                       </Td>
                     )}
-                    {auction.started === "" && (
+                    {(auction.started === null)  && (
                       <Td>
                         <CloseIcon w={3} h={3} color={"red"} />
                       </Td>

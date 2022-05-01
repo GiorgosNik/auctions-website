@@ -18,11 +18,54 @@ import {
   useColorModeValue,
   List,
   ListItem,
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalHeader,
+  ModalFooter,
+  ModalBody,
+  ModalCloseButton,
+  useDisclosure,
 } from "@chakra-ui/react";
 import Axios from "axios";
 import jwt from "jwt-decode";
 import React, { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
+
+function BidConfirmation({ submitHandler }) {
+  const { isOpen, onOpen, onClose } = useDisclosure();
+  return (
+    <>
+      <Button
+        style={{ height: "38px", width: "170px", fontSize: "20px" }}
+        rounded={"md"}
+        px={8}
+        colorScheme={"purple"}
+        bg={"purple.400"}
+        _hover={{ bg: "purple.500" }}
+        onClick={onOpen}
+      >
+        Place Bid
+      </Button>
+
+      <Modal isOpen={isOpen} onClose={onClose}>
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>Confirmation</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody>Are you sure you want to proceed? This action cannot be reversed!</ModalBody>
+
+          <ModalFooter>
+            <Button color="#9F7AEA" mr={3} onClick={onClose}>
+              Cancel
+            </Button>
+            <Button onClick={submitHandler} colorScheme="purple">Confirm Bid</Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+    </>
+  );
+}
 
 export default function AuctionPage() {
   const [errorMessage, setErrorMessage] = useState("");
@@ -165,17 +208,7 @@ export default function AuctionPage() {
                     />
                     <InputRightAddon children="$" />
                   </InputGroup>
-                  <Button
-                    style={{ height: "38px", width: "170px", fontSize: "20px" }}
-                    rounded={"md"}
-                    px={8}
-                    colorScheme={"purple"}
-                    bg={"purple.400"}
-                    _hover={{ bg: "purple.500" }}
-                    onClick={submitHandler}
-                  >
-                    Place Bid
-                  </Button>
+                  <BidConfirmation submitHandler={submitHandler} />
                 </Stack>
                 {errorMessage !== "" && (
                   <span id="message" style={{ color: "red", fontSize: "15px" }}>

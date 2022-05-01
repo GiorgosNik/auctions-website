@@ -19,7 +19,6 @@ import {
   Icon,
 } from "@chakra-ui/react";
 
-import FileUpload from "./FileUpload";
 import React, { useState, useEffect } from "react";
 import Axios from "axios";
 import jwt from "jwt-decode";
