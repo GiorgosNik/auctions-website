@@ -10,6 +10,7 @@ import {
   TableCaption,
   TableContainer,
   Stack,
+  HStack,
   Box,
   Button,
 } from "@chakra-ui/react";
@@ -118,17 +119,33 @@ function DownloadAuctions() {
   }, []);
 
   return (
-    <div>
-      <a
-        href={`data:text/json;charset=utf-8,${encodeURIComponent(
-          JSON.stringify({ auctions })
-        )}`}
-        download="auctions.json"
-      >
-        {`All auctions in json`}
-      </a>
-
-      <Button onClick={toXML}>All auctions in XML</Button>
-    </div>
+    <HStack style={{ display: "flex" }}>
+      <Stack style={{ marginLeft: "auto" }}></Stack>
+      <HStack style={{ marginLeft: "auto" }}>
+        <a
+          href={`data:text/json;charset=utf-8,${encodeURIComponent(
+            JSON.stringify({ auctions })
+          )}`}
+          download="auctions.json"
+        >
+          <Button
+            style={{ marginLeft: "auto" }}
+            mx={3}
+            colorScheme={"purple"}
+            bg={"purple.400"}
+          >
+            All auctions in JSON
+          </Button>
+        </a>
+        <Button
+          style={{ marginLeft: "auto" }}
+          colorScheme={"purple"}
+          bg={"purple.400"}
+          onClick={toXML}
+        >
+          All auctions in XML
+        </Button>
+      </HStack>
+    </HStack>
   );
 }

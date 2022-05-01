@@ -261,9 +261,17 @@ app.put("/:id", async (req, res) => {
 
 app.get("/", async (req, res) => {
   try {
+    var categories;
     const auctions = await client.query(
       "SELECT id, item_name, account_id, description, image, price_start, price_inst, price_curr, started, ends, num_of_bids FROM auction"
     );
+    for (let auction of auctions.rows) {
+      categories = await client.query(
+        "SELECT name FROM auction_category INNER JOIN category ON (category.id = auction_category.category_id) WHERE auction_id =  $1",
+        [auction.id]
+      );
+      auction.categories = categories.rows[0];
+    }
     res.json(auctions.rows);
   } catch (err) {
     console.error(err.message);
