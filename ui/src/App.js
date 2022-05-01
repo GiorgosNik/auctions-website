@@ -18,6 +18,7 @@ import {
   AuctionPage,
   AuctionsList,
   Messaging,
+  EditAuction,
   Notification,
 } from "./components";
 
@@ -108,6 +109,14 @@ const AppHelper = () => {
             element={
               <>
                 <Messaging />
+              </>
+            }
+          />
+          <Route
+            path="/editauction/:id"
+            element={
+              <>
+                <EditAuction />
               </>
             }
           />
