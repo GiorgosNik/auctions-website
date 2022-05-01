@@ -89,7 +89,7 @@ const AppHelper = () => {
             }
           />
           <Route
-            path="/myauctions"
+            path="/myauctions/:userId"
             element={
               <>
                 <AuctionsList />
@@ -97,7 +97,7 @@ const AppHelper = () => {
             }
           />
           <Route
-            path="/productpage"
+            path="/auction/:id"
             element={
               <>
                 <AuctionPage />

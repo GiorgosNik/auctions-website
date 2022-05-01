@@ -1,56 +1,55 @@
 const express = require("express");
 const app = express.Router();
 const client = require("../database.js");
+const moment= require('moment');
 
 //Auction
 app.post("/", async (req, res) => {
   try {
     const {
-      item_name,
-      account_id,
-      description,
-      category,
-      price_start,
-      price_inst,
-      started,
-      ends,
+      productName,
+      accountId,
+      productDescription,
+      productCategories,
+      startingPrice,
+      buyOutPrice,
     } = req.body;
 
     ////////////////// validate input //////////////////
-    if (!item_name) {
+    var buyOut;
+    if (!productName) {
       return res.status(400).json({ error: "Product Name cannot be blank" });
     }
-    if (item_name.length > 30) {
+    if (productName.length > 30) {
       return res.status(400).json({ error: "Product Name length is too long" });
     }
-    if (!account_id) {
+    if (!accountId) {
       return res.status(400).json({ error: "Account Id cannot be blank" });
     }
-    if (!description) {
+    if (!productDescription) {
       return res.status(400).json({ error: "Description cannot be blank" });
     }
-    if (description.length > 500) {
+    if (productDescription.length > 500) {
       return res.status(400).json({ error: "Description length is too long" });
     }
-    if (!category) {
+    if (productCategories.length === 0) {
       return res.status(400).json({ error: "Category list cannot be blank" });
     }
-    if (!price_start) {
+    if (!startingPrice) {
       return res.status(400).json({ error: "Price cannot be blank" });
     }
-    if (!started) {
-      return res.status(400).json({ error: "Start time cannot be blank" });
+    if (buyOutPrice === "") {
+      buyOut = "0";
+    }else{
+      buyOut = buyOutPrice;
     }
-    if (!ends) {
-      return res.status(400).json({ error: "Start time cannot be blank" });
-    }
-
+    
     //Check Categories Exist
-    for (let i = 0; i < category.length; i++) {
+    for (let i = 0; i < productCategories.length; i++) {
       try {
         const categories = await client.query(
           "SELECT * FROM category WHERE name = $1",
-          [category[i]]
+          [productCategories[i]]
         );
         if (categories.rows.length == 0) {
           return res.status(409).json({ error: "Category does not exist" });
@@ -61,20 +60,12 @@ app.post("/", async (req, res) => {
     }
 
     //Check Start and End Date are correct
-    var time = moment(Date.now()).format("YYYY-MM-DD HH:mm:ss");
-    if (time > started) {
-      return res
-        .status(409)
-        .json({ error: "Cant have auction start in the past" });
-    }
-    if (ends < started) {
-      return res
-        .status(409)
-        .json({ error: "Cant have auction end before it starts" });
-    }
+    var started = moment(Date.now()).format("YYYY-MM-DD HH:mm:ss");
+    var ends = moment(Date.now()).add(5, 'days').format("YYYY-MM-DD HH:mm:ss");
+
 
     const getUser = () =>
-      client.query("SELECT * FROM account WHERE id = $1", [account_id]);
+      client.query("SELECT * FROM account WHERE id = $1", [accountId]);
     const { rows } = await getUser();
     if (rows.length == 0) {
       return res.status(409).json({ error: "No such user" });
@@ -82,22 +73,22 @@ app.post("/", async (req, res) => {
       const newAuction = await client.query(
         "INSERT INTO auction (item_name,account_id,description,price_start,price_curr,price_inst,num_of_bids,started,ends) VALUES($1,$2,$3,$4,$4,$5,$6,$7,$8) RETURNING *",
         [
-          item_name,
-          account_id,
-          description,
-          price_start,
-          price_inst,
+          productName,
+          accountId,
+          productDescription,
+          startingPrice,
+          buyOut,
           0,
           started,
           ends,
         ]
       );
-      newAuction.rows[0]["category"] = category;
-      for (let i = 0; i < category.length; i++) {
+      newAuction.rows[0]["category"] = productCategories;
+      for (let i = 0; i < productCategories.length; i++) {
         try {
           const categories = await client.query(
             "SELECT * FROM category WHERE name = $1",
-            [category[i]]
+            [productCategories[i]]
           );
           try {
             await client.query(
@@ -128,15 +119,38 @@ app.get("/", async (req, res) => {
   }
 });
 
+app.get("/myauctions/:id", async (req, res) => {
+  try {
+    const id = req.params.id;
+    const auction = await client.query("SELECT * FROM auction WHERE account_id =  $1", [
+      id,
+    ]);
+    console.log(auction.rows);
+    res.json(auction.rows);
+  } catch (err) {
+    console.error(err.message);
+  }
+});
+
 app.get("/:id", async (req, res) => {
   try {
     const id = req.params.id;
     const auction = await client.query("SELECT * FROM auction WHERE id =  $1", [
       id,
     ]);
+    const categories = await client.query("SELECT name FROM auction_category INNER JOIN category ON (category.id = auction_category.category_id) WHERE auction_id =  $1", [
+      id,
+    ]);
+    auction.rows[0].categories = [];
+    for(let category of categories.rows){
+      auction.rows[0].categories.push(category.name);
+    }
+    const user = await client.query("SELECT * FROM account WHERE id =  $1", [
+      auction.rows[0].account_id,
+    ]);
+    auction.rows[0].user = user.rows[0];
     res.json(auction.rows);
   } catch (err) {
-    console.error(err.message);
   }
 });
 

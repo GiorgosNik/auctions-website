@@ -19,6 +19,7 @@ import SignupCard from "./Register";
 import { UserContext } from "./UserProvider";
 import logo from "../images/logo.jpg";
 import "../App.css";
+import jwt from "jwt-decode";
 
 interface NavItem {
   label: string;
@@ -28,6 +29,7 @@ interface NavItem {
 
 export default function NavBar() {
   const { user, setUser } = React.useContext(UserContext);
+  var accountId = "";
   const [loggedIn, setLoggedIn] = React.useState(false);
   const [showLogin, setShowLogin] = React.useState(false);
   const [showRegister, setShowRegister] = React.useState(false);
@@ -40,6 +42,10 @@ export default function NavBar() {
         Object.keys(user)?.length > 0
     );
   }, [user]);
+
+  if (loggedIn) {
+    accountId = jwt(localStorage.getItem("user")).user_id;
+  }
 
   const submitHandler = (event) => {
     event.preventDefault();
@@ -70,7 +76,7 @@ export default function NavBar() {
     },
     {
       label: "My Auctions",
-      href: "/myauctions",
+      href: "/myauctions/" + accountId,
     },
     {
       label: "Messaging",
