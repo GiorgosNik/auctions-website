@@ -13,7 +13,7 @@ import {
   Box,
   Button,
 } from "@chakra-ui/react";
-
+import exportFromJSON from "export-from-json";
 import { CheckIcon, CloseIcon, ArrowForwardIcon } from "@chakra-ui/icons";
 
 export default function UsersList() {
@@ -27,7 +27,6 @@ export default function UsersList() {
     const { data } = await Axios.get("http://localhost:5000/auth/users");
     const users = data;
     setUsers(users);
-    console.log(users);
   };
 
   useEffect(() => {
@@ -58,12 +57,10 @@ export default function UsersList() {
             </Thead>
             <Tbody>
               {users.map((user, index) => {
-                console.log(user);
                 const username = user.username;
-                console.log(username);
                 if (username !== "admin") {
                   return (
-                    <Tr>
+                    <Tr key={index}>
                       <Td>{index}</Td>
                       <Td>{user.username}</Td>
                       {user.approved && (
@@ -95,6 +92,43 @@ export default function UsersList() {
           </Table>
         </TableContainer>
       </Box>
+      <DownloadAuctions />
     </Stack>
+  );
+}
+
+function DownloadAuctions() {
+  const [auctions, setAuctions] = useState(null);
+
+  const fetchAuctions = async () => {
+    const { data } = await Axios.get("http://localhost:5000/auction");
+    setAuctions(data);
+  };
+
+  const toXML = async () => {
+    const data = auctions;
+    const fileName = "auctions";
+    const exportType = "xml";
+    console.log(data);
+    exportFromJSON({ data, fileName, exportType });
+  };
+
+  useEffect(() => {
+    fetchAuctions();
+  }, []);
+
+  return (
+    <div>
+      <a
+        href={`data:text/json;charset=utf-8,${encodeURIComponent(
+          JSON.stringify({ auctions })
+        )}`}
+        download="auctions.json"
+      >
+        {`All auctions in json`}
+      </a>
+
+      <Button onClick={toXML}>All auctions in XML</Button>
+    </div>
   );
 }

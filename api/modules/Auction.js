@@ -261,7 +261,9 @@ app.put("/:id", async (req, res) => {
 
 app.get("/", async (req, res) => {
   try {
-    const auctions = await client.query("SELECT * FROM auction");
+    const auctions = await client.query(
+      "SELECT id, item_name, account_id, description, image, price_start, price_inst, price_curr, started, ends, num_of_bids FROM auction"
+    );
     res.json(auctions.rows);
   } catch (err) {
     console.error(err.message);
