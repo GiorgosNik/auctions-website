@@ -31,7 +31,7 @@ export default function AuctionMain() {
   const [productDescription, setProductDescription] = useState("");
   const [startingPrice, setStartingPrice] = useState("");
   const [buyOutPrice, setBuyoutPrice] = useState("");
-  const [selectedFile, setSelectedFile] = useState(null);
+  const [selectedFiles, setSelectedFiles] = useState([]);
   const accountId = jwt(localStorage.getItem("user")).user_id;
 
   const productNameChangeHandler = (event) => {
@@ -62,24 +62,29 @@ export default function AuctionMain() {
     const categories = data;
     setCategories(categories);
   };
+  const data = new FormData();
+
+  const onImageDrop = async (acceptedFiles) => {
+    for (let i = 0; i < acceptedFiles.length; i += 1) {
+      setSelectedFiles(...selectedFiles, acceptedFiles[i]);
+    }
+  };
 
   const submitHandler = (event) => {
     event.preventDefault();
-    console.log(selectedFile);
-    const body = {
-      productName,
-      productDescription,
-      startingPrice,
-      buyOutPrice,
-      productCategories,
-      accountId,
-    };
-    console.log(body);
+    console.log(selectedFiles);
+    data.append("file", selectedFiles);
+    data.append("productName", productName);
+    data.append("productDescription", productDescription);
+    data.append("startingPrice", startingPrice);
+    data.append("buyOutPrice", buyOutPrice);
+    data.append("productCategories", productCategories);
+    data.append("accountId", accountId);
+
     try {
       fetch("http://localhost:5000/auction", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
+        body: data,
       })
         .then((res) => res.json())
         .then(async (res) => {
@@ -301,7 +306,7 @@ export default function AuctionMain() {
                       </Box>
                     </FormControl>
                   </Stack>
-                  {/* <FormControl id="imageUploader">
+                  <FormControl id="imageUploader">
                     <Box>
                       <Stack direction={["column"]}>
                         <FormLabel
@@ -311,13 +316,22 @@ export default function AuctionMain() {
                           Upload Image
                         </FormLabel>
                         <Dropzone
-                          style={{ position: "relative" }}
-                          accept="image/*"
-                          name="avatar"
-                        ></Dropzone>
+                          onDrop={(acceptedFiles) => onImageDrop(acceptedFiles)}
+                        >
+                          {({ getRootProps, getInputProps }) => (
+                            <section>
+                              <div {...getRootProps()}>
+                                <input {...getInputProps()} type="file" />
+                                <p>
+                                  Drag 'n' drop images here, or click to select
+                                </p>
+                              </div>
+                            </section>
+                          )}
+                        </Dropzone>
                       </Stack>
                     </Box>
-                  </FormControl> */}
+                  </FormControl>
                 </Stack>
               </Stack>
             </Stack>

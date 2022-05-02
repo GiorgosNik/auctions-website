@@ -2,15 +2,19 @@ const express = require("express");
 const app = express.Router();
 const client = require("../database.js");
 const moment = require("moment");
-// const multer = require("multer");
-// const bodyParser = require("body-parser");
+var multer = require("multer");
 
-// app.use(bodyParser.urlencoded({ extended: true }));
-// app.use(multer({ dest: "public/images" }));
-// app.use(express.static(path.join(__dirname, "bower_components")));
+var storage = multer.diskStorage({
+  destination: "images/",
+  filename: function (req, file, cb) {
+    cb(null, file.originalname);
+  },
+});
+
+var upload = multer({ storage: storage });
 
 //Auction
-app.post("/", async (req, res) => {
+app.post("/", upload.single("file"), async (req, res) => {
   try {
     const {
       productName,
@@ -50,23 +54,20 @@ app.post("/", async (req, res) => {
       buyOut = buyOutPrice;
     }
 
-    var started = "";
-    var ends = "";
-
-    //Check Categories Exist
-    for (let i = 0; i < productCategories.length; i++) {
-      try {
-        const categories = await client.query(
-          "SELECT * FROM category WHERE name = $1",
-          [productCategories[i]]
-        );
-        if (categories.rows.length == 0) {
-          return res.status(409).json({ error: "Category does not exist" });
-        }
-      } catch (err) {
-        console.error(err.message);
-      }
-    }
+    // Check Categories Exist
+    // for (let i = 0; i < productCategories.length; i++) {
+    //   try {
+    //     const categories = await client.query(
+    //       "SELECT * FROM category WHERE name = $1",
+    //       [productCategories[i]]
+    //     );
+    //     if (categories.rows.length == 0) {
+    //       return res.status(409).json({ error: "Category does not exist" });
+    //     }
+    //   } catch (err) {
+    //     console.error(err.message);
+    //   }
+    // }
 
     const getUser = () =>
       client.query("SELECT * FROM account WHERE id = $1", [accountId]);
@@ -75,8 +76,16 @@ app.post("/", async (req, res) => {
       return res.status(409).json({ error: "No such user" });
     } else {
       const newAuction = await client.query(
-        "INSERT INTO auction (item_name,account_id,description,price_start,price_curr,price_inst,num_of_bids) VALUES($1,$2,$3,$4,$4,$5,$6) RETURNING *",
-        [productName, accountId, productDescription, startingPrice, buyOut, 0]
+        "INSERT INTO auction (item_name,account_id,description,price_start,price_curr,price_inst,num_of_bids,image) VALUES($1,$2,$3,$4,$4,$5,$6,$7) RETURNING *",
+        [
+          productName,
+          accountId,
+          productDescription,
+          startingPrice,
+          buyOut,
+          0,
+          `http://localhost:5000/images/${req.file.originalname}`,
+        ]
       );
       newAuction.rows[0]["category"] = productCategories;
       for (let i = 0; i < productCategories.length; i++) {
