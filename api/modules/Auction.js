@@ -53,21 +53,21 @@ app.post("/", upload.single("file"), async (req, res) => {
     } else {
       buyOut = buyOutPrice;
     }
-
     // Check Categories Exist
-    // for (let i = 0; i < productCategories.length; i++) {
-    //   try {
-    //     const categories = await client.query(
-    //       "SELECT * FROM category WHERE name = $1",
-    //       [productCategories[i]]
-    //     );
-    //     if (categories.rows.length == 0) {
-    //       return res.status(409).json({ error: "Category does not exist" });
-    //     }
-    //   } catch (err) {
-    //     console.error(err.message);
-    //   }
-    // }
+    for (let i = 0; i < productCategories.length; i++) {
+      try {
+        console.log(productCategories[i]);
+        const categories = await client.query(
+          "SELECT * FROM category WHERE name = $1",
+          [productCategories[i]]
+        );
+        if (categories.rows.length == 0) {
+          return res.status(409).json({ error: "Category does not exist" });
+        }
+      } catch (err) {
+        console.error(err.message);
+      }
+    }
 
     const getUser = () =>
       client.query("SELECT * FROM account WHERE id = $1", [accountId]);
@@ -75,6 +75,10 @@ app.post("/", upload.single("file"), async (req, res) => {
     if (rows.length == 0) {
       return res.status(409).json({ error: "No such user" });
     } else {
+      const filepath = null;
+      if (req.file) {
+        const filepath = `http://localhost:5000/images/${req.file.originalname}`;
+      }
       const newAuction = await client.query(
         "INSERT INTO auction (item_name,account_id,description,price_start,price_curr,price_inst,num_of_bids,image) VALUES($1,$2,$3,$4,$4,$5,$6,$7) RETURNING *",
         [
@@ -84,7 +88,7 @@ app.post("/", upload.single("file"), async (req, res) => {
           startingPrice,
           buyOut,
           0,
-          `http://localhost:5000/images/${req.file.originalname}`,
+          filepath,
         ]
       );
       newAuction.rows[0]["category"] = productCategories;

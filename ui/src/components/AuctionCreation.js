@@ -62,7 +62,6 @@ export default function AuctionMain() {
     const categories = data;
     setCategories(categories);
   };
-  const data = new FormData();
 
   const onImageDrop = async (acceptedFiles) => {
     for (let i = 0; i < acceptedFiles.length; i += 1) {
@@ -70,15 +69,19 @@ export default function AuctionMain() {
     }
   };
 
+  const data = new FormData();
   const submitHandler = (event) => {
+    productCategories.forEach((item) => {
+      data.append("productCategories", item);
+    });
+
     event.preventDefault();
-    console.log(selectedFiles);
     data.append("file", selectedFiles);
     data.append("productName", productName);
     data.append("productDescription", productDescription);
     data.append("startingPrice", startingPrice);
     data.append("buyOutPrice", buyOutPrice);
-    data.append("productCategories", productCategories);
+    // data.append("productCategories", productCategories);
     data.append("accountId", accountId);
 
     try {
