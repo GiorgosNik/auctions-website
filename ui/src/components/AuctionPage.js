@@ -54,13 +54,17 @@ function BidConfirmation({ submitHandler }) {
         <ModalContent>
           <ModalHeader>Confirmation</ModalHeader>
           <ModalCloseButton />
-          <ModalBody>Are you sure you want to proceed? This action cannot be reversed!</ModalBody>
+          <ModalBody>
+            Are you sure you want to proceed? This action cannot be reversed!
+          </ModalBody>
 
           <ModalFooter>
             <Button color="#9F7AEA" mr={3} onClick={onClose}>
               Cancel
             </Button>
-            <Button onClick={submitHandler} colorScheme="purple">Confirm Bid</Button>
+            <Button onClick={submitHandler} colorScheme="purple">
+              Confirm Bid
+            </Button>
           </ModalFooter>
         </ModalContent>
       </Modal>
@@ -281,7 +285,7 @@ export default function AuctionPage() {
           </Stack>
         </Stack>
       </SimpleGrid>
-      <OpenStreetMap address={seller.address} city={seller.city} />
+      {/* <OpenStreetMap address={seller.address} city={seller.city} /> */}
     </Container>
   );
 }

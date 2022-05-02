@@ -110,6 +110,24 @@ function Filters() {
   const [categories, setCategories] = useState([]);
   const [locations, setLocations] = useState([]);
 
+  const [productCategories, setProductCategories] = useState([]);
+  const [productLocation, setProductLocation] = useState("");
+
+  const categoryChangeHandler = (categoryName, event) => {
+    var tempList = [];
+    tempList = productCategories;
+    if (tempList.includes(categoryName)) {
+      tempList.splice(tempList.indexOf(categoryName), 1);
+    } else {
+      tempList.push(categoryName);
+    }
+    setProductCategories(tempList);
+  };
+
+  const locationChangeHandler = (locationDetails, event) => {
+    setProductLocation(locationDetails);
+  };
+
   const fetchCategories = async () => {
     const { data } = await Axios.get("http://localhost:5000/category");
     const categories = data;
@@ -118,6 +136,19 @@ function Filters() {
 
   const fetchLocations = async () => {
     const { data } = await Axios.get("http://localhost:5000/auth/locations");
+    const locations = data;
+    console.log(locations);
+    setLocations(locations);
+  };
+
+  const fetchProducts = async () => {
+    const { data } = await Axios.get("http://localhost:5000/auction/browse", {
+      params: {
+        categories: productCategories,
+        location: productLocation,
+        // price: price,
+      },
+    });
     const locations = data;
     console.log(locations);
     setLocations(locations);
@@ -155,7 +186,14 @@ function Filters() {
         </p>
         <Stack>
           {categories.map((category, index) => {
-            return <Checkbox key={index}>{category.name}</Checkbox>;
+            return (
+              <Checkbox
+                key={index}
+                onChange={() => categoryChangeHandler(category.name)}
+              >
+                {category.name}
+              </Checkbox>
+            );
           })}
         </Stack>
         <p
@@ -190,7 +228,18 @@ function Filters() {
         <MenuList>
           {locations.map((location, index) => {
             return (
-              <MenuItem key={index}>
+              <MenuItem
+                key={index}
+                onChange={() =>
+                  locationChangeHandler(
+                    location.address +
+                      ", " +
+                      location.city +
+                      ", " +
+                      location.country
+                  )
+                }
+              >
                 {location.address +
                   ", " +
                   location.city +

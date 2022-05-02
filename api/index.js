@@ -1,6 +1,7 @@
 const express = require("express");
 const app = express();
 const cors = require("cors");
+const path = require("path");
 const auction = require("./modules/Auction");
 const auth = require("./modules/Auth");
 const bid = require("./modules/Bid");
@@ -17,6 +18,7 @@ app.use("/bid", bid);
 app.use("/category", category);
 app.use("/messaging", message);
 app.use("/newsletter", newsletter);
+app.use("/images", express.static(path.join(__dirname, "./images")));
 
 app.listen(5000, () => {
   console.log("API listening at http://localhost:5000");
