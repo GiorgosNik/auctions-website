@@ -27,8 +27,6 @@ import { ChevronDownIcon } from "@chakra-ui/icons";
 import React, { useState, useEffect } from "react";
 import Axios from "axios";
 import { Container, Row, Col } from "react-grid-system";
-const IMAGE =
-  "https://images.unsplash.com/photo-1518051870910-a46e30d9db16?ixlib=rb-1.2.1&ixid=MXwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHw%3D&auto=format&fit=crop&w=1350&q=80";
 const goToAuctionPage = (id) => {
   window.location.href = "/auction/" + id;
 };
@@ -36,30 +34,29 @@ const goToAuctionPage = (id) => {
 const producsPerPage = 6;
 export default function Browse() {
   const [curPage, setCurPage] = useState(1);
+  const [productArray, setProductArray] = useState([]);
 
   const pageSelectHandler = (pageId) => {
     setCurPage(pageId);
   };
-  var productArray = [];
-  productArray.push(1);
-  productArray.push(1);
-  productArray.push(1);
-  productArray.push(1);
-  productArray.push(1);
-  productArray.push(1);
-  productArray.push(1);
-  productArray.push(1);
-  productArray.push(1);
-  productArray.push(1);
-  productArray.push(1);
-  productArray.push(1);
-  productArray.push(1);
-  productArray.push(1);
+  const fetchProductArray = async () => {
+    const { data } = await Axios.get("http://localhost:5000/auction/");
+    const products = data;
+    setProductArray(products);
+  };
 
   var pagesArray = [];
   for (let i = 0; i < productArray.length / producsPerPage; i++) {
     pagesArray.push(1);
   }
+  useEffect(() => {
+    fetchProductArray();
+  }, []);
+
+  useEffect(() => {
+    console.log(productArray);
+  }, [productArray]);
+
   return (
     <Box m={5}>
       <Container>
@@ -82,19 +79,20 @@ export default function Browse() {
             })}
           </Col>
           <SimpleGrid columns={[1, 2, 3]} spacing={10}>
-            {productArray.map((p, index) => {
+            {productArray.map((product, index) => {
               if (
-                index > producsPerPage * curPage - producsPerPage &&
+                index > producsPerPage * curPage - producsPerPage - 1 &&
                 index <= producsPerPage * curPage
               )
                 return (
                   <ProductCard
+                    productName={product.item_name}
+                    sellerUsername={product.username}
+                    price={product.price_curr}
+                    buyoutPrice={product.price_inst}
+                    id={product.id}
+                    image={product.image}
                     key={index}
-                    productName={"name"}
-                    sellerUsername={"seller name"}
-                    price={"price"}
-                    buyoutPrice={"buyout price"}
-                    id={index}
                   />
                 );
             })}
@@ -303,24 +301,25 @@ function ProductCard({
   price,
   buyoutPrice,
   id,
+  image,
   index,
 }) {
   return (
     <LinkBox as="article" maxW="sm" p="5" borderWidth="0px" rounded="md">
-      <LinkOverlay onClick={() => goToAuctionPage(id)}>
-        <Center py={12}>
-          <Box
-            role={"group"}
-            style={{ zIndex: "0" }}
-            p={6}
-            maxW={"330px"}
-            w={"full"}
-            bg={useColorModeValue("white", "gray.800")}
-            boxShadow={"2xl"}
-            rounded={"lg"}
-            pos={"relative"}
-            zIndex={1}
-          >
+      <Center py={12}>
+        <Box
+          role={"group"}
+          style={{ zIndex: "0" }}
+          p={6}
+          maxW={"330px"}
+          w={"full"}
+          bg={useColorModeValue("white", "gray.800")}
+          boxShadow={"2xl"}
+          rounded={"lg"}
+          pos={"relative"}
+          zIndex={1}
+        >
+          <LinkOverlay onClick={() => goToAuctionPage(id)}>
             <Box
               rounded={"lg"}
               mt={-12}
@@ -334,7 +333,7 @@ function ProductCard({
                 pos: "absolute",
                 top: 5,
                 left: 0,
-                backgroundImage: `url(${IMAGE})`,
+                backgroundImage: `url(${image})`,
                 filter: "blur(15px)",
                 zIndex: -1,
               }}
@@ -349,7 +348,7 @@ function ProductCard({
                 height={230}
                 width={282}
                 objectFit={"cover"}
-                src={IMAGE}
+                src={image}
               />
             </Box>
             <Stack pt={10} align={"center"}>
@@ -370,9 +369,9 @@ function ProductCard({
                 <Text color={"gray.600"}>{buyoutPrice}</Text>
               </Stack>
             </Stack>
-          </Box>
-        </Center>
-      </LinkOverlay>
+          </LinkOverlay>
+        </Box>
+      </Center>
     </LinkBox>
   );
 }

@@ -53,13 +53,18 @@ app.post("/", upload.single("file"), async (req, res) => {
     } else {
       buyOut = buyOutPrice;
     }
+    var productCategs = [];
+    if(typeof productCategories === typeof "test"){
+      productCategs.push(productCategories);
+    }else{
+      productCategs = productCategories;
+    }
     // Check Categories Exist
-    for (let i = 0; i < productCategories.length; i++) {
+    for (let i = 0; i < productCategs.length; i++) {
       try {
-        console.log(productCategories[i]);
         const categories = await client.query(
           "SELECT * FROM category WHERE name = $1",
-          [productCategories[i]]
+          [productCategs[i]]
         );
         if (categories.rows.length == 0) {
           return res.status(409).json({ error: "Category does not exist" });
@@ -68,16 +73,16 @@ app.post("/", upload.single("file"), async (req, res) => {
         console.error(err.message);
       }
     }
-
+    
     const getUser = () =>
       client.query("SELECT * FROM account WHERE id = $1", [accountId]);
     const { rows } = await getUser();
     if (rows.length == 0) {
       return res.status(409).json({ error: "No such user" });
     } else {
-      const filepath = null;
+      var filepath = null;
       if (req.file) {
-        const filepath = `http://localhost:5000/images/${req.file.originalname}`;
+        filepath = `http://localhost:5000/images/${req.file.originalname}`;
       }
       const newAuction = await client.query(
         "INSERT INTO auction (item_name,account_id,description,price_start,price_curr,price_inst,num_of_bids,image) VALUES($1,$2,$3,$4,$4,$5,$6,$7) RETURNING *",
@@ -91,12 +96,12 @@ app.post("/", upload.single("file"), async (req, res) => {
           filepath,
         ]
       );
-      newAuction.rows[0]["category"] = productCategories;
-      for (let i = 0; i < productCategories.length; i++) {
+      newAuction.rows[0]["category"] = productCategs;
+      for (let i = 0; i < productCategs.length; i++) {
         try {
           const categories = await client.query(
             "SELECT * FROM category WHERE name = $1",
-            [productCategories[i]]
+            [productCategs[i]]
           );
           try {
             await client.query(
@@ -284,6 +289,12 @@ app.get("/", async (req, res) => {
         [auction.id]
       );
       auction.categories = categories.rows[0];
+      user = await client.query(
+        "SELECT username FROM account WHERE id =  $1",
+        [auction.account_id]
+      );
+      auction.username = user.rows[0].username;
+      console.log(auction.username);
     }
     res.json(auctions.rows);
   } catch (err) {

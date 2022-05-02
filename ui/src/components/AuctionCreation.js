@@ -81,7 +81,6 @@ export default function AuctionMain() {
     data.append("productDescription", productDescription);
     data.append("startingPrice", startingPrice);
     data.append("buyOutPrice", buyOutPrice);
-    // data.append("productCategories", productCategories);
     data.append("accountId", accountId);
 
     try {
