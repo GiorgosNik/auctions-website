@@ -35,7 +35,7 @@ const producsPerPage = 6;
 export default function Browse() {
   const [searchTerms, setSearchTerms] = useState("");
   const [curPage, setCurPage] = useState(1);
-  const [productArray, setProductArray] = useState([]);
+  var [productArray, setProductArray] = useState([]);
   var pagesArray = [];
 
   const pageSelectHandler = (pageId) => {
@@ -49,14 +49,21 @@ export default function Browse() {
     setProductArray(data);
   };
   
+  const setProductArrayFilter = (data) => {
+    productArray = [];
+    setProductArray(data);
+    setCurPage(1);
+  };
+
   for (let i = 0; i < productArray.length / producsPerPage; i++) {
     pagesArray.push(1);
   }
 
   useEffect(() => {
-    console.log(searchTerms);
     fetchProductArray();
+    setCurPage(1);
   }, [searchTerms]);
+
 
   return (
     <Box m={5}>
@@ -68,7 +75,7 @@ export default function Browse() {
       <Container>
         <Row>
           <Col sm={2.5}>
-            <Filters />
+            <Filters setProducts={setProductArrayFilter}/>
             {pagesArray.map((page, index) => {
               return (
                 <Button
@@ -109,11 +116,13 @@ export default function Browse() {
   );
 }
 
-function Filters() {
+function Filters({setProducts}) {
   const [categories, setCategories] = useState([]);
   const [locations, setLocations] = useState([]);
+  const [sliderValue, setSliderValue] = useState(100);
   const [productCategories, setProductCategories] = useState([]);
   const [productLocation, setProductLocation] = useState("");
+  const [productPrice, setProductPrice] = useState(100);
 
   const categoryChangeHandler = (categoryName, event) => {
     var tempList = [];
@@ -124,10 +133,7 @@ function Filters() {
       tempList.push(categoryName);
     }
     setProductCategories(tempList);
-  };
-
-  const locationChangeHandler = (locationDetails, event) => {
-    setProductLocation(locationDetails);
+    fetchProducts();
   };
 
   const fetchCategories = async () => {
@@ -139,27 +145,46 @@ function Filters() {
   const fetchLocations = async () => {
     const { data } = await Axios.get("http://localhost:5000/auth/locations");
     const locations = data;
-    console.log(locations);
     setLocations(locations);
   };
 
   const fetchProducts = async () => {
+    if (
+      productCategories === [] &&
+      productLocation === "" &&
+      productPrice === 100
+    ) {
+      return;
+    }
+    const locationArray = productLocation.split(",");
+
+    const params = new URLSearchParams([
+      ["categories", productCategories.map((s) => [s])],
+      ["address", locationArray[0]],
+      ["city", locationArray[1]],
+      ["country", locationArray[2]],
+      ["price", productPrice],
+    ]);
     const { data } = await Axios.get("http://localhost:5000/auction/browse", {
-      params: {
-        categories: productCategories,
-        location: productLocation,
-        // price: price,
-      },
+      params,
     });
-    const locations = data;
-    console.log(locations);
-    setLocations(locations);
+
+    const products = data;
+    setProducts(products);
   };
 
   useEffect(() => {
     fetchCategories();
     fetchLocations();
   }, []);
+
+  useEffect(() => {
+    fetchProducts();
+  }, [productLocation]);
+
+  useEffect(() => {
+    fetchProducts();
+  }, [productPrice]);
 
   return (
     <Stack>
@@ -199,7 +224,32 @@ function Filters() {
           Price
         </p>
       </CheckboxGroup>
-      <PriceSlider />
+      <Slider
+        w={200}
+        aria-label="slider-ex-6"
+        onChangeEnd={(val) => setProductPrice(val)}
+        onChange={(val) => setSliderValue(val)}
+      >
+        <SliderMark value={100} mt="1" ml="-2.5" fontSize="sm">
+          100
+        </SliderMark>
+
+        <SliderMark
+          value={sliderValue}
+          textAlign="center"
+          bg="purple.500"
+          color="white"
+          mt="-10"
+          ml="-5"
+          w="12"
+        >
+          {sliderValue}
+        </SliderMark>
+        <SliderTrack>
+          <SliderFilledTrack bg="purple.500" />
+        </SliderTrack>
+        <SliderThumb />
+      </Slider>
       <br></br>
       <br></br>
 
@@ -207,7 +257,6 @@ function Filters() {
         style={{
           fontSize: "20px",
           fontWeight: "bold",
-          marginBottom: "10px",
         }}
       >
         Location
@@ -222,20 +271,20 @@ function Filters() {
             return (
               <MenuItem
                 key={index}
-                onChange={() =>
-                  locationChangeHandler(
+                onClick={() =>
+                  setProductLocation(
                     location.address +
-                      ", " +
+                      "," +
                       location.city +
-                      ", " +
+                      "," +
                       location.country
                   )
                 }
               >
                 {location.address +
-                  ", " +
+                  "," +
                   location.city +
-                  ", " +
+                  "," +
                   location.country}
               </MenuItem>
             );
@@ -243,38 +292,6 @@ function Filters() {
         </MenuList>
       </Menu>
     </Stack>
-  );
-}
-
-function PriceSlider() {
-  const [sliderValue, setSliderValue] = useState(100);
-  return (
-    <Slider
-      w={200}
-      aria-label="slider-ex-6"
-      onChangeEnd={(val) => console.log(val)}
-      onChange={(val) => setSliderValue(val)}
-    >
-      <SliderMark value={100} mt="1" ml="-2.5" fontSize="sm">
-        100
-      </SliderMark>
-
-      <SliderMark
-        value={sliderValue}
-        textAlign="center"
-        bg="purple.500"
-        color="white"
-        mt="-10"
-        ml="-5"
-        w="12"
-      >
-        {sliderValue}
-      </SliderMark>
-      <SliderTrack>
-        <SliderFilledTrack bg="purple.500" />
-      </SliderTrack>
-      <SliderThumb />
-    </Slider>
   );
 }
 

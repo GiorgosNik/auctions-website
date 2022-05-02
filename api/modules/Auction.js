@@ -305,14 +305,14 @@ app.get("/search", async (req, res) => {
   try {
     var terms = req.query.term;
     var auctions;
-    console.log(terms.length);
+    //console.log(terms.length);
     if (terms.length === 0) {
       auctions = await client.query(
         "SELECT id, item_name, account_id, description, image, price_start, price_inst, price_curr, started, ends, num_of_bids FROM auction"
       );
     } else {
       terms = terms.split(" ").join(" & ");
-      console.log(terms);
+      //console.log(terms);
       await client.query(
         "ALTER TABLE auction ADD COLUMN IF NOT EXISTS ts tsvector GENERATED ALWAYS AS ((setweight(to_tsvector('english', coalesce(description, '')), 'B'))) STORED"
       );
@@ -324,7 +324,7 @@ app.get("/search", async (req, res) => {
         "SELECT * FROM auction WHERE ts @@ to_tsquery('english', $1)",
         [terms]
       );
-      console.log(auctions.rows);
+      //console.log(auctions.rows);
     }
     for (let auction of auctions.rows) {
       categories = await client.query(
@@ -336,7 +336,7 @@ app.get("/search", async (req, res) => {
         auction.account_id,
       ]);
       auction.username = user.rows[0].username;
-      console.log(auction.username);
+      //console.log(auction.username);
     }
     res.json(auctions.rows);
   } catch (err) {
@@ -353,6 +353,130 @@ app.get("/myauctions/:id", async (req, res) => {
     );
     console.log(auction.rows);
     res.json(auction.rows);
+  } catch (err) {
+    console.error(err.message);
+  }
+});
+
+app.get("/browse", async (req, res) => {
+  console.log(req.query);
+
+  const { categories, address, city, country, price } = req.query;
+  const allCategories = categories.split(",");
+
+  var result = [];
+
+  var locationResult = [];
+  if (address && city && country) {
+    const productLocation = await client.query(
+      "SELECT * FROM  account INNER JOIN auction ON (account.id = auction.account_id) WHERE address =  $1 AND city = $2 AND country = $3",
+      [address, city, country]
+    );
+
+    for (let i = 0; i < productLocation.rows.length; i++) {
+      const productLocationCategories = await client.query(
+        "SELECT name FROM auction_category INNER JOIN category ON (category.id = auction_category.category_id) WHERE auction_id = $1",
+        [productLocation.rows[i].id]
+      );
+      productLocation.rows[i].categories = [];
+      for (let k = 0; k < productLocationCategories.rows.length; k++) {
+        productLocation.rows[i].categories.push(
+          productLocationCategories.rows[k].name
+        );
+      }
+    }
+    locationResult = productLocation.rows;
+  }
+  // console.log("locationResult = ", locationResult);
+
+  var priceResult = [];
+  if (price) {
+    const productPrice = await client.query(
+      "SELECT * FROM account INNER JOIN auction ON (account.id = auction.account_id) WHERE price_curr <=  $1",
+      [price]
+    );
+
+    for (let i = 0; i < productPrice.rows.length; i++) {
+      const productPriceCategories = await client.query(
+        "SELECT name FROM auction_category INNER JOIN category ON (category.id = auction_category.category_id) WHERE auction_id = $1",
+        [productPrice.rows[i].id]
+      );
+      productPrice.rows[i].categories = [];
+      for (let k = 0; k < productPriceCategories.rows.length; k++) {
+        productPrice.rows[i].categories.push(
+          productPriceCategories.rows[k].name
+        );
+      }
+    }
+    priceResult = productPrice.rows;
+
+    // console.log("priceResult = ", priceResult);
+
+    if (!(address && city && country)) {
+      result = priceResult;
+    } else if (priceResult.length === 0) {
+      result = locationResult;
+    } else {
+      for (let i = 0; i < priceResult.length; i++) {
+        for (let j = 0; j < locationResult.length; j++) {
+          if (locationResult[j].id === priceResult[i].id) {
+            result.push(locationResult[j]);
+            break;
+          }
+        }
+      }
+    }
+
+    // console.log("combined = ", result);
+  }
+
+  var finalResult = [];
+  var categoriesResult = [];
+  for (let i = 0; i < allCategories.length; i++) {
+    // every selected category
+    var auctionIds = await client.query(
+      "SELECT auction_id FROM auction_category INNER JOIN category ON (category.id = auction_category.category_id) WHERE name =  $1",
+      [allCategories[i]]
+    );
+    // get auctions of this category
+    for (let i = 0; i < auctionIds.rows.length; i++) {
+      var productCategories = await client.query(
+        "SELECT * FROM auction WHERE id =  $1",
+        [auctionIds.rows[i].auction_id]
+      );
+      categoriesResult.push(productCategories.rows);
+    }
+  }
+
+  // console.log("categoriesResult = ", categoriesResult);
+
+  if (result.length === 0) {
+    for (let i = 0; i < categoriesResult.length; i++) {
+      if (categoriesResult[i].length === 0) {
+        continue;
+      }
+      finalResult.push(categoriesResult[i][0]);
+    }
+  } else if (!categories) {
+    finalResult = result;
+  } else {
+    for (let j = 0; j < result.length; j++) {
+      for (let i = 0; i < categoriesResult.length; i++) {
+        if (categoriesResult[i].length === 0) {
+          continue;
+        }
+        if (categoriesResult[i][0].id === result[j].id) {
+          finalResult.push(result[j]);
+          break;
+        }
+      }
+    }
+  }
+
+   console.log("finalResult = ", finalResult);
+
+  try {
+    res.json(finalResult);
   } catch (err) {
     console.error(err.message);
   }
