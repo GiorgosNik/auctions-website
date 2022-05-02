@@ -33,32 +33,38 @@ const goToAuctionPage = (id) => {
 
 const producsPerPage = 6;
 export default function Browse() {
+  const [searchTerms, setSearchTerms] = useState("");
   const [curPage, setCurPage] = useState(1);
   const [productArray, setProductArray] = useState([]);
+  var pagesArray = [];
 
   const pageSelectHandler = (pageId) => {
     setCurPage(pageId);
   };
+  
   const fetchProductArray = async () => {
-    const { data } = await Axios.get("http://localhost:5000/auction/");
-    const products = data;
-    setProductArray(products);
+    const { data } = await Axios.get("http://localhost:5000/auction/search", {
+      params: { term: searchTerms },
+    });
+    setProductArray(data);
   };
-
-  var pagesArray = [];
+  
   for (let i = 0; i < productArray.length / producsPerPage; i++) {
     pagesArray.push(1);
   }
-  useEffect(() => {
-    fetchProductArray();
-  }, []);
 
   useEffect(() => {
-    console.log(productArray);
-  }, [productArray]);
+    console.log(searchTerms);
+    fetchProductArray();
+  }, [searchTerms]);
 
   return (
     <Box m={5}>
+      <Input
+        onChange={(event) => setSearchTerms(event.target.value)}
+        placeholder="Search"
+        w={240}
+      />
       <Container>
         <Row>
           <Col sm={2.5}>
@@ -81,8 +87,8 @@ export default function Browse() {
           <SimpleGrid columns={[1, 2, 3]} spacing={10}>
             {productArray.map((product, index) => {
               if (
-                index > producsPerPage * curPage - producsPerPage-1 &&
-                index <= producsPerPage * curPage
+                index > producsPerPage * curPage - producsPerPage - 1 &&
+                index < producsPerPage * curPage
               )
                 return (
                   <ProductCard
@@ -106,7 +112,6 @@ export default function Browse() {
 function Filters() {
   const [categories, setCategories] = useState([]);
   const [locations, setLocations] = useState([]);
-
   const [productCategories, setProductCategories] = useState([]);
   const [productLocation, setProductLocation] = useState("");
 
@@ -159,18 +164,8 @@ function Filters() {
   return (
     <Stack>
       <CheckboxGroup colorScheme="purple">
-        <p
-          style={{
-            fontSize: "20px",
-            fontWeight: "bold",
-            marginTop: "30px",
-            marginBottom: "10px",
-          }}
-        >
-          Description
-        </p>
+        
 
-        <Input placeholder="Search" w={240} />
         <p
           style={{
             fontSize: "20px",
@@ -294,22 +289,20 @@ function ProductCard({
 }) {
   return (
     <LinkBox as="article" maxW="sm" p="5" borderWidth="0px" rounded="md">
-      
-        <Center py={12}>
-        
-          <Box
-            role={"group"}
-            style={{ zIndex: "0" }}
-            p={6}
-            maxW={"330px"}
-            w={"full"}
-            bg={useColorModeValue("white", "gray.800")}
-            boxShadow={"2xl"}
-            rounded={"lg"}
-            pos={"relative"}
-            zIndex={1}
-          >
-            <LinkOverlay onClick={() => goToAuctionPage(id)}>
+      <Center py={12}>
+        <Box
+          role={"group"}
+          style={{ zIndex: "0" }}
+          p={6}
+          maxW={"330px"}
+          w={"full"}
+          bg={useColorModeValue("white", "gray.800")}
+          boxShadow={"2xl"}
+          rounded={"lg"}
+          pos={"relative"}
+          zIndex={1}
+        >
+          <LinkOverlay onClick={() => goToAuctionPage(id)}>
             <Box
               rounded={"lg"}
               mt={-12}
@@ -338,7 +331,6 @@ function ProductCard({
                 height={230}
                 width={282}
                 objectFit={"cover"}
-
                 src={image}
               />
             </Box>
@@ -360,11 +352,9 @@ function ProductCard({
                 <Text color={"gray.600"}>{buyoutPrice}</Text>
               </Stack>
             </Stack>
-            </LinkOverlay>
-          </Box>
-          
-        </Center>
-      
+          </LinkOverlay>
+        </Box>
+      </Center>
     </LinkBox>
   );
 }

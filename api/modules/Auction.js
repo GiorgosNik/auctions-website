@@ -54,9 +54,9 @@ app.post("/", upload.single("file"), async (req, res) => {
       buyOut = buyOutPrice;
     }
     var productCategs = [];
-    if(typeof productCategories === typeof "test"){
+    if (typeof productCategories === typeof "test") {
       productCategs.push(productCategories);
-    }else{
+    } else {
       productCategs = productCategories;
     }
     // Check Categories Exist
@@ -73,7 +73,7 @@ app.post("/", upload.single("file"), async (req, res) => {
         console.error(err.message);
       }
     }
-    
+
     const getUser = () =>
       client.query("SELECT * FROM account WHERE id = $1", [accountId]);
     const { rows } = await getUser();
@@ -289,10 +289,52 @@ app.get("/", async (req, res) => {
         [auction.id]
       );
       auction.categories = categories.rows[0];
-      user = await client.query(
-        "SELECT username FROM account WHERE id =  $1",
-        [auction.account_id]
+      user = await client.query("SELECT username FROM account WHERE id =  $1", [
+        auction.account_id,
+      ]);
+      auction.username = user.rows[0].username;
+      console.log(auction.username);
+    }
+    res.json(auctions.rows);
+  } catch (err) {
+    console.error(err.message);
+  }
+});
+
+app.get("/search", async (req, res) => {
+  try {
+    var terms = req.query.term;
+    var auctions;
+    console.log(terms.length);
+    if (terms.length === 0) {
+      auctions = await client.query(
+        "SELECT id, item_name, account_id, description, image, price_start, price_inst, price_curr, started, ends, num_of_bids FROM auction"
       );
+    } else {
+      terms = terms.split(" ").join(" & ");
+      console.log(terms);
+      await client.query(
+        "ALTER TABLE auction ADD COLUMN IF NOT EXISTS ts tsvector GENERATED ALWAYS AS ((setweight(to_tsvector('english', coalesce(description, '')), 'B'))) STORED"
+      );
+      await client.query(
+        "CREATE INDEX IF NOT EXISTS ts_idx ON auction USING GIN (ts)"
+      );
+
+      auctions = await client.query(
+        "SELECT * FROM auction WHERE ts @@ to_tsquery('english', $1)",
+        [terms]
+      );
+      console.log(auctions.rows);
+    }
+    for (let auction of auctions.rows) {
+      categories = await client.query(
+        "SELECT name FROM auction_category INNER JOIN category ON (category.id = auction_category.category_id) WHERE auction_id =  $1",
+        [auction.id]
+      );
+      auction.categories = categories.rows[0];
+      user = await client.query("SELECT username FROM account WHERE id =  $1", [
+        auction.account_id,
+      ]);
       auction.username = user.rows[0].username;
       console.log(auction.username);
     }
