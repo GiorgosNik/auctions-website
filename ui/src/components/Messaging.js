@@ -78,9 +78,7 @@ export default function Messaging({ children }: { children: ReactNode }) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
       }
-    )
-      .then((res) => console.log(res))
-      .catch((err) => console.error(err));
+    );
   }, [receivedMessages]);
 
   useEffect(() => {

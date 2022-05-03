@@ -32,7 +32,7 @@ function App() {
 }
 
 const AppHelper = () => {
-  const { setUser } = React.useContext(UserContext);
+  const { user, setUser } = React.useContext(UserContext);
 
   useEffect(() => {
     const token = localStorage.getItem("user");
@@ -40,12 +40,11 @@ const AppHelper = () => {
       setUser(jwt(token));
     } catch (err) {}
   }, [setUser]);
-
   return (
     <Router>
       <ChakraProvider>
         <NavBar />
-        {/* <Notification /> */}
+        {Object.keys(user).length !== 0 && <Notification />}
         <Routes>
           <Route
             path="/"
@@ -57,70 +56,86 @@ const AppHelper = () => {
               </>
             }
           />
-          <Route
-            path="/waitingroom"
-            element={
-              <>
-                <WaitingRoom />
-              </>
-            }
-          />
-          <Route
-            path="/users"
-            element={
-              <>
-                <UsersList />
-              </>
-            }
-          />
-          <Route
-            path="/users/:userId"
-            element={
-              <>
-                <UserPage />
-              </>
-            }
-          />
-          <Route
-            path="/createauction"
-            element={
-              <>
-                <AuctionCreation />
-              </>
-            }
-          />
-          <Route
-            path="/myauctions/:userId"
-            element={
-              <>
-                <AuctionsList />
-              </>
-            }
-          />
-          <Route
-            path="/auction/:id"
-            element={
-              <>
-                <AuctionPage />
-              </>
-            }
-          />
-          <Route
-            path="/messaging/:userId"
-            element={
-              <>
-                <Messaging />
-              </>
-            }
-          />
-          <Route
-            path="/editauction/:id"
-            element={
-              <>
-                <EditAuction />
-              </>
-            }
-          />
+          {Object.keys(user).length !== 0 && (
+            <Route
+              path="/waitingroom"
+              element={
+                <>
+                  <WaitingRoom />
+                </>
+              }
+            />
+          )}
+          {user.username === "admin" && (
+            <Route
+              path="/users"
+              element={
+                <>
+                  <UsersList />
+                </>
+              }
+            />
+          )}
+          {user.username === "admin" && (
+            <Route
+              path="/users/:userId"
+              element={
+                <>
+                  <UserPage />
+                </>
+              }
+            />
+          )}
+          {Object.keys(user).length !== 0 && (
+            <Route
+              path="/createauction"
+              element={
+                <>
+                  <AuctionCreation />
+                </>
+              }
+            />
+          )}
+          {Object.keys(user).length !== 0 && (
+            <Route
+              path={"/myauctions/" + user.user_id}
+              element={
+                <>
+                  <AuctionsList />
+                </>
+              }
+            />
+          )}
+          {Object.keys(user).length !== 0 && (
+            <Route
+              path="/auction/:id"
+              element={
+                <>
+                  <AuctionPage />
+                </>
+              }
+            />
+          )}
+          {Object.keys(user).length !== 0 && (
+            <Route
+              path={"/messaging/" + user.user_id}
+              element={
+                <>
+                  <Messaging />
+                </>
+              }
+            />
+          )}
+          {Object.keys(user).length !== 0 && (
+            <Route
+              path="/editauction/:id"
+              element={
+                <>
+                  <EditAuction />
+                </>
+              }
+            />
+          )}
           <Route
             path="/browse"
             element={

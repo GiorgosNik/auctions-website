@@ -28,7 +28,6 @@ app.post("/", async (req, res) => {
         "INSERT INTO category (name) VALUES($1) RETURNING *",
         [name]
       );
-      console.log(newCat.rows[0]);
       return res.status(201).json(newCat.rows[0]);
     }
   } catch (err) {

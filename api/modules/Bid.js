@@ -1,7 +1,7 @@
 const express = require("express");
 const app = express.Router();
 const client = require("../database.js");
-const moment= require('moment');
+const moment = require("moment");
 
 //Bid
 app.post("/", async (req, res) => {
@@ -54,7 +54,6 @@ app.post("/", async (req, res) => {
         "UPDATE auction SET price_curr = $1, num_of_bids = $2 WHERE id = $3",
         [amount, parseInt(auction.rows[0]["num_of_bids"]) + 1, auction_id]
       );
-      console.log(newBid.rows[0]);
       return res.status(201).json(newBid.rows[0]);
     }
   } catch (err) {

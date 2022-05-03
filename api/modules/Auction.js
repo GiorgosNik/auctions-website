@@ -115,7 +115,6 @@ app.post("/", upload.single("file"), async (req, res) => {
           console.error(err.message);
         }
       }
-      console.log(newAuction.rows[0]);
       return res.status(201).json(newAuction.rows[0]);
     }
   } catch (err) {
@@ -232,7 +231,6 @@ app.put("/:id", async (req, res) => {
             console.error(err.message);
           }
         }
-        console.log(updatedAuction.rows[0]);
         return res.status(201).json(updatedAuction.rows[0]);
       }
     } else {
@@ -268,7 +266,6 @@ app.put("/:id", async (req, res) => {
             console.error(err.message);
           }
         }
-        console.log(updatedAuction.rows[0]);
         return res.status(201).json(updatedAuction.rows[0]);
       }
     }
@@ -311,7 +308,6 @@ app.get("/maxprice", async (req, res) => {
       "SELECT MAX(price_curr) FROM (SELECT * FROM auction WHERE $1 < ends AND started IS NOT NULL) AS x ",
       [time]
     );
-    console.log("MAXPRICE",maxPrice);
     res.json(maxPrice.rows[0].max);
   } catch (err) {
     console.error(err.message);
@@ -366,7 +362,6 @@ app.get("/myauctions/:id", async (req, res) => {
       "SELECT * FROM auction WHERE account_id =  $1",
       [id]
     );
-    console.log(auction.rows);
     res.json(auction.rows);
   } catch (err) {
     console.error(err.message);
@@ -374,7 +369,6 @@ app.get("/myauctions/:id", async (req, res) => {
 });
 
 app.get("/browse", async (req, res) => {
-  console.log(req.query);
   var time = moment(Date.now()).format("YYYY-MM-DD HH:mm:ss");
   const { categories, address, city, country, price } = req.query;
   const allCategories = categories.split(",");
@@ -402,7 +396,6 @@ app.get("/browse", async (req, res) => {
     }
     locationResult = productLocation.rows;
   }
-  console.log("Loc Res = ", locationResult);
   var priceResult = [];
   if (price) {
     const productPrice = await client.query(
@@ -457,8 +450,6 @@ app.get("/browse", async (req, res) => {
       categoriesResult.push(productCategories.rows);
     }
   }
-
-  // console.log("categoriesResult = ", categoriesResult);
 
   if (result.length === 0) {
     for (let i = 0; i < categoriesResult.length; i++) {
