@@ -304,6 +304,9 @@ function ProductCard({
   image,
   index,
 }) {
+  if(image === null){
+    image = "http://localhost:5000/images/37375020.jpg";
+  }
   return (
     <LinkBox as="article" maxW="sm" p="5" borderWidth="0px" rounded="md">
       <Center py={12}>
@@ -317,7 +320,6 @@ function ProductCard({
           boxShadow={"2xl"}
           rounded={"lg"}
           pos={"relative"}
-          zIndex={1}
         >
           <LinkOverlay onClick={() => goToAuctionPage(id)}>
             <Box

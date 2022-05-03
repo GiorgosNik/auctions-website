@@ -305,14 +305,14 @@ app.get("/search", async (req, res) => {
   try {
     var terms = req.query.term;
     var auctions;
-    //console.log(terms.length);
+    var time = moment(Date.now()).format("YYYY-MM-DD HH:mm:ss");
     if (terms.length === 0) {
       auctions = await client.query(
-        "SELECT id, item_name, account_id, description, image, price_start, price_inst, price_curr, started, ends, num_of_bids FROM auction"
+        "SELECT id, item_name, account_id, description, image, price_start, price_inst, price_curr, started, ends, num_of_bids FROM auction WHERE AND $1 < ends AND started IS NOT NULL",
+        [time]
       );
     } else {
       terms = terms.split(" ").join(" & ");
-      //console.log(terms);
       await client.query(
         "ALTER TABLE auction ADD COLUMN IF NOT EXISTS ts tsvector GENERATED ALWAYS AS ((setweight(to_tsvector('english', coalesce(description, '')), 'B'))) STORED"
       );
@@ -321,10 +321,9 @@ app.get("/search", async (req, res) => {
       );
 
       auctions = await client.query(
-        "SELECT * FROM auction WHERE ts @@ to_tsquery('english', $1)",
-        [terms]
+        "SELECT * FROM auction WHERE ts @@ to_tsquery('english', $1) AND $2 < ends AND started IS NOT NULL",
+        [terms, time]
       );
-      //console.log(auctions.rows);
     }
     for (let auction of auctions.rows) {
       categories = await client.query(
@@ -336,7 +335,6 @@ app.get("/search", async (req, res) => {
         auction.account_id,
       ]);
       auction.username = user.rows[0].username;
-      //console.log(auction.username);
     }
     res.json(auctions.rows);
   } catch (err) {
@@ -360,7 +358,7 @@ app.get("/myauctions/:id", async (req, res) => {
 
 app.get("/browse", async (req, res) => {
   console.log(req.query);
-
+  var time = moment(Date.now()).format("YYYY-MM-DD HH:mm:ss");
   const { categories, address, city, country, price } = req.query;
   const allCategories = categories.split(",");
 
@@ -369,8 +367,8 @@ app.get("/browse", async (req, res) => {
   var locationResult = [];
   if (address && city && country) {
     const productLocation = await client.query(
-      "SELECT * FROM  account INNER JOIN auction ON (account.id = auction.account_id) WHERE address =  $1 AND city = $2 AND country = $3",
-      [address, city, country]
+      "SELECT * FROM  account INNER JOIN auction ON (account.id = auction.account_id) WHERE address =  $1 AND city = $2 AND country = $3 AND $4 < ends AND started IS NOT NULL",
+      [address, city, country, time]
     );
 
     for (let i = 0; i < productLocation.rows.length; i++) {
@@ -387,13 +385,12 @@ app.get("/browse", async (req, res) => {
     }
     locationResult = productLocation.rows;
   }
-  // console.log("locationResult = ", locationResult);
-
+  console.log("Loc Res = ",locationResult);
   var priceResult = [];
   if (price) {
     const productPrice = await client.query(
-      "SELECT * FROM account INNER JOIN auction ON (account.id = auction.account_id) WHERE price_curr <=  $1",
-      [price]
+      "SELECT * FROM account INNER JOIN auction ON (account.id = auction.account_id) WHERE price_curr <=  $1 AND $2 < ends AND started IS NOT NULL",
+      [price, time]
     );
 
     for (let i = 0; i < productPrice.rows.length; i++) {
@@ -410,8 +407,6 @@ app.get("/browse", async (req, res) => {
     }
     priceResult = productPrice.rows;
 
-    // console.log("priceResult = ", priceResult);
-
     if (!(address && city && country)) {
       result = priceResult;
     } else if (priceResult.length === 0) {
@@ -427,7 +422,6 @@ app.get("/browse", async (req, res) => {
       }
     }
 
-    // console.log("combined = ", result);
   }
 
   var finalResult = [];
@@ -441,8 +435,8 @@ app.get("/browse", async (req, res) => {
     // get auctions of this category
     for (let i = 0; i < auctionIds.rows.length; i++) {
       var productCategories = await client.query(
-        "SELECT * FROM auction WHERE id =  $1",
-        [auctionIds.rows[i].auction_id]
+        "SELECT * FROM auction WHERE id =  $1 AND $2 < ends AND started IS NOT NULL",
+        [auctionIds.rows[i].auction_id,time]
       );
       categoriesResult.push(productCategories.rows);
     }

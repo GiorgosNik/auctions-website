@@ -137,15 +137,28 @@ export default function AuctionPage() {
         py={{ base: 18, md: 24, lg: 30 }}
       >
         <Flex>
-          <Image
-            rounded={"md"}
-            alt={"product image"}
-            src={auction.image}
-            fit={"cover"}
-            align={"center"}
-            w={"100%"}
-            h={{ base: "100%", sm: "400px", lg: "500px" }}
-          />
+          {auction.image !== null && (
+            <Image
+              rounded={"md"}
+              alt={"product image"}
+              src={auction.image}
+              fit={"cover"}
+              align={"center"}
+              w={"100%"}
+              h={{ base: "100%", sm: "400px", lg: "500px" }}
+            />
+          )}
+          {auction.image === null && (
+            <Image
+              rounded={"md"}
+              alt={"product image"}
+              src={"http://localhost:5000/images/37375020.jpg"}
+              fit={"cover"}
+              align={"center"}
+              w={"100%"}
+              h={{ base: "100%", sm: "400px", lg: "500px" }}
+            />
+          )}
         </Flex>
         <Stack>
           <Box as={"header"}>
@@ -179,50 +192,62 @@ export default function AuctionPage() {
               {"Starting Price " + auction.price_start}
             </Text>
           </Box>
-          <FormControl id="bid_form" isRequired>
-            <Stack direction={["column", "row"]}>
-              <Box>
-                <FormLabel
-                  color={useColorModeValue("gray.600", "gray.500")}
-                  fontWeight={"600"}
-                >
-                  Make a bid
-                </FormLabel>
-                <Stack direction={["column", "row"]}>
-                  <InputGroup>
-                    <InputLeftElement
-                      pointerEvents="none"
-                      color="gray.300"
-                      fontSize="1.2em"
-                      children="$"
-                    />
-                    <Input
-                      htmlSize={17}
-                      width="auto"
-                      type="text"
-                      onChange={bidAmountChangeHandler}
-                      onKeyPress={(event) => {
-                        if (!/[0-9]/.test(event.key)) {
-                          event.preventDefault();
-                        }
-                      }}
-                      color={useColorModeValue("gray.600", "gray.500")}
-                      fontWeight={"500"}
-                      placeholder="Your Bid"
-                      _placeholder={{ color: "gray.500" }}
-                    />
-                    <InputRightAddon children="$" />
-                  </InputGroup>
-                  <BidConfirmation submitHandler={submitHandler} />
-                </Stack>
-                {errorMessage !== "" && (
-                  <span id="message" style={{ color: "red", fontSize: "15px" }}>
-                    {errorMessage}
-                  </span>
-                )}
-              </Box>
-            </Stack>
-          </FormControl>
+          {auction.started !== null && (
+            <FormControl id="bid_form" isRequired>
+              <Stack direction={["column", "row"]}>
+                <Box>
+                  <FormLabel color={"gray"} fontWeight={"600"}>
+                    Make a bid
+                  </FormLabel>
+                  <Stack direction={["column", "row"]}>
+                    <InputGroup>
+                      <InputLeftElement
+                        pointerEvents="none"
+                        color="gray.300"
+                        fontSize="1.2em"
+                        children="$"
+                      />
+                      <Input
+                        htmlSize={17}
+                        width="auto"
+                        type="text"
+                        onChange={bidAmountChangeHandler}
+                        onKeyPress={(event) => {
+                          if (!/[0-9]/.test(event.key)) {
+                            event.preventDefault();
+                          }
+                        }}
+                        color={"gray"}
+                        fontWeight={"500"}
+                        placeholder="Your Bid"
+                        _placeholder={{ color: "gray.500" }}
+                      />
+                      <InputRightAddon children="$" />
+                    </InputGroup>
+                    <BidConfirmation submitHandler={submitHandler} />
+                  </Stack>
+                  {errorMessage !== "" && (
+                    <span
+                      id="message"
+                      style={{ color: "red", fontSize: "15px" }}
+                    >
+                      {errorMessage}
+                    </span>
+                  )}
+                </Box>
+              </Stack>
+            </FormControl>
+          )}
+          {auction.started === null && (
+            <Text
+              color={"purple.500"}
+              fontSize={"2xl"}
+              fontWeight={"600"}
+              textAlign={"left"}
+            >
+              Auction Not Active
+            </Text>
+          )}
           <Stack
             spacing={{ base: 4, sm: 6 }}
             direction={"column"}
