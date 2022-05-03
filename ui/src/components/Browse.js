@@ -34,6 +34,7 @@ const goToAuctionPage = (id) => {
 const producsPerPage = 6;
 export default function Browse() {
   const [searchTerms, setSearchTerms] = useState("");
+
   const [curPage, setCurPage] = useState(1);
   var [productArray, setProductArray] = useState([]);
   var pagesArray = [];
@@ -41,14 +42,14 @@ export default function Browse() {
   const pageSelectHandler = (pageId) => {
     setCurPage(pageId);
   };
-  
+
   const fetchProductArray = async () => {
     const { data } = await Axios.get("http://localhost:5000/auction/search", {
       params: { term: searchTerms },
     });
     setProductArray(data);
   };
-  
+
   const setProductArrayFilter = (data) => {
     productArray = [];
     setProductArray(data);
@@ -64,7 +65,6 @@ export default function Browse() {
     setCurPage(1);
   }, [searchTerms]);
 
-
   return (
     <Box m={5}>
       <Input
@@ -75,7 +75,7 @@ export default function Browse() {
       <Container>
         <Row>
           <Col sm={2.5}>
-            <Filters setProducts={setProductArrayFilter}/>
+            <Filters setProducts={setProductArrayFilter} />
             {pagesArray.map((page, index) => {
               return (
                 <Button
@@ -116,10 +116,11 @@ export default function Browse() {
   );
 }
 
-function Filters({setProducts}) {
+function Filters({ setProducts }) {
   const [categories, setCategories] = useState([]);
+  const [maxPrice, setMaxPrice] = useState(Infinity);
   const [locations, setLocations] = useState([]);
-  const [sliderValue, setSliderValue] = useState(100);
+  const [sliderValue, setSliderValue] = useState(Infinity);
   const [productCategories, setProductCategories] = useState([]);
   const [productLocation, setProductLocation] = useState("");
   const [productPrice, setProductPrice] = useState(100);
@@ -134,6 +135,11 @@ function Filters({setProducts}) {
     }
     setProductCategories(tempList);
     fetchProducts();
+  };
+
+  const fetchMaxPrice = async () => {
+    const { data } = await Axios.get("http://localhost:5000/auction/maxprice");
+    setMaxPrice(parseInt(data));
   };
 
   const fetchCategories = async () => {
@@ -152,7 +158,7 @@ function Filters({setProducts}) {
     if (
       productCategories === [] &&
       productLocation === "" &&
-      productPrice === 100
+      productPrice === maxPrice
     ) {
       return;
     }
@@ -174,12 +180,22 @@ function Filters({setProducts}) {
   };
 
   useEffect(() => {
+    fetchMaxPrice();
+  }, []);
+
+  useEffect(() => {
+    setSliderValue(maxPrice);
+  }, [maxPrice]);
+
+  useEffect(() => {
     fetchCategories();
     fetchLocations();
+    fetchMaxPrice();
   }, []);
 
   useEffect(() => {
     fetchProducts();
+    fetchMaxPrice();
   }, [productLocation]);
 
   useEffect(() => {
@@ -189,8 +205,6 @@ function Filters({setProducts}) {
   return (
     <Stack>
       <CheckboxGroup colorScheme="purple">
-        
-
         <p
           style={{
             fontSize: "20px",
@@ -226,12 +240,14 @@ function Filters({setProducts}) {
       </CheckboxGroup>
       <Slider
         w={200}
+        defaultValue={maxPrice}
+        max={maxPrice}
         aria-label="slider-ex-6"
         onChangeEnd={(val) => setProductPrice(val)}
         onChange={(val) => setSliderValue(val)}
       >
-        <SliderMark value={100} mt="1" ml="-2.5" fontSize="sm">
-          100
+        <SliderMark value={maxPrice} mt="1" ml="-2.5" fontSize="sm">
+          {maxPrice}
         </SliderMark>
 
         <SliderMark
@@ -304,7 +320,7 @@ function ProductCard({
   image,
   index,
 }) {
-  if(image === null){
+  if (image === null) {
     image = "http://localhost:5000/images/37375020.jpg";
   }
   return (

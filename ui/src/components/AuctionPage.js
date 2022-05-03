@@ -80,7 +80,10 @@ export default function AuctionPage() {
   const [seller, setSeller] = useState([]);
   const [categories, setCategories] = useState([]);
   const [auction_id, setAuctionId] = useState("");
-  const account_id = jwt(localStorage.getItem("user")).user_id;
+  var  account_id = 0;
+  if(localStorage.getItem("user")){
+    account_id = jwt(localStorage.getItem("user")).user_id;
+  }
   const fetchAuction = async () => {
     const { data } = await Axios.get(
       "http://localhost:5000" + location.pathname

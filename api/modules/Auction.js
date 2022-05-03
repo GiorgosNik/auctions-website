@@ -288,14 +288,31 @@ app.get("/", async (req, res) => {
         "SELECT name FROM auction_category INNER JOIN category ON (category.id = auction_category.category_id) WHERE auction_id =  $1",
         [auction.id]
       );
-      auction.categories = categories.rows[0];
+      bids = await client.query(
+        "SELECT account_id, username, time, amount, city, country address FROM bid INNER JOIN account ON (account.id = bid.account_id) WHERE bid.auction_id =  $1",
+        [auction.id]
+      );
+      auction.bids = bids.rows;
       user = await client.query("SELECT username FROM account WHERE id =  $1", [
         auction.account_id,
       ]);
       auction.username = user.rows[0].username;
-      console.log(auction.username);
     }
     res.json(auctions.rows);
+  } catch (err) {
+    console.error(err.message);
+  }
+});
+
+app.get("/maxprice", async (req, res) => {
+  try {
+    var time = moment(Date.now()).format("YYYY-MM-DD HH:mm:ss");
+    const maxPrice = await client.query(
+      "SELECT MAX(price_curr) FROM (SELECT * FROM auction WHERE $1 < ends AND started IS NOT NULL) AS x ",
+      [time]
+    );
+    console.log("MAXPRICE",maxPrice);
+    res.json(maxPrice.rows[0].max);
   } catch (err) {
     console.error(err.message);
   }
@@ -308,7 +325,7 @@ app.get("/search", async (req, res) => {
     var time = moment(Date.now()).format("YYYY-MM-DD HH:mm:ss");
     if (terms.length === 0) {
       auctions = await client.query(
-        "SELECT id, item_name, account_id, description, image, price_start, price_inst, price_curr, started, ends, num_of_bids FROM auction WHERE AND $1 < ends AND started IS NOT NULL",
+        "SELECT id, item_name, account_id, description, image, price_start, price_inst, price_curr, started, ends, num_of_bids FROM auction WHERE $1 < ends AND started IS NOT NULL",
         [time]
       );
     } else {
@@ -385,7 +402,7 @@ app.get("/browse", async (req, res) => {
     }
     locationResult = productLocation.rows;
   }
-  console.log("Loc Res = ",locationResult);
+  console.log("Loc Res = ", locationResult);
   var priceResult = [];
   if (price) {
     const productPrice = await client.query(
@@ -421,7 +438,6 @@ app.get("/browse", async (req, res) => {
         }
       }
     }
-
   }
 
   var finalResult = [];
@@ -436,7 +452,7 @@ app.get("/browse", async (req, res) => {
     for (let i = 0; i < auctionIds.rows.length; i++) {
       var productCategories = await client.query(
         "SELECT * FROM auction WHERE id =  $1 AND $2 < ends AND started IS NOT NULL",
-        [auctionIds.rows[i].auction_id,time]
+        [auctionIds.rows[i].auction_id, time]
       );
       categoriesResult.push(productCategories.rows);
     }
@@ -467,7 +483,7 @@ app.get("/browse", async (req, res) => {
     }
   }
 
-   console.log("finalResult = ", finalResult);
+  console.log("finalResult = ", finalResult);
 
   try {
     res.json(finalResult);
