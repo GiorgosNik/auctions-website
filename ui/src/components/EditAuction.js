@@ -35,7 +35,8 @@ export default function AuctionMain() {
   const [startingPrice, setStartingPrice] = useState("");
   const [buyOutPrice, setBuyoutPrice] = useState("");
   const [auction, setAuction] = useState([]);
-  const [auction_id, setAuctionId] = useState("");
+  const [auctionItemId, setAuctionItemId] = useState("");
+  const [auctionId, setAuctionId] = useState("");
   const accountId = jwt(localStorage.getItem("user")).user_id;
   const [selectedFile, setSelectedFile] = useState(null);
   const splitLocation = location.pathname.split("/");
@@ -48,12 +49,13 @@ export default function AuctionMain() {
 
   const fetchAuction = async () => {
     const { data } = await Axios.get(
-      "http://localhost:5000/auction/" + splitLocation[2]
+      "https://localhost:5000/auction/" + splitLocation[2]
     );
 
     const auction = data;
     setAuction(auction[0]);
-    setAuctionId(auction[0].id);
+    setAuctionItemId(auction[0].id);
+    setAuctionId(auction[0].auction_id);
     setAuctionCategories(auction[0].categories);
     setProductCategories(auction[0].categories);
     setProductName(auction[0].item_name);
@@ -85,14 +87,14 @@ export default function AuctionMain() {
   };
 
   const fetchCategories = async () => {
-    const { data } = await Axios.get("http://localhost:5000/category");
+    const { data } = await Axios.get("https://localhost:5000/category");
     const categories = data;
     setCategories(categories);
   };
 
   const deleteHandler = async () => {
-    await Axios.delete("http://localhost:5000/auction/" + auction_id);
-    window.location.href = "/myauctions/" + accountId;
+    await Axios.delete("https://localhost:5000/auction/" + auctionItemId);
+    window.location.href = "/myauction/" + auctionId;
   };
 
   const submitHandler = (event) => {
@@ -109,7 +111,7 @@ export default function AuctionMain() {
     };
     console.log(body);
     try {
-      fetch("http://localhost:5000/auction/" + auction_id, {
+      fetch("https://localhost:5000/auction/" + auctionItemId, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
@@ -120,7 +122,7 @@ export default function AuctionMain() {
             setErrorMessage(res?.error);
           } else {
             setErrorMessage("");
-            window.location.href = "/myauctions/" + accountId;
+            window.location.href = "/myauction/" + auctionId;
           }
         });
     } catch (err) {
@@ -142,7 +144,7 @@ export default function AuctionMain() {
     };
     console.log(body);
     try {
-      fetch("http://localhost:5000/auction/" + auction_id, {
+      fetch("https://localhost:5000/auction/" + auctionItemId, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
@@ -153,7 +155,7 @@ export default function AuctionMain() {
             setErrorMessage(res?.error);
           } else {
             setErrorMessage("");
-            window.location.href = "/myauctions/" + accountId;
+            window.location.href = "/myauction/" + auctionId;
           }
         });
     } catch (err) {

@@ -25,7 +25,7 @@ export default function UsersList() {
   };
 
   const fetchUsers = async () => {
-    const { data } = await Axios.get("http://localhost:5000/auth/users");
+    const { data } = await Axios.get("https://localhost:5000/auth/users");
     const users = data;
     setUsers(users);
   };
@@ -102,7 +102,7 @@ function DownloadAuctions() {
   const [auctions, setAuctions] = useState(null);
 
   const fetchAuctions = async () => {
-    const { data } = await Axios.get("http://localhost:5000/auction");
+    const { data } = await Axios.get("https://localhost:5000/auction");
     setAuctions(data);
   };
 

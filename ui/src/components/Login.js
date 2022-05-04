@@ -41,7 +41,7 @@ export default function LoginCard({ onClose }) {
     };
 
     try {
-      fetch("http://localhost:5000/auth/login", {
+      fetch("https://localhost:5000/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),

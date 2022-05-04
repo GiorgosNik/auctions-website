@@ -18,20 +18,35 @@ import { ArrowForwardIcon, CheckIcon, CloseIcon } from "@chakra-ui/icons";
 
 export default function AuctionsList() {
   const [auctions, setAuctions] = useState([]);
+  const [auctionName, setAuctionName] = useState("");
   const accountId = jwt(localStorage.getItem("user")).user_id;
+  const splitLocation = window.location.pathname.split("/");
+  const auctionId = splitLocation[2];
   const goToAuctionPage = (id) => {
     window.location.href = "/editauction/" + id;
   };
 
   const fetchAuctions = async () => {
     const { data } = await Axios.get(
-      "http://localhost:5000/auction/myauctions/" + accountId
+      "https://localhost:5000/auction/myauction/",
+      {
+        params: { accountId: accountId, auction_id: auctionId },
+      }
     );
     const auctions = data;
     setAuctions(auctions);
   };
 
+  const fetchAuctionName = async () => {
+    const { data } = await Axios.get(
+      "https://localhost:5000/auction/mycollections/" + auctionId
+    );
+    setAuctionName(data.auction_name);
+    console.log(auctionName);
+  };
+
   useEffect(() => {
+    fetchAuctionName();
     fetchAuctions();
   }, []);
 
@@ -47,7 +62,7 @@ export default function AuctionsList() {
         >
           <Table variant="simple">
             <TableCaption placement="top" fontSize={20}>
-              My Auctions
+              {auctionName}
             </TableCaption>
             <Thead>
               <Tr>

@@ -3,6 +3,7 @@ const app = express.Router();
 const client = require("../database.js");
 const moment = require("moment");
 var multer = require("multer");
+const { query } = require("express");
 
 var storage = multer.diskStorage({
   destination: "images/",
@@ -23,12 +24,15 @@ app.post("/", upload.single("file"), async (req, res) => {
       productCategories,
       startingPrice,
       buyOutPrice,
+      auctionName,
     } = req.body;
 
     ////////////////// validate input //////////////////
-    var buyOut;
     if (!productName) {
       return res.status(400).json({ error: "Product Name cannot be blank" });
+    }
+    if (!auctionName) {
+      return res.status(400).json({ error: "Auction Name cannot be blank" });
     }
     if (productName.length > 30) {
       return res.status(400).json({ error: "Product Name length is too long" });
@@ -48,11 +52,14 @@ app.post("/", upload.single("file"), async (req, res) => {
     if (!startingPrice) {
       return res.status(400).json({ error: "Price cannot be blank" });
     }
-    if (buyOutPrice === "") {
-      buyOut = "0";
-    } else {
-      buyOut = buyOutPrice;
+    if (buyOutPrice) {
+      if (buyOutPrice <= startingPrice) {
+        return res.status(409).json({
+          error: "Buyout Price cannot be lower than the Starting Price",
+        });
+      }
     }
+    var newAuction;
     var productCategs = [];
     if (typeof productCategories === typeof "test") {
       productCategs.push(productCategories);
@@ -74,6 +81,20 @@ app.post("/", upload.single("file"), async (req, res) => {
       }
     }
 
+    var auction = await client.query(
+      "SELECT * FROM auction WHERE auction_name = $1",
+      [auctionName]
+    );
+    console.log(auction.rows);
+    if (auction.rows.length === 0) {
+      auction = await client.query(
+        "INSERT INTO auction (auction_name) VALUES($1) RETURNING *",
+        [auctionName]
+      );
+    }
+    console.log("ROWS ID", auction.rows[0].id);
+
+    console.log(auction.rows[0]);
     const getUser = () =>
       client.query("SELECT * FROM account WHERE id = $1", [accountId]);
     const { rows } = await getUser();
@@ -82,20 +103,37 @@ app.post("/", upload.single("file"), async (req, res) => {
     } else {
       var filepath = null;
       if (req.file) {
-        filepath = `http://localhost:5000/images/${req.file.originalname}`;
+        filepath = `https://localhost:5000/images/${req.file.originalname}`;
       }
-      const newAuction = await client.query(
-        "INSERT INTO auction (item_name,account_id,description,price_start,price_curr,price_inst,num_of_bids,image) VALUES($1,$2,$3,$4,$4,$5,$6,$7) RETURNING *",
-        [
-          productName,
-          accountId,
-          productDescription,
-          startingPrice,
-          buyOut,
-          0,
-          filepath,
-        ]
-      );
+      if (!buyOutPrice) {
+        newAuction = await client.query(
+          "INSERT INTO auction_item (item_name,account_id,description,price_start,price_curr,num_of_bids,image,auction_id) VALUES($1,$2,$3,$4,$4,$5,$6,$7) RETURNING *",
+          [
+            productName,
+            accountId,
+            productDescription,
+            startingPrice,
+            0,
+            filepath,
+            auction.rows[0].id,
+          ]
+        );
+      } else {
+        newAuction = await client.query(
+          "INSERT INTO auction_item (item_name,account_id,description,price_start,price_curr,price_inst,num_of_bids,image,auction_id) VALUES($1,$2,$3,$4,$4,$5,$6,$7,$8) RETURNING *",
+          [
+            productName,
+            accountId,
+            productDescription,
+            startingPrice,
+            buyOutPrice,
+            0,
+            filepath,
+            auction.rows[0].id,
+          ]
+        );
+      }
+
       newAuction.rows[0]["category"] = productCategs;
       for (let i = 0; i < productCategs.length; i++) {
         try {
@@ -115,6 +153,8 @@ app.post("/", upload.single("file"), async (req, res) => {
           console.error(err.message);
         }
       }
+      console.log(newAuction.rows[0]);
+      newAuction.rows[0].auction_id = auction.rows[0].id;
       return res.status(201).json(newAuction.rows[0]);
     }
   } catch (err) {
@@ -134,8 +174,8 @@ app.put("/:id", async (req, res) => {
       activate,
     } = req.body;
     const id = req.params.id;
+    var updatedAuction;
     ////////////////// validate input //////////////////
-    var buyOut;
     if (!productName) {
       return res.status(400).json({ error: "Product Name cannot be blank" });
     }
@@ -157,15 +197,12 @@ app.put("/:id", async (req, res) => {
     if (!startingPrice) {
       return res.status(400).json({ error: "Price cannot be blank" });
     }
-    if (buyOutPrice === "") {
-      buyOut = "0";
-    } else {
+    if (buyOutPrice) {
       if (buyOutPrice <= startingPrice) {
         return res
           .status(400)
           .json({ error: "Buyout price cannot be lower than starting price" });
       }
-      buyOut = buyOutPrice;
     }
 
     //Check Categories Exist
@@ -190,22 +227,21 @@ app.put("/:id", async (req, res) => {
     const getUser = () =>
       client.query("SELECT * FROM account WHERE id = $1", [accountId]);
     const { rows } = await getUser();
-    if (activate) {
+    if (!activate) {
       if (rows.length === 0) {
         return res.status(409).json({ error: "No such user" });
       } else {
-        const updatedAuction = await client.query(
-          "UPDATE auction SET item_name = $1 ,description = $2, price_start = $3, price_inst = $4, started = $5, ends = $6 WHERE id = $7 RETURNING *",
-          [
-            productName,
-            productDescription,
-            startingPrice,
-            buyOut,
-            started,
-            ends,
-            id,
-          ]
-        );
+        if (buyOutPrice) {
+          updatedAuction = await client.query(
+            "UPDATE auction_item SET item_name = $1 ,description = $2, price_start = $3, price_inst = $4 WHERE id = $5 RETURNING *",
+            [productName, productDescription, startingPrice, buyOutPrice, id]
+          );
+        } else {
+          updatedAuction = await client.query(
+            "UPDATE auction_item SET item_name = $1 ,description = $2, price_start = $3 , price_inst = NULL WHERE id = $4 RETURNING *",
+            [productName, productDescription, startingPrice, id]
+          );
+        }
 
         updatedAuction.rows[0]["category"] = productCategories;
         await client.query(
@@ -237,10 +273,25 @@ app.put("/:id", async (req, res) => {
       if (rows.length === 0) {
         return res.status(409).json({ error: "No such user" });
       } else {
-        const updatedAuction = await client.query(
-          "UPDATE auction SET item_name = $1 ,description = $2, price_start = $3, price_inst = $4 WHERE id = $5 RETURNING *",
-          [productName, productDescription, startingPrice, buyOut, id]
-        );
+        if (buyOutPrice) {
+          updatedAuction = await client.query(
+            "UPDATE auction_item SET item_name = $1 ,description = $2, price_start = $3, price_inst = $4, started = $5, ends = $6 WHERE id = $7 RETURNING *",
+            [
+              productName,
+              productDescription,
+              startingPrice,
+              buyOutPrice,
+              started,
+              ends,
+              id,
+            ]
+          );
+        } else {
+          updatedAuction = await client.query(
+            "UPDATE auction_item SET item_name = $1 ,description = $2, price_start = $3,price_inst = NULL, started = $4, ends = $5 WHERE id = $6 RETURNING *",
+            [productName, productDescription, startingPrice, started, ends, id]
+          );
+        }
 
         updatedAuction.rows[0]["category"] = productCategories;
         await client.query(
@@ -278,22 +329,22 @@ app.get("/", async (req, res) => {
   try {
     var categories;
     const auctions = await client.query(
-      "SELECT id, item_name, account_id, description, image, price_start, price_inst, price_curr, started, ends, num_of_bids FROM auction"
+      "SELECT id, item_name, account_id, description, image, price_start, price_inst, price_curr, started, ends, num_of_bids FROM auction_item"
     );
-    for (let auction of auctions.rows) {
+    for (let auction_item of auctions.rows) {
       categories = await client.query(
         "SELECT name FROM auction_category INNER JOIN category ON (category.id = auction_category.category_id) WHERE auction_id =  $1",
-        [auction.id]
+        [auction_item.id]
       );
       bids = await client.query(
         "SELECT account_id, username, time, amount, city, country address FROM bid INNER JOIN account ON (account.id = bid.account_id) WHERE bid.auction_id =  $1",
-        [auction.id]
+        [auction_item.id]
       );
-      auction.bids = bids.rows;
+      auction_item.bids = bids.rows;
       user = await client.query("SELECT username FROM account WHERE id =  $1", [
-        auction.account_id,
+        auction_item.account_id,
       ]);
-      auction.username = user.rows[0].username;
+      auction_item.username = user.rows[0].username;
     }
     res.json(auctions.rows);
   } catch (err) {
@@ -305,7 +356,7 @@ app.get("/maxprice", async (req, res) => {
   try {
     var time = moment(Date.now()).format("YYYY-MM-DD HH:mm:ss");
     const maxPrice = await client.query(
-      "SELECT MAX(price_curr) FROM (SELECT * FROM auction WHERE $1 < ends AND started IS NOT NULL) AS x ",
+      "SELECT MAX(price_curr) FROM (SELECT * FROM auction_item WHERE $1 < ends AND started IS NOT NULL AND (price_curr < price_inst OR price_inst IS NULL)) AS x ",
       [time]
     );
     res.json(maxPrice.rows[0].max);
@@ -321,33 +372,33 @@ app.get("/search", async (req, res) => {
     var time = moment(Date.now()).format("YYYY-MM-DD HH:mm:ss");
     if (terms.length === 0) {
       auctions = await client.query(
-        "SELECT id, item_name, account_id, description, image, price_start, price_inst, price_curr, started, ends, num_of_bids FROM auction WHERE $1 < ends AND started IS NOT NULL",
+        "SELECT id, item_name, account_id, description, image, price_start, price_inst, price_curr, started, ends, num_of_bids FROM auction_item WHERE $1 < ends AND started IS NOT NULL AND (price_curr < price_inst OR price_inst IS NULL)",
         [time]
       );
     } else {
       terms = terms.split(" ").join(" & ");
       await client.query(
-        "ALTER TABLE auction ADD COLUMN IF NOT EXISTS ts tsvector GENERATED ALWAYS AS ((setweight(to_tsvector('english', coalesce(description, '')), 'B'))) STORED"
+        "ALTER TABLE auction_item ADD COLUMN IF NOT EXISTS ts tsvector GENERATED ALWAYS AS ((setweight(to_tsvector('english', coalesce(description, '')), 'B'))) STORED"
       );
       await client.query(
-        "CREATE INDEX IF NOT EXISTS ts_idx ON auction USING GIN (ts)"
+        "CREATE INDEX IF NOT EXISTS ts_idx ON auction_item USING GIN (ts)"
       );
 
       auctions = await client.query(
-        "SELECT * FROM auction WHERE ts @@ to_tsquery('english', $1) AND $2 < ends AND started IS NOT NULL",
+        "SELECT * FROM auction_item WHERE ts @@ to_tsquery('english', $1) AND $2 < ends AND started IS NOT NULL AND (price_curr < price_inst OR price_inst IS NULL)",
         [terms, time]
       );
     }
-    for (let auction of auctions.rows) {
+    for (let auction_item of auctions.rows) {
       categories = await client.query(
         "SELECT name FROM auction_category INNER JOIN category ON (category.id = auction_category.category_id) WHERE auction_id =  $1",
-        [auction.id]
+        [auction_item.id]
       );
-      auction.categories = categories.rows[0];
+      auction_item.categories = categories.rows[0];
       user = await client.query("SELECT username FROM account WHERE id =  $1", [
-        auction.account_id,
+        auction_item.account_id,
       ]);
-      auction.username = user.rows[0].username;
+      auction_item.username = user.rows[0].username;
     }
     res.json(auctions.rows);
   } catch (err) {
@@ -355,14 +406,27 @@ app.get("/search", async (req, res) => {
   }
 });
 
-app.get("/myauctions/:id", async (req, res) => {
+app.get("/myauction/", async (req, res) => {
+  try {
+    const id = req.query.accountId;
+    const auction_id = req.query.auction_id;
+    const auction_item = await client.query(
+      "SELECT * FROM auction_item WHERE account_id = $1 AND auction_id = $2",
+      [id, auction_id]
+    );
+    console.log(auction_item.rows, id, auction_id);
+    res.json(auction_item.rows);
+  } catch (err) {
+    console.error(err.message);
+  }
+});
+
+app.get("/mycollections/:id", async (req, res) => {
   try {
     const id = req.params.id;
-    const auction = await client.query(
-      "SELECT * FROM auction WHERE account_id =  $1",
-      [id]
-    );
-    res.json(auction.rows);
+    const collection = await client.query("SELECT * FROM auction WHERE id = $1",
+    [id]);
+    res.json(collection.rows[0]);
   } catch (err) {
     console.error(err.message);
   }
@@ -370,16 +434,16 @@ app.get("/myauctions/:id", async (req, res) => {
 
 app.get("/browse", async (req, res) => {
   var time = moment(Date.now()).format("YYYY-MM-DD HH:mm:ss");
-  const { categories, address, city, country, price } = req.query;
+  const { categories, country, price } = req.query;
   const allCategories = categories.split(",");
 
   var result = [];
 
   var locationResult = [];
-  if (address && city && country) {
+  if (country) {
     const productLocation = await client.query(
-      "SELECT * FROM  account INNER JOIN auction ON (account.id = auction.account_id) WHERE address =  $1 AND city = $2 AND country = $3 AND $4 < ends AND started IS NOT NULL",
-      [address, city, country, time]
+      "SELECT * FROM  account INNER JOIN auction_item ON (account.id = auction_item.account_id) WHERE country = $1 AND $2 < ends AND started IS NOT NULL AND (price_curr < price_inst OR price_inst IS NULL)",
+      [country, time]
     );
 
     for (let i = 0; i < productLocation.rows.length; i++) {
@@ -399,7 +463,7 @@ app.get("/browse", async (req, res) => {
   var priceResult = [];
   if (price) {
     const productPrice = await client.query(
-      "SELECT * FROM account INNER JOIN auction ON (account.id = auction.account_id) WHERE price_curr <=  $1 AND $2 < ends AND started IS NOT NULL",
+      "SELECT * FROM account INNER JOIN auction_item ON (account.id = auction_item.account_id) WHERE price_curr <=  $1 AND $2 < ends AND started IS NOT NULL AND (price_curr < price_inst OR price_inst IS NULL)",
       [price, time]
     );
 
@@ -417,7 +481,7 @@ app.get("/browse", async (req, res) => {
     }
     priceResult = productPrice.rows;
 
-    if (!(address && city && country)) {
+    if (!country) {
       result = priceResult;
     } else if (priceResult.length === 0) {
       result = locationResult;
@@ -444,7 +508,7 @@ app.get("/browse", async (req, res) => {
     // get auctions of this category
     for (let i = 0; i < auctionIds.rows.length; i++) {
       var productCategories = await client.query(
-        "SELECT * FROM auction WHERE id =  $1 AND $2 < ends AND started IS NOT NULL",
+        "SELECT * FROM auction_item WHERE id =  $1 AND $2 < ends AND started IS NOT NULL AND (price_curr < price_inst OR price_inst IS NULL)",
         [auctionIds.rows[i].auction_id, time]
       );
       categoriesResult.push(productCategories.rows);
@@ -486,29 +550,34 @@ app.get("/browse", async (req, res) => {
 app.get("/:id", async (req, res) => {
   try {
     const id = req.params.id;
-    const auction = await client.query("SELECT * FROM auction WHERE id =  $1", [
-      id,
-    ]);
+    const auction_item = await client.query(
+      "SELECT * FROM auction_item WHERE id =  $1",
+      [id]
+    );
     const categories = await client.query(
       "SELECT name FROM auction_category INNER JOIN category ON (category.id = auction_category.category_id) WHERE auction_id =  $1",
       [id]
     );
-    auction.rows[0].categories = [];
+    auction_item.rows[0].categories = [];
     for (let category of categories.rows) {
-      auction.rows[0].categories.push(category.name);
+      auction_item.rows[0].categories.push(category.name);
     }
     const user = await client.query("SELECT * FROM account WHERE id =  $1", [
-      auction.rows[0].account_id,
+      auction_item.rows[0].account_id,
     ]);
-    auction.rows[0].user = user.rows[0];
-    res.json(auction.rows);
+    const auction_name = await client.query("SELECT auction_name FROM auction WHERE id =  $1", [
+      auction_item.rows[0].auction_id,
+    ]);
+    auction_item.rows[0].user = user.rows[0];
+    auction_item.rows[0].auction_name = auction_name.rows[0].auction_name;
+    res.json(auction_item.rows);
   } catch (err) {}
 });
 
 app.delete("/:id", async (req, res) => {
   try {
     const id = req.params.id;
-    await client.query("DELETE FROM auction WHERE id =  $1", [id]);
+    await client.query("DELETE FROM auction_item WHERE id =  $1", [id]);
     res.json("Auction Deleted");
   } catch (err) {
     console.error(err.message);
@@ -517,7 +586,7 @@ app.delete("/:id", async (req, res) => {
 
 app.delete("/", async (req, res) => {
   try {
-    await client.query("DELETE FROM auction");
+    await client.query("DELETE FROM auction_item");
     res.json("Auctions Deleted");
   } catch (error) {
     console.error(err.message);

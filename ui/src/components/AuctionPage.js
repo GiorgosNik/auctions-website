@@ -80,13 +80,13 @@ export default function AuctionPage() {
   const [seller, setSeller] = useState([]);
   const [categories, setCategories] = useState([]);
   const [auction_id, setAuctionId] = useState("");
-  var  account_id = 0;
-  if(localStorage.getItem("user")){
+  var account_id = 0;
+  if (localStorage.getItem("user")) {
     account_id = jwt(localStorage.getItem("user")).user_id;
   }
   const fetchAuction = async () => {
     const { data } = await Axios.get(
-      "http://localhost:5000" + location.pathname
+      "https://localhost:5000" + location.pathname
     );
 
     const auction = data;
@@ -109,7 +109,7 @@ export default function AuctionPage() {
     };
     console.log(body);
     try {
-      fetch("http://localhost:5000/bid", {
+      fetch("https://localhost:5000/bid", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
@@ -155,7 +155,7 @@ export default function AuctionPage() {
             <Image
               rounded={"md"}
               alt={"product image"}
-              src={"http://localhost:5000/images/37375020.jpg"}
+              src={"https://localhost:5000/images/37375020.jpg"}
               fit={"cover"}
               align={"center"}
               w={"100%"}
@@ -181,6 +181,13 @@ export default function AuctionPage() {
                 {"Current Price: " + auction.price_curr}
               </Text>
             </Stack>
+            <Text
+              color={useColorModeValue("gray.900", "gray.400")}
+              fontWeight={400}
+              fontSize={"2xl"}
+            >
+              {"Auction: " + auction.auction_name}
+            </Text>
             {auction.price_inst !== "" && (
               <Text fontWeight={200} fontSize={"lg"}>
                 {"Buyout Price " + auction.price_inst}

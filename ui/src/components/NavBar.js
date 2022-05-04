@@ -76,7 +76,7 @@ export default function NavBar() {
     },
     {
       label: "My Auctions",
-      href: "/myauctions/" + accountId,
+      href: "/myauctions/" ,
     },
     {
       label: "Messaging",

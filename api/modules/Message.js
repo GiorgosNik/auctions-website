@@ -59,7 +59,11 @@ app.get("/:id/inbox", async (req, res) => {
             "SELECT * FROM message WHERE receiver = $1",
             [receiver],
             function (err, result) {
-              return res.json(result.rows);
+              if(result !== undefined){
+                return res.json(result.rows);
+              }
+              return res.json("");
+
             }
           );
         }
