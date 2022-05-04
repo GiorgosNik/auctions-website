@@ -28,6 +28,9 @@ export default function AuctionMain() {
   const [categories, setCategories] = useState([]);
   const [productCategories, setProductCategories] = useState([]);
   const [productName, setProductName] = useState("");
+  const [auctionName, setAuctionName] = useState(
+    localStorage.getItem("auctionName")
+  );
   const [productDescription, setProductDescription] = useState("");
   const [startingPrice, setStartingPrice] = useState("");
   const [buyOutPrice, setBuyoutPrice] = useState("");
@@ -36,6 +39,9 @@ export default function AuctionMain() {
 
   const productNameChangeHandler = (event) => {
     setProductName(event.target.value);
+  };
+  const auctionNameChangeHandler = (event) => {
+    setAuctionName(event.target.value);
   };
   const productDescriptionChangeHandler = (event) => {
     setProductDescription(event.target.value);
@@ -85,6 +91,41 @@ export default function AuctionMain() {
     data.append("productDescription", productDescription);
     data.append("startingPrice", startingPrice);
     data.append("buyOutPrice", buyOutPrice);
+    data.append("auctionName", auctionName);
+    data.append("accountId", accountId);
+    localStorage.removeItem("auctionName");
+    try {
+      fetch("https://localhost:5000/auction", {
+        method: "POST",
+        body: data,
+      })
+        .then((res) => res.json())
+        .then(async (res) => {
+          if (res?.error) {
+            setErrorMessage(res?.error);
+          } else {
+            setErrorMessage("");
+            window.location.href = "/myauction/" + res.auction_id;
+          }
+          console.log(res);
+        });
+    } catch (err) {
+      console.error(err.message);
+    }
+  };
+
+  const addMoreHandler = (event) => {
+    productCategories.forEach((item) => {
+      data.append("productCategories", item);
+    });
+
+    event.preventDefault();
+    data.append("file", selectedFiles);
+    data.append("productName", productName);
+    data.append("productDescription", productDescription);
+    data.append("startingPrice", startingPrice);
+    data.append("buyOutPrice", buyOutPrice);
+    data.append("auctionName", auctionName);
     data.append("accountId", accountId);
 
     try {
@@ -98,7 +139,8 @@ export default function AuctionMain() {
             setErrorMessage(res?.error);
           } else {
             setErrorMessage("");
-            window.location.href = "/myauctions/" + accountId;
+            localStorage.setItem("auctionName", auctionName);
+            window.location.href = "/createauction";
           }
           console.log(res);
         });
@@ -149,15 +191,23 @@ export default function AuctionMain() {
                   >
                     Product Details
                   </Text>
-                  <Text
-                    color={useColorModeValue("gray.600", "gray.500")}
-                    fontSize={"1xl"}
-                    fontWeight={"520"}
-                  >
-                    First of all, we need some information on the item you want
-                    to sell, like a title, a description and a general category.
-                  </Text>
-
+                  <FormControl id="auction_name" isRequired>
+                    <FormLabel
+                      color={useColorModeValue("gray.600", "gray.500")}
+                      fontWeight={"600"}
+                    >
+                      Auction Name
+                    </FormLabel>
+                    <Input
+                      type="text"
+                      defaultValue={localStorage.getItem("auctionName")}
+                      color={useColorModeValue("gray.600", "gray.500")}
+                      fontWeight={"500"}
+                      placeholder="The name of the auction to add the item to"
+                      _placeholder={{ color: "gray.500" }}
+                      onChange={auctionNameChangeHandler}
+                    />
+                  </FormControl>
                   <FormControl id="product_name" isRequired>
                     <FormLabel
                       color={useColorModeValue("gray.600", "gray.500")}
@@ -219,25 +269,6 @@ export default function AuctionMain() {
                 }
               >
                 <Stack spacing={{ base: 2, md: 2 }}>
-                  <Text
-                    fontSize={{ base: "16px", lg: "18px" }}
-                    color={"purple.500"}
-                    fontWeight={"600"}
-                    textTransform={"uppercase"}
-                  >
-                    Auction Details
-                  </Text>
-                  <Text
-                    color={useColorModeValue("gray.600", "gray.500")}
-                    fontSize={"1xl"}
-                    fontWeight={"520"}
-                  >
-                    Then we need some information on the way you want put your
-                    item up for sale, like starting price, the amount of time
-                    the auction should run for or if you want an instant-buy
-                    price.
-                  </Text>
-
                   <Stack direction={["column", "row"]}>
                     <FormControl id="starting_price" isRequired>
                       <Box>
@@ -362,6 +393,23 @@ export default function AuctionMain() {
               onClick={submitHandler}
             >
               Create Listing
+            </Button>
+            <Button
+              w={"full"}
+              mt={3}
+              size={"lg"}
+              py={"7"}
+              bg={"purple.600"}
+              color={useColorModeValue("white", "gray.900")}
+              textTransform={"uppercase"}
+              _hover={{
+                bg: "purple.400",
+                boxShadow: "lg",
+              }}
+              borderRadius={10}
+              onClick={addMoreHandler}
+            >
+              Add more items to auction
             </Button>
           </Box>
         </SimpleGrid>

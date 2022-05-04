@@ -22,6 +22,7 @@ import {
   Notification,
   Browse,
 } from "./components";
+import CollectionList from "./components/CollectionList";
 
 function App() {
   return (
@@ -98,7 +99,7 @@ const AppHelper = () => {
           )}
           {Object.keys(user).length !== 0 && (
             <Route
-              path={"/myauctions/" + user.user_id}
+              path={"/myauction/:id"}
               element={
                 <>
                   <AuctionsList />
@@ -144,6 +145,16 @@ const AppHelper = () => {
               </>
             }
           />
+          {Object.keys(user).length !== 0 && (
+            <Route
+              path="/myauctions"
+              element={
+                <>
+                  <CollectionList />
+                </>
+              }
+            />
+          )}
         </Routes>
         <Footer />
       </ChakraProvider>

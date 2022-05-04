@@ -168,8 +168,8 @@ export default function AuctionPage() {
         py={{ base: 18, md: 24, lg: 30 }}
       >
         <Flex>
-          {auction.image !== null && <Carousel images={auction?.image} />}
-          {auction.image === null && (
+          {(auction.image !== null && auction.image !== "") && <Carousel images={auction?.image} />}
+          {(auction.image === null ||auction.image === ""  ) && (
             <Image
               rounded={"md"}
               alt={"product image"}
@@ -199,6 +199,13 @@ export default function AuctionPage() {
                 {"Current Price: " + auction.price_curr}
               </Text>
             </Stack>
+            <Text
+              color={useColorModeValue("gray.900", "gray.400")}
+              fontWeight={400}
+              fontSize={"2xl"}
+            >
+              {"Auction: " + auction.auction_name}
+            </Text>
             {auction.price_inst !== "" && (
               <Text fontWeight={200} fontSize={"lg"}>
                 {"Buyout Price " + auction.price_inst}

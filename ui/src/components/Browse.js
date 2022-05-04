@@ -94,8 +94,12 @@ export default function Browse() {
           <SimpleGrid columns={[1, 2, 3]} spacing={10}>
             {productArray.map((product, index) => {
               var firstImage = null;
-              if (product.image !== null)
+              if (product.image !== null && product.image !== "") {
+                console.log(product.image);
                 firstImage = product.image.split(",")[0];
+              } else {
+                firstImage = null;
+              }
               if (
                 index > producsPerPage * curPage - producsPerPage - 1 &&
                 index < producsPerPage * curPage
@@ -165,13 +169,10 @@ function Filters({ setProducts }) {
     ) {
       return;
     }
-    const locationArray = productLocation.split(",");
 
     const params = new URLSearchParams([
       ["categories", productCategories.map((s) => [s])],
-      ["address", locationArray[0]],
-      ["city", locationArray[1]],
-      ["country", locationArray[2]],
+      ["country", productLocation],
       ["price", productPrice],
     ]);
     const { data } = await Axios.get("https://localhost:5000/auction/browse", {
@@ -290,21 +291,9 @@ function Filters({ setProducts }) {
             return (
               <MenuItem
                 key={index}
-                onClick={() =>
-                  setProductLocation(
-                    location.address +
-                      "," +
-                      location.city +
-                      "," +
-                      location.country
-                  )
-                }
+                onClick={() => setProductLocation(location.country)}
               >
-                {location.address +
-                  "," +
-                  location.city +
-                  "," +
-                  location.country}
+                {location.country}
               </MenuItem>
             );
           })}
