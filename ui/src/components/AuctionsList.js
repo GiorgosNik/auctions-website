@@ -25,7 +25,7 @@ export default function AuctionsList() {
 
   const fetchAuctions = async () => {
     const { data } = await Axios.get(
-      "http://localhost:5000/auction/myauctions/" + accountId
+      "https://localhost:5000/auction/myauctions/" + accountId
     );
     const auctions = data;
     setAuctions(auctions);

@@ -44,7 +44,7 @@ export default function Browse() {
   };
 
   const fetchProductArray = async () => {
-    const { data } = await Axios.get("http://localhost:5000/auction/search", {
+    const { data } = await Axios.get("https://localhost:5000/auction/search", {
       params: { term: searchTerms },
     });
     setProductArray(data);
@@ -141,18 +141,18 @@ function Filters({ setProducts }) {
   };
 
   const fetchMaxPrice = async () => {
-    const { data } = await Axios.get("http://localhost:5000/auction/maxprice");
+    const { data } = await Axios.get("https://localhost:5000/auction/maxprice");
     setMaxPrice(parseInt(data));
   };
 
   const fetchCategories = async () => {
-    const { data } = await Axios.get("http://localhost:5000/category");
+    const { data } = await Axios.get("https://localhost:5000/category");
     const categories = data;
     setCategories(categories);
   };
 
   const fetchLocations = async () => {
-    const { data } = await Axios.get("http://localhost:5000/auth/locations");
+    const { data } = await Axios.get("https://localhost:5000/auth/locations");
     const locations = data;
     setLocations(locations);
   };
@@ -174,7 +174,7 @@ function Filters({ setProducts }) {
       ["country", locationArray[2]],
       ["price", productPrice],
     ]);
-    const { data } = await Axios.get("http://localhost:5000/auction/browse", {
+    const { data } = await Axios.get("https://localhost:5000/auction/browse", {
       params,
     });
 
@@ -324,7 +324,7 @@ function ProductCard({
   index,
 }) {
   if (image === null) {
-    image = "http://localhost:5000/images/37375020.jpg";
+    image = "https://localhost:5000/images/37375020.jpg";
   }
   return (
     <LinkBox

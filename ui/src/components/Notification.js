@@ -10,7 +10,7 @@ export default function Notification() {
 
   const fetchReceivedMessages = async () => {
     let { data } = await Axios.get(
-      "http://localhost:5000/messaging/" +
+      "https://localhost:5000/messaging/" +
         jwt(localStorage.getItem("user")).user_id +
         "/inbox"
     );
@@ -18,7 +18,7 @@ export default function Notification() {
     setReceivedLength(received.length);
 
     let { data: user_data } = await Axios.get(
-      "http://localhost:5000/auth/users/" +
+      "https://localhost:5000/auth/users/" +
         jwt(localStorage.getItem("user")).user_id
     );
     setUser(user_data[0]);

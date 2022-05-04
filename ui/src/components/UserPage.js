@@ -19,18 +19,18 @@ export default function UserProfileEdit(): JSX.Element {
   const location = useLocation();
 
   const approveUser = async () => {
-    await Axios.put("http://localhost:5000/auth" + location.pathname);
+    await Axios.put("https://localhost:5000/auth" + location.pathname);
     window.location.href = location.pathname;
   };
 
   const disapproveUser = async () => {
-    await Axios.delete("http://localhost:5000/auth" + location.pathname);
+    await Axios.delete("https://localhost:5000/auth" + location.pathname);
     window.location.href = "/users";
   };
 
   const fetchUser = async () => {
     const { data } = await Axios.get(
-      "http://localhost:5000/auth" + location.pathname
+      "https://localhost:5000/auth" + location.pathname
     );
     const user = data[0];
     setUser(user);

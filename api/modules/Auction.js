@@ -80,7 +80,6 @@ app.post("/", upload.any(), async (req, res) => {
     if (rows.length == 0) {
       return res.status(409).json({ error: "No such user" });
     } else {
-      console.log(req.files);
       var concatenated_filepaths = "";
       for (let i = 0; i < req.files.length; i++) {
         var filepath = `https://localhost:5000/images/${req.files[i].originalname}`;

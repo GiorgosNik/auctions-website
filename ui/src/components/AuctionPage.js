@@ -26,7 +26,6 @@ import {
   ModalBody,
   ModalCloseButton,
   useDisclosure,
-  IconButton,
   useBreakpointValue,
 } from "@chakra-ui/react";
 import Axios from "axios";
@@ -34,9 +33,9 @@ import jwt from "jwt-decode";
 import React, { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import OpenStreetMap from "./Map";
-import { CCarousel, CCarouselItem, CImage } from '@coreui/react';
-import '@coreui/coreui/dist/css/coreui.min.css'
-
+import { CCarousel, CCarouselItem, CImage } from "@coreui/react";
+import "@coreui/coreui/dist/css/coreui.min.css";
+import ReactStars from "react-rating-stars-component";
 
 function BidConfirmation({ submitHandler }) {
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -85,13 +84,15 @@ export default function AuctionPage() {
   const [seller, setSeller] = useState([]);
   const [categories, setCategories] = useState([]);
   const [auction_id, setAuctionId] = useState("");
+  const [review, setReview] = useState(0);
+
   var account_id = 0;
   if (localStorage.getItem("user")) {
     account_id = jwt(localStorage.getItem("user")).user_id;
   }
   const fetchAuction = async () => {
     const { data } = await Axios.get(
-      "http://localhost:5000" + location.pathname
+      "https://localhost:5000" + location.pathname
     );
 
     const auction = data;
@@ -112,9 +113,8 @@ export default function AuctionPage() {
       auction_id,
       account_id,
     };
-    console.log(body);
     try {
-      fetch("http://localhost:5000/bid", {
+      fetch("https://localhost:5000/bid", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
@@ -127,16 +127,39 @@ export default function AuctionPage() {
             setErrorMessage("");
             window.location.href = "";
           }
-          console.log(res);
         });
     } catch (err) {
       console.error(err.message);
     }
   };
+  const fetchReview = async () => {
+    const { data } = await Axios.get(
+      "https://localhost:5000/auth/review/" + auction.user.id
+    );
+    const review = data;
+    setReview(review[0].sellerscore / review[0].sellerreviewcount);
+  };
 
   useEffect(() => {
     fetchAuction();
+    fetchReview();
   });
+
+  const ratingChanged = (newRating) => {
+    var seller_id = auction.user.id;
+    var score = newRating;
+    const body = {
+      seller_id,
+      score,
+    };
+    console.log(body);
+    fetch("https://localhost:5000/auth/review", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+  };
+
   return (
     <Container maxW={"7xl"}>
       <SimpleGrid
@@ -150,7 +173,7 @@ export default function AuctionPage() {
             <Image
               rounded={"md"}
               alt={"product image"}
-              src={"http://localhost:5000/images/37375020.jpg"}
+              src={"https://localhost:5000/images/37375020.jpg"}
               fit={"cover"}
               align={"center"}
               w={"100%"}
@@ -294,14 +317,26 @@ export default function AuctionPage() {
                 Seller Details
               </Text>
 
+              <ReactStars
+                count={5}
+                onChange={ratingChanged}
+                size={24}
+                activeColor="#ffd700"
+              />
+
               <SimpleGrid columns={{ base: 1, md: 2 }} spacing={10}>
                 <List spacing={2}>
                   <ListItem>{seller.username}</ListItem>
-                  <ListItem>Review Score</ListItem>{" "}
+                  <ListItem>Review Score : {review}</ListItem>
                 </List>
                 <List spacing={2}>
-                  <ListItem>{seller.country}</ListItem>
-                  <ListItem>{seller.address + ", " + seller.city}</ListItem>
+                  <ListItem>
+                    {seller.address +
+                      ", " +
+                      seller.city +
+                      ", " +
+                      seller.country}
+                  </ListItem>
                 </List>
               </SimpleGrid>
             </Box>
@@ -312,8 +347,6 @@ export default function AuctionPage() {
     </Container>
   );
 }
-
-
 
 function Carousel(images) {
   const top = useBreakpointValue({ base: "90%", md: "50%" });
@@ -330,15 +363,13 @@ function Carousel(images) {
 
     if (cards.length !== 0) {
       return (
-        <CCarousel controls transition="crossfade"
-        >
-            {cards.map((url, index) => (
-              <CCarouselItem key={index}>
-                <CImage className="d-block w-100" src={url.image} 
-                />
-              </CCarouselItem>
-            ))}
-          </CCarousel>
+        <CCarousel controls transition="crossfade">
+          {cards.map((url, index) => (
+            <CCarouselItem key={index}>
+              <CImage className="d-block w-100" src={url.image} />
+            </CCarouselItem>
+          ))}
+        </CCarousel>
       );
     }
   }

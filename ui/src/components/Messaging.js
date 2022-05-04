@@ -70,7 +70,7 @@ export default function Messaging({ children }: { children: ReactNode }) {
     };
 
     fetch(
-      "http://localhost:5000/auth/users/" +
+      "https://localhost:5000/auth/users/" +
         jwt(localStorage.getItem("user")).user_id +
         "/messages",
       {
@@ -102,7 +102,7 @@ export default function Messaging({ children }: { children: ReactNode }) {
   };
 
   const deleteMessage = async (id) => {
-    await Axios.delete("http://localhost:5000/messaging/" + id);
+    await Axios.delete("https://localhost:5000/messaging/" + id);
     window.location.href = location.pathname;
   };
   const openMessage = async (id) => {
@@ -122,7 +122,7 @@ export default function Messaging({ children }: { children: ReactNode }) {
     };
 
     try {
-      fetch("http://localhost:5000" + location.pathname, {
+      fetch("https://localhost:5000" + location.pathname, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
@@ -143,7 +143,7 @@ export default function Messaging({ children }: { children: ReactNode }) {
 
   const fetchSentMessages = async () => {
     let { data } = await Axios.get(
-      "http://localhost:5000" + location.pathname + "/sent"
+      "https://localhost:5000" + location.pathname + "/sent"
     );
     const sent = data;
     setSentMessages(sent);
@@ -151,7 +151,7 @@ export default function Messaging({ children }: { children: ReactNode }) {
 
   const fetchReceivedMessages = async () => {
     let { data } = await Axios.get(
-      "http://localhost:5000" + location.pathname + "/inbox"
+      "https://localhost:5000" + location.pathname + "/inbox"
     );
     const received = data;
     setReceivedMessages(received);
@@ -514,7 +514,7 @@ function MessageDetails({ openedMessage }) {
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const fetchMessage = async (id) => {
-    const { data } = await Axios.get("http://localhost:5000/messaging/" + id);
+    const { data } = await Axios.get("https://localhost:5000/messaging/" + id);
     const message = data[0];
     if (message.subject === "") {
       message.subject = "(no subject)";

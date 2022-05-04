@@ -50,7 +50,7 @@ export default function NavBar() {
   const submitHandler = (event) => {
     event.preventDefault();
     try {
-      fetch("http://localhost:5000/auth/logout", {
+      fetch("https://localhost:5000/auth/logout", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
       })

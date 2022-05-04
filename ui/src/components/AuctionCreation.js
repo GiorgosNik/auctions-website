@@ -58,7 +58,7 @@ export default function AuctionMain() {
   };
 
   const fetchCategories = async () => {
-    const { data } = await Axios.get("http://localhost:5000/category");
+    const { data } = await Axios.get("https://localhost:5000/category");
     const categories = data;
     setCategories(categories);
   };
@@ -88,7 +88,7 @@ export default function AuctionMain() {
     data.append("accountId", accountId);
 
     try {
-      fetch("http://localhost:5000/auction", {
+      fetch("https://localhost:5000/auction", {
         method: "POST",
         body: data,
       })
@@ -98,9 +98,9 @@ export default function AuctionMain() {
             setErrorMessage(res?.error);
           } else {
             setErrorMessage("");
-            // window.location.href = "/myauctions/" + accountId;
+            window.location.href = "/myauctions/" + accountId;
           }
-          // console.log(res);
+          console.log(res);
         });
     } catch (err) {
       console.error(err.message);

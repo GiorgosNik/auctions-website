@@ -120,7 +120,7 @@ app.post("/register", async (req, res) => {
     } else {
       bcrypt.hash(password, 10, function (err, hash) {
         client.query(
-          "INSERT INTO account (username, password, firstname, lastname, email, phone, country, city, address, postcode, taxcode, approved, messagecount) VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13) RETURNING *",
+          "INSERT INTO account (username, password, firstname, lastname, email, phone, country, city, address, postcode, taxcode, approved, sellerScore, bidderScore, sellerReviewCount, bidderReviewCount, messagecount) VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17) RETURNING *",
           [
             username,
             hash,
@@ -133,6 +133,10 @@ app.post("/register", async (req, res) => {
             address,
             postcode,
             taxcode,
+            0,
+            0,
+            0,
+            0,
             0,
             0,
           ],
@@ -293,6 +297,33 @@ app.put("/logout", async (req, res) => {
       res.send({ msg: "Error" });
     }
   });
+});
+
+app.put("/review", async (req, res) => {
+  try {
+    const { seller_id, score } = req.body;
+    console.log(seller_id, score);
+    await client.query(
+      "UPDATE account SET sellerScore = (sellerScore + $1) ,sellerReviewCount = sellerReviewCount + 1 WHERE id = $2",
+      [parseInt(score), seller_id]
+    );
+    res.json("User was updated");
+  } catch (err) {
+    console.error(err.message);
+  }
+});
+
+app.get("/review/:id", async (req, res) => {
+  try {
+    const id = req.params.id;
+    const user = await client.query(
+      "SELECT sellerScore, sellerReviewCount FROM account WHERE id =  $1",
+      [id]
+    );
+    res.json(user.rows);
+  } catch (err) {
+    console.error(err.message);
+  }
 });
 
 module.exports = app;

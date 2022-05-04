@@ -39,7 +39,7 @@ export default function AuctionMain() {
 
   const fetchAuction = async () => {
     const { data } = await Axios.get(
-      "http://localhost:5000/auction/" + splitLocation[2]
+      "https://localhost:5000/auction/" + splitLocation[2]
     );
 
     const auction = data;
@@ -76,13 +76,13 @@ export default function AuctionMain() {
   };
 
   const fetchCategories = async () => {
-    const { data } = await Axios.get("http://localhost:5000/category");
+    const { data } = await Axios.get("https://localhost:5000/category");
     const categories = data;
     setCategories(categories);
   };
 
   const deleteHandler = async () => {
-    await Axios.delete("http://localhost:5000/auction/" + auction_id);
+    await Axios.delete("https://localhost:5000/auction/" + auction_id);
     window.location.href = "/myauctions/" + accountId;
   };
 
@@ -100,7 +100,7 @@ export default function AuctionMain() {
     };
     console.log(body);
     try {
-      fetch("http://localhost:5000/auction/" + auction_id, {
+      fetch("https://localhost:5000/auction/" + auction_id, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
@@ -133,7 +133,7 @@ export default function AuctionMain() {
     };
     console.log(body);
     try {
-      fetch("http://localhost:5000/auction/" + auction_id, {
+      fetch("https://localhost:5000/auction/" + auction_id, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),

@@ -27,8 +27,8 @@ app.use("/messaging", message);
 app.use("/newsletter", newsletter);
 app.use("/images", express.static(path.join(__dirname, "./images")));
 
-// https.createServer(options, app).listen(5000);
+https.createServer(options, app).listen(5000);
 
-app.listen(5000, () => {
-  console.log("API listening at http://localhost:5000");
-});
+// app.listen(5000, () => {
+//   console.log("API listening at https://localhost:5000");
+// });

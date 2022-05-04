@@ -28,7 +28,7 @@ export default function CardWithIllustration() {
       email,
     };
 
-    fetch("http://localhost:5000/newsletter", {
+    fetch("https://localhost:5000/newsletter", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
