@@ -39,7 +39,7 @@ export default function AuctionsList() {
 
   const fetchAuctionName = async () => {
     const { data } = await Axios.get(
-      "https://localhost:5000/auction/mycollections/" + auctionId
+      "https://localhost:5000/auction/collections/" + auctionId
     );
     setAuctionName(data.auction_name);
     console.log(auctionName);

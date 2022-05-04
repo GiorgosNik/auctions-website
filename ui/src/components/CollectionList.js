@@ -21,17 +21,12 @@ import jwt from "jwt-decode";
 import { ArrowForwardIcon, CheckIcon, CloseIcon } from "@chakra-ui/icons";
 
 export default function CollectionList() {
-  const [errorMessage, setErrorMessage] = useState("");
   const [collections, setCollections] = useState([]);
   const accountId = jwt(localStorage.getItem("user")).user_id;
-  const [collectionName, setCollectionName] = useState("");
   const goToAuctionPage = (name) => {
     window.location.href = "/myauction/" + name;
   };
 
-  const collectionNameChangeHandler = (event) => {
-    setCollectionName(event.target.value);
-  };
   const fetchCollections = async () => {
     const { data } = await Axios.get(
       "https://localhost:5000/auction/mycollections/" + accountId
@@ -44,7 +39,7 @@ export default function CollectionList() {
   useEffect(() => {
     fetchCollections();
   }, []);
-
+  console.log(collections);
   return (
     <Stack>
       <br></br>

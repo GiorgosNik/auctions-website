@@ -38,7 +38,8 @@ CREATE TABLE auction_item(
 
 CREATE TABLE auction(
     id SERIAL PRIMARY KEY,
-    auction_name VARCHAR(30) NOT NULL
+    auction_name VARCHAR(30) NOT NULL,
+    account_id INT REFERENCES account(id) ON DELETE CASCADE
 );
 
 CREATE TABLE bid(

@@ -15,7 +15,7 @@ var storage = multer.diskStorage({
 var upload = multer({ storage: storage });
 
 //Auction
-app.post("/", upload.single("file"), async (req, res) => {
+app.post("/", upload.any(), async (req, res) => {
   try {
     const {
       productName,
@@ -53,7 +53,8 @@ app.post("/", upload.single("file"), async (req, res) => {
       return res.status(400).json({ error: "Price cannot be blank" });
     }
     if (buyOutPrice) {
-      if (buyOutPrice <= startingPrice) {
+      if (parseInt(buyOutPrice) <= parseInt(startingPrice)) {
+        console.log(buyOutPrice, startingPrice);
         return res.status(409).json({
           error: "Buyout Price cannot be lower than the Starting Price",
         });
@@ -81,6 +82,17 @@ app.post("/", upload.single("file"), async (req, res) => {
       }
     }
 
+    console.log(req.files);
+    var concatenated_filepaths = "";
+    for (let i = 0; i < req.files.length; i++) {
+      var filepath = `https://localhost:5000/images/${req.files[i].originalname}`;
+      if (i === 0) {
+        concatenated_filepaths += filepath;
+      } else {
+        concatenated_filepaths += "," + filepath;
+      }
+    }
+
     var auction = await client.query(
       "SELECT * FROM auction WHERE auction_name = $1",
       [auctionName]
@@ -88,8 +100,8 @@ app.post("/", upload.single("file"), async (req, res) => {
     console.log(auction.rows);
     if (auction.rows.length === 0) {
       auction = await client.query(
-        "INSERT INTO auction (auction_name) VALUES($1) RETURNING *",
-        [auctionName]
+        "INSERT INTO auction (auction_name, account_id) VALUES($1,$2) RETURNING *",
+        [auctionName, accountId]
       );
     }
     console.log("ROWS ID", auction.rows[0].id);
@@ -101,6 +113,7 @@ app.post("/", upload.single("file"), async (req, res) => {
     if (rows.length == 0) {
       return res.status(409).json({ error: "No such user" });
     } else {
+      //////////////////////
       var filepath = null;
       if (req.file) {
         filepath = `https://localhost:5000/images/${req.file.originalname}`;
@@ -114,7 +127,7 @@ app.post("/", upload.single("file"), async (req, res) => {
             productDescription,
             startingPrice,
             0,
-            filepath,
+            concatenated_filepaths,
             auction.rows[0].id,
           ]
         );
@@ -128,7 +141,7 @@ app.post("/", upload.single("file"), async (req, res) => {
             startingPrice,
             buyOutPrice,
             0,
-            filepath,
+            concatenated_filepaths,
             auction.rows[0].id,
           ]
         );
@@ -198,7 +211,7 @@ app.put("/:id", async (req, res) => {
       return res.status(400).json({ error: "Price cannot be blank" });
     }
     if (buyOutPrice) {
-      if (buyOutPrice <= startingPrice) {
+      if (parseInt(buyOutPrice) <= parseInt(startingPrice)) {
         return res
           .status(400)
           .json({ error: "Buyout price cannot be lower than starting price" });
@@ -424,8 +437,23 @@ app.get("/myauction/", async (req, res) => {
 app.get("/mycollections/:id", async (req, res) => {
   try {
     const id = req.params.id;
-    const collection = await client.query("SELECT * FROM auction WHERE id = $1",
-    [id]);
+    const collection = await client.query(
+      "SELECT * FROM auction WHERE account_id = $1",
+      [id]
+    );
+    res.json(collection.rows);
+  } catch (err) {
+    console.error(err.message);
+  }
+});
+
+app.get("/collections/:id", async (req, res) => {
+  try {
+    const id = req.params.id;
+    const collection = await client.query(
+      "SELECT * FROM auction WHERE id = $1",
+      [id]
+    );
     res.json(collection.rows[0]);
   } catch (err) {
     console.error(err.message);
@@ -565,9 +593,10 @@ app.get("/:id", async (req, res) => {
     const user = await client.query("SELECT * FROM account WHERE id =  $1", [
       auction_item.rows[0].account_id,
     ]);
-    const auction_name = await client.query("SELECT auction_name FROM auction WHERE id =  $1", [
-      auction_item.rows[0].auction_id,
-    ]);
+    const auction_name = await client.query(
+      "SELECT auction_name FROM auction WHERE id =  $1",
+      [auction_item.rows[0].auction_id]
+    );
     auction_item.rows[0].user = user.rows[0];
     auction_item.rows[0].auction_name = auction_name.rows[0].auction_name;
     res.json(auction_item.rows);

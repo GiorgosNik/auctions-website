@@ -29,30 +29,30 @@ app.post("/", async (req, res) => {
       client.query("SELECT * FROM account WHERE id = $1", [account_id]);
     const user = await getUser();
     const getAuction = () =>
-      client.query("SELECT * FROM auction WHERE id = $1", [auction_id]);
-    const auction = await getAuction();
+      client.query("SELECT * FROM auction_item WHERE id = $1", [auction_id]);
+    const auction_item = await getAuction();
     if (user.rows.length == 0) {
       return res.status(409).json({ error: "No such user" });
-    } else if (auction.rows.length == 0) {
-      return res.status(409).json({ error: "No such auction" });
-    } else if (auction.rows[0]["price_curr"] >= amount) {
+    } else if (auction_item.rows.length == 0) {
+      return res.status(409).json({ error: "No such auction_item" });
+    } else if (auction_item.rows[0]["price_curr"] >= amount) {
       return res.status(409).json({ error: "Offer lower than current price" });
-    } else if (auction.rows[0]["started"] > time) {
+    } else if (auction_item.rows[0]["started"] > time) {
       return res
         .status(409)
-        .json({ error: "Cannot create bid in auction that has not started" });
-    } else if (auction.rows[0]["ends"] < time) {
+        .json({ error: "Cannot create bid in auction_item that has not started" });
+    } else if (auction_item.rows[0]["ends"] < time) {
       return res
         .status(409)
-        .json({ error: "Cannot create bid in auction that has ended" });
+        .json({ error: "Cannot create bid in auction_item that has ended" });
     } else {
       const newBid = await client.query(
         "INSERT INTO bid (account_id,auction_id,amount,time) VALUES($1,$2,$3,$4) RETURNING *",
         [account_id, auction_id, amount, time]
       );
       await client.query(
-        "UPDATE auction SET price_curr = $1, num_of_bids = $2 WHERE id = $3",
-        [amount, parseInt(auction.rows[0]["num_of_bids"]) + 1, auction_id]
+        "UPDATE auction_item SET price_curr = $1, num_of_bids = $2 WHERE id = $3",
+        [amount, parseInt(auction_item.rows[0]["num_of_bids"]) + 1, auction_id]
       );
       return res.status(201).json(newBid.rows[0]);
     }

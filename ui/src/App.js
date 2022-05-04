@@ -67,7 +67,7 @@ const AppHelper = () => {
               }
             />
           )}
-          {user.username === "admin" && (
+          {/* {user.username === "admin" && ( */}
             <Route
               path="/users"
               element={
@@ -76,17 +76,17 @@ const AppHelper = () => {
                 </>
               }
             />
-          )}
-          {user.username === "admin" && (
-            <Route
-              path="/users/:userId"
-              element={
-                <>
-                  <UserPage />
-                </>
-              }
-            />
-          )}
+          {/* )} */}
+          {/* {user.username === "admin" && ( */}
+          <Route
+            path="/users/:userId"
+            element={
+              <>
+                <UserPage />
+              </>
+            }
+          />
+          {/* )} */}
           {Object.keys(user).length !== 0 && (
             <Route
               path="/createauction"
@@ -146,14 +146,14 @@ const AppHelper = () => {
             }
           />
           {Object.keys(user).length !== 0 && (
-          <Route
-            path="/myauctions"
-            element={
-              <>
-                <CollectionList />
-              </>
-            }
-          />
+            <Route
+              path="/myauctions"
+              element={
+                <>
+                  <CollectionList />
+                </>
+              }
+            />
           )}
         </Routes>
         <Footer />

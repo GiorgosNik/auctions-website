@@ -69,7 +69,7 @@ export default function AuctionMain() {
 
   const onImageDrop = async (acceptedFiles) => {
     for (let i = 0; i < acceptedFiles.length; i += 1) {
-      setSelectedFiles(...selectedFiles, acceptedFiles[i]);
+      setSelectedFiles((selectedFiles) => [...selectedFiles, acceptedFiles[i]]);
     }
   };
 
@@ -80,7 +80,11 @@ export default function AuctionMain() {
     });
 
     event.preventDefault();
-    data.append("file", selectedFiles);
+    console.log(selectedFiles);
+    for (const single_file of selectedFiles) {
+      data.append("file", single_file);
+    }
+
     data.append("productName", productName);
     data.append("productDescription", productDescription);
     data.append("startingPrice", startingPrice);
@@ -136,7 +140,7 @@ export default function AuctionMain() {
             localStorage.setItem("auctionName", auctionName);
             window.location.href = "/createauction";
           }
-          console.log(res);
+          // console.log(res);
         });
     } catch (err) {
       console.error(err.message);
