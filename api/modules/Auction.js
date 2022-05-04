@@ -14,7 +14,7 @@ var storage = multer.diskStorage({
 var upload = multer({ storage: storage });
 
 //Auction
-app.post("/", upload.single("file"), async (req, res) => {
+app.post("/", upload.any(), async (req, res) => {
   try {
     const {
       productName,
@@ -80,10 +80,17 @@ app.post("/", upload.single("file"), async (req, res) => {
     if (rows.length == 0) {
       return res.status(409).json({ error: "No such user" });
     } else {
-      var filepath = null;
-      if (req.file) {
-        filepath = `http://localhost:5000/images/${req.file.originalname}`;
+      console.log(req.files);
+      var concatenated_filepaths = "";
+      for (let i = 0; i < req.files.length; i++) {
+        var filepath = `https://localhost:5000/images/${req.files[i].originalname}`;
+        if (i === 0) {
+          concatenated_filepaths += filepath;
+        } else {
+          concatenated_filepaths += "," + filepath;
+        }
       }
+
       const newAuction = await client.query(
         "INSERT INTO auction (item_name,account_id,description,price_start,price_curr,price_inst,num_of_bids,image) VALUES($1,$2,$3,$4,$4,$5,$6,$7) RETURNING *",
         [
@@ -93,7 +100,7 @@ app.post("/", upload.single("file"), async (req, res) => {
           startingPrice,
           buyOut,
           0,
-          filepath,
+          concatenated_filepaths,
         ]
       );
       newAuction.rows[0]["category"] = productCategs;

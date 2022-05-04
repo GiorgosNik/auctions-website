@@ -16,7 +16,6 @@ import {
   Checkbox,
   Textarea,
 } from "@chakra-ui/react";
-import Dropzone, { useDropzone } from "react-dropzone";
 
 import React, { useState, useEffect } from "react";
 import Axios from "axios";
@@ -25,7 +24,6 @@ import { useLocation } from "react-router-dom";
 
 export default function AuctionMain() {
   const location = useLocation();
-  const [selectedFiles, setSelectedFiles] = useState([]);
   const [errorMessage, setErrorMessage] = useState("");
   const [categories, setCategories] = useState([]);
   const [auctionCategories, setAuctionCategories] = useState([]);
@@ -37,14 +35,7 @@ export default function AuctionMain() {
   const [auction, setAuction] = useState([]);
   const [auction_id, setAuctionId] = useState("");
   const accountId = jwt(localStorage.getItem("user")).user_id;
-  const [selectedFile, setSelectedFile] = useState(null);
   const splitLocation = location.pathname.split("/");
-
-  const onImageDrop = async (acceptedFiles) => {
-    for (let i = 0; i < acceptedFiles.length; i += 1) {
-      setSelectedFiles(...selectedFiles, acceptedFiles[i]);
-    }
-  };
 
   const fetchAuction = async () => {
     const { data } = await Axios.get(
@@ -343,18 +334,6 @@ export default function AuctionMain() {
                         </Box>
                       </FormControl>
                     </Stack>
-                    <Dropzone
-                      onDrop={(acceptedFiles) => onImageDrop(acceptedFiles)}
-                    >
-                      {({ getRootProps, getInputProps }) => (
-                        <section>
-                          <div {...getRootProps()}>
-                            <input {...getInputProps()} type="file" />
-                            <p>Drag 'n' drop images here, or click to select</p>
-                          </div>
-                        </section>
-                      )}
-                    </Dropzone>
                   </Stack>
                 </Stack>
               </Stack>

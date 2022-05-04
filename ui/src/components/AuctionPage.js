@@ -26,12 +26,17 @@ import {
   ModalBody,
   ModalCloseButton,
   useDisclosure,
+  IconButton,
+  useBreakpointValue,
 } from "@chakra-ui/react";
 import Axios from "axios";
 import jwt from "jwt-decode";
 import React, { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import OpenStreetMap from "./Map";
+import { CCarousel, CCarouselItem, CImage } from '@coreui/react';
+import '@coreui/coreui/dist/css/coreui.min.css'
+
 
 function BidConfirmation({ submitHandler }) {
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -80,8 +85,8 @@ export default function AuctionPage() {
   const [seller, setSeller] = useState([]);
   const [categories, setCategories] = useState([]);
   const [auction_id, setAuctionId] = useState("");
-  var  account_id = 0;
-  if(localStorage.getItem("user")){
+  var account_id = 0;
+  if (localStorage.getItem("user")) {
     account_id = jwt(localStorage.getItem("user")).user_id;
   }
   const fetchAuction = async () => {
@@ -140,17 +145,7 @@ export default function AuctionPage() {
         py={{ base: 18, md: 24, lg: 30 }}
       >
         <Flex>
-          {auction.image !== null && (
-            <Image
-              rounded={"md"}
-              alt={"product image"}
-              src={auction.image}
-              fit={"cover"}
-              align={"center"}
-              w={"100%"}
-              h={{ base: "100%", sm: "400px", lg: "500px" }}
-            />
-          )}
+          {auction.image !== null && <Carousel images={auction?.image} />}
           {auction.image === null && (
             <Image
               rounded={"md"}
@@ -313,7 +308,38 @@ export default function AuctionPage() {
           </Stack>
         </Stack>
       </SimpleGrid>
-      {/* <OpenStreetMap address={seller.address} city={seller.city} /> */}
+      <OpenStreetMap address={seller.address} city={seller.city} />
     </Container>
   );
+}
+
+
+
+function Carousel(images) {
+  const top = useBreakpointValue({ base: "90%", md: "50%" });
+  const side = useBreakpointValue({ base: "30%", md: "10px" });
+
+  const cards = [];
+  if (images.images) {
+    var imagesArray = images.images.split(",");
+    for (let i = 0; i < imagesArray.length; i++) {
+      cards.push({
+        image: imagesArray[i],
+      });
+    }
+
+    if (cards.length !== 0) {
+      return (
+        <CCarousel controls transition="crossfade"
+        >
+            {cards.map((url, index) => (
+              <CCarouselItem key={index}>
+                <CImage className="d-block w-100" src={url.image} 
+                />
+              </CCarouselItem>
+            ))}
+          </CCarousel>
+      );
+    }
+  }
 }

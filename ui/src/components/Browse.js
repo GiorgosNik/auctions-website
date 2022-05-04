@@ -93,6 +93,9 @@ export default function Browse() {
           </Col>
           <SimpleGrid columns={[1, 2, 3]} spacing={10}>
             {productArray.map((product, index) => {
+              var firstImage = null;
+              if (product.image !== null)
+                firstImage = product.image.split(",")[0];
               if (
                 index > producsPerPage * curPage - producsPerPage - 1 &&
                 index < producsPerPage * curPage
@@ -104,7 +107,7 @@ export default function Browse() {
                     price={product.price_curr}
                     buyoutPrice={product.price_inst}
                     id={product.id}
-                    image={product.image}
+                    image={firstImage}
                     key={index}
                   />
                 );
@@ -324,7 +327,14 @@ function ProductCard({
     image = "http://localhost:5000/images/37375020.jpg";
   }
   return (
-    <LinkBox as="article" maxW="sm" p="5" borderWidth="0px" rounded="md">
+    <LinkBox
+      as="article"
+      maxW="sm"
+      p="5"
+      borderWidth="0px"
+      rounded="md"
+      style={{ cursor: "pointer" }}
+    >
       <Center py={12}>
         <Box
           role={"group"}
