@@ -1,4 +1,3 @@
-import React from "react";
 import {
   Box,
   Flex,
@@ -20,6 +19,7 @@ import { UserContext } from "./UserProvider";
 import logo from "../images/logo.jpg";
 import "../App.css";
 import jwt from "jwt-decode";
+import React from "react";
 
 interface NavItem {
   label: string;
@@ -27,13 +27,14 @@ interface NavItem {
   href?: string;
 }
 
-export default function NavBar() {
+export default function NavBar({ approved, setApproved }) {
   const { user, setUser } = React.useContext(UserContext);
   var accountId = "";
   const [loggedIn, setLoggedIn] = React.useState(false);
   const [showLogin, setShowLogin] = React.useState(false);
   const [showRegister, setShowRegister] = React.useState(false);
   const { isOpen, onToggle } = useDisclosure();
+
   React.useEffect(() => {
     setLoggedIn(
       typeof user === "object" &&
@@ -76,7 +77,7 @@ export default function NavBar() {
     },
     {
       label: "My Auctions",
-      href: "/myauctions/" ,
+      href: "/myauctions/",
     },
     {
       label: "Messaging",
@@ -124,7 +125,7 @@ export default function NavBar() {
             <img src={logo} alt="logo" width={70} height={70} />
           </Link>
           <Flex display={{ base: "none", md: "flex" }} ml={10}>
-            {loggedIn && <DesktopNav itemsMap={itemsMap} />}
+            {loggedIn && approved && <DesktopNav itemsMap={itemsMap} />}
             {!loggedIn && <DesktopNav itemsMap={[]} />}
           </Flex>
         </Flex>
