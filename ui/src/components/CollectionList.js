@@ -10,15 +10,11 @@ import {
   TableCaption,
   TableContainer,
   Stack,
-  HStack,
   Box,
   Button,
-  FormControl,
-  useColorModeValue,
-  Input,
 } from "@chakra-ui/react";
 import jwt from "jwt-decode";
-import { ArrowForwardIcon, CheckIcon, CloseIcon } from "@chakra-ui/icons";
+import { ArrowForwardIcon } from "@chakra-ui/icons";
 
 export default function CollectionList() {
   const [collections, setCollections] = useState([]);
@@ -35,7 +31,7 @@ export default function CollectionList() {
   };
 
   const data = new FormData();
-  
+
   useEffect(() => {
     fetchCollections();
   }, []);

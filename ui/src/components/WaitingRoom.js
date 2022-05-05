@@ -10,6 +10,9 @@ import {
 } from "@chakra-ui/react";
 
 export default function CallToActionWithIllustration() {
+  const gotoBrowse = () => {
+    window.location.href = "/browse";
+  };
   return (
     <Container maxW={"5xl"}>
       <Stack
@@ -43,6 +46,7 @@ export default function CallToActionWithIllustration() {
             colorScheme={"purple"}
             bg={"purple.400"}
             _hover={{ bg: "purple.500" }}
+            onClick={gotoBrowse}
           >
             Browse
           </Button>
