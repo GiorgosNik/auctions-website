@@ -100,7 +100,6 @@ export default function AuctionMain() {
       accountId,
       activate,
     };
-    console.log(body);
     try {
       fetch("https://localhost:5000/auction/" + auctionItemId, {
         method: "PUT",
@@ -133,7 +132,6 @@ export default function AuctionMain() {
       accountId,
       activate,
     };
-    console.log(body);
     try {
       fetch("https://localhost:5000/auction/" + auctionItemId, {
         method: "PUT",

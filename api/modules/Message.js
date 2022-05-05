@@ -1,6 +1,8 @@
+const e = require("express");
 const express = require("express");
 const app = express.Router();
 const client = require("../database.js");
+const moment = require("moment");
 
 // messaging
 app.post("/:id", async (req, res) => {
@@ -45,6 +47,71 @@ app.post("/:id", async (req, res) => {
   }
 });
 
+app.post("/check/:id", async (req, res) => {
+  try {
+    const time = moment(Date.now()).format("YYYY-MM-DD HH:mm:ss");
+    const userId = req.params.id;
+    var sender;
+    var bids;
+    var maxBid;
+    var maxBidder;
+    var subject;
+    var message;
+    const buyer = await client.query(
+      "SELECT username FROM account WHERE id = $1",
+      [userId]
+    );
+    const receiver = buyer.rows[0]["username"];
+
+    const completedAuctions = await client.query(
+      "SELECT * FROM auction_item WHERE ends < $1 AND message_sent = false",
+      [time]
+    );
+      await client.query(
+      "UPDATE auction_item SET message_sent = true WHERE ends < $1 AND message_sent = false",
+      [time]
+    );
+    for (let auction of completedAuctions.rows) {
+      sender = await client.query("SELECT * FROM account WHERE id = $1", [
+        auction.account_id,
+      ]);
+
+      // Get all the bids
+      bids = await client.query("SELECT * FROM bid WHERE account_id = $1", [
+        userId,
+      ]);
+
+      maxBid = 0;
+      // Get the max bid and max bidder
+      for (let bid of bids.rows) {
+        if (parseFloat(bid.amount) > parseFloat(maxBid)) {
+          maxBid = bid.amount;
+          maxBidder = bid.account_id;
+        }
+      }
+
+      if (maxBidder === parseInt(userId)) {
+        subject = "Auction Won";
+        sender = sender.rows[0]["username"];
+        message = "You won the auction on: " + auction["item_name"];
+
+        const body = {
+          subject,
+          receiver,
+          message,
+        };
+        const newMessage = client.query(
+          "INSERT INTO message (subject, sender, receiver, text) VALUES($1, $2, $3, $4) RETURNING *",
+          [subject, sender, receiver, message]
+        );
+      }
+    }
+    return res.json("");
+  } catch (err) {
+    console.error(err);
+  }
+});
+
 app.get("/:id/inbox", async (req, res) => {
   try {
     const receiverId = req.params.id;
@@ -59,11 +126,10 @@ app.get("/:id/inbox", async (req, res) => {
             "SELECT * FROM message WHERE receiver = $1",
             [receiver],
             function (err, result) {
-              if(result !== undefined){
+              if (result !== undefined) {
                 return res.json(result.rows);
               }
               return res.json("");
-
             }
           );
         }
@@ -88,7 +154,11 @@ app.get("/:id/sent", async (req, res) => {
             "SELECT * FROM message WHERE sender = $1",
             [sender],
             function (err, result) {
-              return res.json(result.rows);
+              if (result !== undefined) {
+                return res.json(result.rows);
+              } else {
+                return res.json([]);
+              }
             }
           );
         }

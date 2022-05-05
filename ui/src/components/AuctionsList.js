@@ -42,7 +42,6 @@ export default function AuctionsList() {
       "https://localhost:5000/auction/collections/" + auctionId
     );
     setAuctionName(data.auction_name);
-    console.log(auctionName);
   };
 
   useEffect(() => {

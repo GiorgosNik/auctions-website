@@ -21,6 +21,12 @@ CREATE TABLE account(
     messageCount INT NOT NULL
 );
 
+CREATE TABLE auction(
+    id SERIAL PRIMARY KEY,
+    auction_name VARCHAR(30) NOT NULL,
+    account_id INT REFERENCES account(id) ON DELETE CASCADE
+);
+
 CREATE TABLE auction_item(
     id SERIAL PRIMARY KEY,
     item_name VARCHAR(30) NOT NULL,
@@ -33,12 +39,13 @@ CREATE TABLE auction_item(
     started timestamp,
     ends    timestamp,
     image VARCHAR(500),
-    auction_id INT REFERENCES auction(id) ON DELETE CASCADE
+    auction_id INT REFERENCES auction(id) ON DELETE CASCADE,
+    message_sent boolean
 );
 
-CREATE TABLE auction(
+CREATE TABLE product_view(
     id SERIAL PRIMARY KEY,
-    auction_name VARCHAR(30) NOT NULL,
+    auction_id INT REFERENCES auction_item(id) ON DELETE CASCADE,
     account_id INT REFERENCES account(id) ON DELETE CASCADE
 );
 

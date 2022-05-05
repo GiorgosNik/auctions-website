@@ -24,9 +24,18 @@ export default function Notification() {
     setUser(user_data[0]);
   };
 
+  const checkAuctions = async () => {
+    await Axios.get(
+      "https://localhost:5000/messaging/check/" +
+        jwt(localStorage.getItem("user")).user_id +
+        "/inbox"
+    );
+  };
+
   useEffect(() => {
     const interval = setInterval(() => {
       fetchReceivedMessages();
+      checkAuctions();
     }, 1000);
     return () => clearInterval(interval);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps

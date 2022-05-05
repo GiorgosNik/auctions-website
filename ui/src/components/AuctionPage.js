@@ -85,6 +85,7 @@ export default function AuctionPage() {
   const [categories, setCategories] = useState([]);
   const [auction_id, setAuctionId] = useState("");
   const [review, setReview] = useState(0);
+  const [flag, setFlag] = useState(false);
 
   var account_id = 0;
   if (localStorage.getItem("user")) {
@@ -132,6 +133,26 @@ export default function AuctionPage() {
       console.error(err.message);
     }
   };
+
+  const viewCount = () => {
+    if (!flag && auction_id!= "") {
+      const body = {
+        auction_id,
+        account_id,
+      };
+      try {
+        fetch("https://localhost:5000/view", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body),
+        });
+      } catch (err) {
+        console.error(err.message);
+      }
+      setFlag(true);
+    }
+  };
+
   const fetchReview = async () => {
     const { data } = await Axios.get(
       "https://localhost:5000/auth/review/" + auction.user.id
@@ -143,6 +164,7 @@ export default function AuctionPage() {
   useEffect(() => {
     fetchAuction();
     fetchReview();
+    viewCount();
   });
 
   const ratingChanged = (newRating) => {
@@ -152,7 +174,6 @@ export default function AuctionPage() {
       seller_id,
       score,
     };
-    console.log(body);
     fetch("https://localhost:5000/auth/review", {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
@@ -168,8 +189,10 @@ export default function AuctionPage() {
         py={{ base: 18, md: 24, lg: 30 }}
       >
         <Flex>
-          {(auction.image !== null && auction.image !== "") && <Carousel images={auction?.image} />}
-          {(auction.image === null ||auction.image === ""  ) && (
+          {auction.image !== null && auction.image !== "" && (
+            <Carousel images={auction?.image} />
+          )}
+          {(auction.image === null || auction.image === "") && (
             <Image
               rounded={"md"}
               alt={"product image"}

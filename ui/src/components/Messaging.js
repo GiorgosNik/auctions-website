@@ -85,6 +85,7 @@ export default function Messaging({ children }: { children: ReactNode }) {
     const interval = setInterval(() => {
       fetchSentMessages();
       fetchReceivedMessages();
+      console.log(receivedMessages);
     }, 1000);
     return () => clearInterval(interval);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
@@ -153,7 +154,14 @@ export default function Messaging({ children }: { children: ReactNode }) {
     let { data } = await Axios.get(
       "https://localhost:5000" + location.pathname + "/inbox"
     );
-    const received = data;
+    var received;
+
+    if(!Array.isArray(data)){
+      received = [];
+    }else{
+      received = data;
+    }
+    
     setReceivedMessages(received);
   };
 

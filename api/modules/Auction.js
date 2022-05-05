@@ -117,7 +117,7 @@ app.post("/", upload.any(), async (req, res) => {
 
       if (!buyOutPrice) {
         newAuction = await client.query(
-          "INSERT INTO auction_item (item_name,account_id,description,price_start,price_curr,num_of_bids,image,auction_id) VALUES($1,$2,$3,$4,$4,$5,$6,$7) RETURNING *",
+          "INSERT INTO auction_item (item_name,account_id,description,price_start,price_curr,num_of_bids,image,auction_id, message_sent) VALUES($1,$2,$3,$4,$4,$5,$6,$7,false) RETURNING *",
           [
             productName,
             accountId,
@@ -130,7 +130,7 @@ app.post("/", upload.any(), async (req, res) => {
         );
       } else {
         newAuction = await client.query(
-          "INSERT INTO auction_item (item_name,account_id,description,price_start,price_curr,price_inst,num_of_bids,image,auction_id) VALUES($1,$2,$3,$4,$4,$5,$6,$7,$8) RETURNING *",
+          "INSERT INTO auction_item (item_name,account_id,description,price_start,price_curr,price_inst,num_of_bids,image,auction_id, message_sent) VALUES($1,$2,$3,$4,$4,$5,$6,$7,$8, false) RETURNING *",
           [
             productName,
             accountId,

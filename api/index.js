@@ -10,6 +10,7 @@ const bid = require("./modules/Bid");
 const category = require("./modules/Category");
 const message = require("./modules/Message");
 const newsletter = require("./modules/Newsletter");
+const view = require("./modules/View");
 
 const options = {
   key: fs.readFileSync(path.join(__dirname, "key.pem")),
@@ -18,9 +19,9 @@ const options = {
 
 app.use(cors());
 app.use(express.json());
-
 app.use("/auction", auction);
 app.use("/auth", auth);
+app.use("/view", view);
 app.use("/bid", bid);
 app.use("/category", category);
 app.use("/messaging", message);
