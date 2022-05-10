@@ -27,6 +27,7 @@ import { ChevronDownIcon } from "@chakra-ui/icons";
 import React, { useState, useEffect } from "react";
 import Axios from "axios";
 import { Container, Row, Col } from "react-grid-system";
+
 const goToAuctionPage = (id) => {
   window.location.href = "/auction/" + id;
 };
@@ -63,6 +64,7 @@ export default function Browse() {
   useEffect(() => {
     fetchProductArray();
     setCurPage(1);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchTerms]);
 
   return (
@@ -115,6 +117,7 @@ export default function Browse() {
                     key={index}
                   />
                 );
+              return null;
             })}
           </SimpleGrid>
         </Row>
@@ -200,10 +203,12 @@ function Filters({ setProducts }) {
   useEffect(() => {
     fetchProducts();
     fetchMaxPrice();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [productLocation]);
 
   useEffect(() => {
     fetchProducts();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [productPrice]);
 
   return (
@@ -381,7 +386,7 @@ function ProductCard({
               </Heading>
               <Stack direction={"row"} align={"center"}>
                 <Text fontWeight={800} fontSize={"xl"}>
-                  {price}
+                  ${price}
                 </Text>
                 <Text color={"gray.600"}>{buyoutPrice}</Text>
               </Stack>

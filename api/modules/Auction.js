@@ -3,7 +3,6 @@ const app = express.Router();
 const client = require("../database.js");
 const moment = require("moment");
 var multer = require("multer");
-const { query } = require("express");
 
 var storage = multer.diskStorage({
   destination: "images/",

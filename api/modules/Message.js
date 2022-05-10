@@ -29,7 +29,7 @@ app.post("/:id", async (req, res) => {
       "SELECT * FROM account WHERE id = $1",
       [senderId],
       function (err, result) {
-        if (result.rows.length != 0) {
+        if (result.rows.length !== 0) {
           let sender = result.rows[0].username;
           const newMessage = client.query(
             "INSERT INTO message (subject, sender, receiver, text) VALUES($1, $2, $3, $4) RETURNING *",
@@ -67,7 +67,7 @@ app.post("/check/:id", async (req, res) => {
       "SELECT * FROM auction_item WHERE ends < $1 AND message_sent = false",
       [time]
     );
-      await client.query(
+    await client.query(
       "UPDATE auction_item SET message_sent = true WHERE ends < $1 AND message_sent = false",
       [time]
     );
@@ -119,7 +119,7 @@ app.get("/:id/inbox", async (req, res) => {
       "SELECT * FROM account WHERE id = $1",
       [receiverId],
       function (err, result) {
-        if (result && result.rows.length != 0) {
+        if (result && result.rows.length !== 0) {
           let receiver = result.rows[0].username;
           client.query(
             "SELECT * FROM message WHERE receiver = $1",
@@ -147,7 +147,7 @@ app.get("/:id/sent", async (req, res) => {
       "SELECT * FROM account WHERE id = $1",
       [senderId],
       function (err, result) {
-        if (result && result.rows.length != 0) {
+        if (result && result.rows.length !== 0) {
           let sender = result.rows[0].username;
           client.query(
             "SELECT * FROM message WHERE sender = $1",

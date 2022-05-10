@@ -110,7 +110,7 @@ app.post("/register", async (req, res) => {
       client.query("SELECT * FROM account WHERE username = $1", [username]);
     const { rows } = await getAccounts();
 
-    if (rows.length != 0) {
+    if (rows.length !== 0) {
       return res
         .status(409)
         .json({ error: "Username taken. Please type an other username", id:rows[0].id });
@@ -172,7 +172,7 @@ app.post("/login", async (req, res) => {
       [username],
       function (err, result) {
         const user = result.rows[0];
-        if (result.rowCount != 0) {
+        if (result.rowCount !== 0) {
           bcrypt.compare(
             password,
             result.rows[0].password,

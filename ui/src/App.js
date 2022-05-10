@@ -1,5 +1,5 @@
 import "./App.css";
-import React, { useState, useEffect } from "react";
+import React, { useEffect } from "react";
 import jwt from "jwt-decode";
 import { ChakraProvider } from "@chakra-ui/react";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
@@ -21,6 +21,7 @@ import {
   EditAuction,
   Notification,
   Browse,
+  Suggestions,
 } from "./components";
 import CollectionList from "./components/CollectionList";
 import Axios from "axios";
@@ -74,7 +75,7 @@ const AppHelper = () => {
     <Router>
       <ChakraProvider>
         <NavBar approved={approved} setApproved={setApproved} />
-        {approved && Object.keys(user).length !== 0 && <Notification />}
+        {/* {approved && Object.keys(user).length !== 0 && <Notification />} */}
         <Routes>
           <Route
             path="/"
@@ -82,6 +83,7 @@ const AppHelper = () => {
               <>
                 <Description />
                 <Features />
+                <Suggestions />
                 <Newsletter />
               </>
             }
@@ -116,8 +118,8 @@ const AppHelper = () => {
               }
             />
           )}
-          {approved ||
-            (user.username === "admin" && Object.keys(user).length !== 0 && (
+          {(approved || user.username === "admin") &&
+            Object.keys(user).length !== 0 && (
               <Route
                 path="/createauction"
                 element={
@@ -126,9 +128,9 @@ const AppHelper = () => {
                   </>
                 }
               />
-            ))}
-          {approved ||
-            (user.username === "admin" && Object.keys(user).length !== 0 && (
+            )}
+          {(approved || user.username === "admin") &&
+            Object.keys(user).length !== 0 && (
               <Route
                 path={"/myauction/:id"}
                 element={
@@ -137,9 +139,9 @@ const AppHelper = () => {
                   </>
                 }
               />
-            ))}
-          {approved ||
-            (user.username === "admin" && Object.keys(user).length !== 0 && (
+            )}
+          {(approved || user.username === "admin") &&
+            Object.keys(user).length !== 0 && (
               <Route
                 path="/auction/:id"
                 element={
@@ -148,9 +150,9 @@ const AppHelper = () => {
                   </>
                 }
               />
-            ))}
-          {approved ||
-            (user.username === "admin" && Object.keys(user).length !== 0 && (
+            )}
+          {(approved || user.username === "admin") &&
+            Object.keys(user).length !== 0 && (
               <Route
                 path={"/messaging/" + user.user_id}
                 element={
@@ -159,9 +161,9 @@ const AppHelper = () => {
                   </>
                 }
               />
-            ))}
-          {approved ||
-            (user.username === "admin" && Object.keys(user).length !== 0 && (
+            )}
+          {(approved || user.username === "admin") &&
+            Object.keys(user).length !== 0 && (
               <Route
                 path="/editauction/:id"
                 element={
@@ -170,7 +172,7 @@ const AppHelper = () => {
                   </>
                 }
               />
-            ))}
+            )}
           <Route
             path="/browse"
             element={
@@ -179,8 +181,8 @@ const AppHelper = () => {
               </>
             }
           />
-          {approved ||
-            (user.username === "admin" && Object.keys(user).length !== 0 && (
+          {(approved || user.username === "admin") &&
+            Object.keys(user).length !== 0 && (
               <Route
                 path="/myauctions"
                 element={
@@ -189,7 +191,7 @@ const AppHelper = () => {
                   </>
                 }
               />
-            ))}
+            )}
         </Routes>
         <Footer />
       </ChakraProvider>
