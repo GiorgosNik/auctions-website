@@ -11,6 +11,7 @@ const category = require("./modules/Category");
 const message = require("./modules/Message");
 const newsletter = require("./modules/Newsletter");
 const view = require("./modules/View");
+const xml = require("./modules/XML");
 
 const options = {
   key: fs.readFileSync(path.join(__dirname, "key.pem")),
@@ -26,6 +27,7 @@ app.use("/bid", bid);
 app.use("/category", category);
 app.use("/messaging", message);
 app.use("/newsletter", newsletter);
+app.use("/xml", xml);
 app.use("/images", express.static(path.join(__dirname, "./images")));
 
 https.createServer(options, app).listen(5000);

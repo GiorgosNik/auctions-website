@@ -25,10 +25,9 @@ export default function Notification() {
   };
 
   const checkAuctions = async () => {
-    await Axios.get(
+    await Axios.post(
       "https://localhost:5000/messaging/check/" +
-        jwt(localStorage.getItem("user")).user_id +
-        "/inbox"
+        jwt(localStorage.getItem("user")).user_id
     );
   };
 

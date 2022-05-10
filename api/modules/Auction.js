@@ -34,7 +34,7 @@ app.post("/", upload.any(), async (req, res) => {
     if (!auctionName) {
       return res.status(400).json({ error: "Auction Name cannot be blank" });
     }
-    if (productName.length > 30) {
+    if (productName.length > 500) {
       return res.status(400).json({ error: "Product Name length is too long" });
     }
     if (!accountId) {
@@ -43,7 +43,7 @@ app.post("/", upload.any(), async (req, res) => {
     if (!productDescription) {
       return res.status(400).json({ error: "Description cannot be blank" });
     }
-    if (productDescription.length > 500) {
+    if (productDescription.length > 20000) {
       return res.status(400).json({ error: "Description length is too long" });
     }
     if (productCategories.length === 0) {
@@ -82,14 +82,15 @@ app.post("/", upload.any(), async (req, res) => {
       }
     }
 
-    console.log(req.files);
     var concatenated_filepaths = "";
-    for (let i = 0; i < req.files.length; i++) {
-      var filepath = `https://localhost:5000/images/${req.files[i].originalname}`;
-      if (i === 0) {
-        concatenated_filepaths += filepath;
-      } else {
-        concatenated_filepaths += "," + filepath;
+    if (req.files !== undefined) {
+      for (let i = 0; i < req.files.length; i++) {
+        var filepath = `https://localhost:5000/images/${req.files[i].originalname}`;
+        if (i === 0) {
+          concatenated_filepaths += filepath;
+        } else {
+          concatenated_filepaths += "," + filepath;
+        }
       }
     }
 
@@ -189,7 +190,7 @@ app.put("/:id", async (req, res) => {
     if (!productName) {
       return res.status(400).json({ error: "Product Name cannot be blank" });
     }
-    if (productName.length > 30) {
+    if (productName.length > 500) {
       return res.status(400).json({ error: "Product Name length is too long" });
     }
     if (!accountId) {
@@ -198,7 +199,7 @@ app.put("/:id", async (req, res) => {
     if (!productDescription) {
       return res.status(400).json({ error: "Description cannot be blank" });
     }
-    if (productDescription.length > 500) {
+    if (productDescription.length > 20000) {
       return res.status(400).json({ error: "Description length is too long" });
     }
     if (productCategories.length === 0) {

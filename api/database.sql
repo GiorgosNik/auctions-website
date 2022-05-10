@@ -2,15 +2,15 @@ CREATE DATABASE bidit;
 \c bidit
 CREATE TABLE account(
     id SERIAL PRIMARY KEY,
-    username VARCHAR(30) NOT NULL UNIQUE,
+    username VARCHAR(500) NOT NULL UNIQUE,
     password VARCHAR(500) NOT NULL,
-    firstname VARCHAR(30) NOT NULL,
-    lastname VARCHAR(30) NOT NULL,
-    email VARCHAR(30) NOT NULL,
+    firstname VARCHAR(500) NOT NULL,
+    lastname VARCHAR(500) NOT NULL,
+    email VARCHAR(500) NOT NULL,
     phone VARCHAR(15) NOT NULL,
-    country VARCHAR(30) NOT NULL,
-    city VARCHAR(30) NOT NULL,
-    address VARCHAR(30) NOT NULL,
+    country VARCHAR(500) NOT NULL,
+    city VARCHAR(500) NOT NULL,
+    address VARCHAR(500),
     postcode VARCHAR(5) NOT NULL,
     taxcode VARCHAR(15) NOT NULL,
     approved boolean NOT NULL,
@@ -23,15 +23,15 @@ CREATE TABLE account(
 
 CREATE TABLE auction(
     id SERIAL PRIMARY KEY,
-    auction_name VARCHAR(30) NOT NULL,
+    auction_name VARCHAR(500) NOT NULL,
     account_id INT REFERENCES account(id) ON DELETE CASCADE
 );
 
 CREATE TABLE auction_item(
     id SERIAL PRIMARY KEY,
-    item_name VARCHAR(30) NOT NULL,
+    item_name VARCHAR(500) NOT NULL,
     account_id INT REFERENCES account(id),
-    description VARCHAR(500) NOT NULL,
+    description VARCHAR(20000) NOT NULL,
     price_start NUMERIC NOT NULL,
     price_curr NUMERIC NOT NULL,
     price_inst NUMERIC,
@@ -59,7 +59,7 @@ CREATE TABLE bid(
 
 CREATE TABLE category(
     id SERIAL PRIMARY KEY,
-    name VARCHAR(30) UNIQUE NOT NULL
+    name VARCHAR(500) UNIQUE NOT NULL
 );
 CREATE TABLE auction_category(
     id SERIAL PRIMARY KEY,

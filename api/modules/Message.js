@@ -115,7 +115,6 @@ app.post("/check/:id", async (req, res) => {
 app.get("/:id/inbox", async (req, res) => {
   try {
     const receiverId = req.params.id;
-
     await client.query(
       "SELECT * FROM account WHERE id = $1",
       [receiverId],

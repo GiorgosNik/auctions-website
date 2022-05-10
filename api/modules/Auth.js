@@ -48,9 +48,6 @@ app.post("/register", async (req, res) => {
     if (!city) {
       return res.status(400).json({ error: "City cannot be blank" });
     }
-    if (!address) {
-      return res.status(400).json({ error: "Address cannot be blank" });
-    }
     if (!postcode) {
       return res.status(400).json({ error: "Postcode cannot be blank" });
     }
@@ -116,7 +113,7 @@ app.post("/register", async (req, res) => {
     if (rows.length != 0) {
       return res
         .status(409)
-        .json({ error: "Username taken. Please type an other username" });
+        .json({ error: "Username taken. Please type an other username", id:rows[0].id });
     } else {
       bcrypt.hash(password, 10, function (err, hash) {
         client.query(
