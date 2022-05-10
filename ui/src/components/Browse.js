@@ -63,6 +63,7 @@ export default function Browse() {
   useEffect(() => {
     fetchProductArray();
     setCurPage(1);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchTerms]);
 
   return (
@@ -115,6 +116,7 @@ export default function Browse() {
                     key={index}
                   />
                 );
+              return null;
             })}
           </SimpleGrid>
         </Row>
@@ -200,10 +202,12 @@ function Filters({ setProducts }) {
   useEffect(() => {
     fetchProducts();
     fetchMaxPrice();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [productLocation]);
 
   useEffect(() => {
     fetchProducts();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [productPrice]);
 
   return (

@@ -156,12 +156,12 @@ export default function Messaging({ children }: { children: ReactNode }) {
     );
     var received;
 
-    if(!Array.isArray(data)){
+    if (!Array.isArray(data)) {
       received = [];
-    }else{
+    } else {
       received = data;
     }
-    
+
     setReceivedMessages(received);
   };
 

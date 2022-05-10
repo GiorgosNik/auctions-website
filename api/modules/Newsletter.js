@@ -22,7 +22,7 @@ app.post("/", async (req, res) => {
       "SELECT * FROM newsletter WHERE email = $1",
       [email],
       function (err, result) {
-        if (result.rows.length != 0) {
+        if (result.rows.length !== 0) {
           return res.status(409).json({ error: "You have subscribed before" });
         } else {
           const newEmail = client.query(

@@ -43,9 +43,9 @@ const Feature = ({ text, icon, iconBg }: FeatureProps) => {
 };
 
 export default function SplitWithImage() {
-  const browseHandler =()=>{
+  const browseHandler = () => {
     window.location.href = "/browse";
-  }
+  };
   return (
     <Container maxW={"5xl"} py={12}>
       <SimpleGrid columns={{ base: 1, md: 2 }} spacing={10}>
@@ -57,7 +57,7 @@ export default function SplitWithImage() {
             fontWeight={600}
             fontSize={"sm"}
             bg={useColorModeValue("purple.100", "purple.900")}
-            p={2}
+            p={5}
             alignSelf={"flex-start"}
             rounded={"md"}
           >

@@ -19,7 +19,7 @@ app.post("/", async (req, res) => {
     const getCategories = () =>
       client.query("SELECT * FROM category WHERE name = $1", [name]);
     const { rows } = await getCategories();
-    if (rows.length != 0) {
+    if (rows.length !== 0) {
       return res.status(409).json({
         error: "Category exists already. Please type an other category name",
       });
