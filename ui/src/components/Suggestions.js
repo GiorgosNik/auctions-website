@@ -15,6 +15,15 @@ import {
 } from "@chakra-ui/react";
 import Axios from "axios";
 
+function getIndex(array, element) {
+  for (var i = 0; i < array.length; i++) {
+    if (array[i] === element) {
+      return i;
+    }
+  }
+  return -1;
+}
+
 function transposeMatrix(matrix) {
   let trans = [];
   for (let i = 0; i < matrix[0].length; i++) {
@@ -24,7 +33,7 @@ function transposeMatrix(matrix) {
     }
     trans.push(temp);
   }
-  console.log(trans);
+  //console.log(trans);
   return trans;
 }
 
@@ -36,7 +45,7 @@ function randomMatrix(width, height) {
       result[i][j] = Math.random();
     }
   }
-  console.log(result);
+  //console.log(result);
   return result;
 }
 
@@ -48,6 +57,25 @@ function dotProduct(v1, v2) {
   return sum;
 }
 
+function multiply(a, b) {
+  // sourse https://stackoverflow.com/questions/27205018/multiply-2-matrices-in-javascript
+  var aNumRows = a.length,
+    aNumCols = a[0].length,
+    bNumRows = b.length,
+    bNumCols = b[0].length,
+    m = new Array(aNumRows); // initialize array of rows
+  for (var r = 0; r < aNumRows; ++r) {
+    m[r] = new Array(bNumCols); // initialize the current row
+    for (var c = 0; c < bNumCols; ++c) {
+      m[r][c] = 0; // initialize the current cell
+      for (var i = 0; i < aNumCols; ++i) {
+        m[r][c] += a[r][i] * b[i][c];
+      }
+    }
+  }
+  return m;
+}
+
 function matrixFactorization(
   R,
   P,
@@ -57,28 +85,55 @@ function matrixFactorization(
   alpha = 0.0002,
   beta = 0.02
 ) {
+  const dot = (a, b) => a.map((x, i) => a[i] * b[i]).reduce((m, n) => m + n);
+  var tempSliceP;
+  var tempSliceQ;
+  var eR;
+  var e;
+  var eij;
   for (let step = 0; step < steps; step++) {
-    //     for i in range(len(R)):
-    //         for j in range(len(R[i])):
-    //             if R[i][j] > 0:
-    //                 # calculate error
-    //                 eij = R[i][j] - numpy.dot(P[i,:],Q[:,j])
-    //                 for k in range(K):
-    //                     # calculate gradient with a and beta parameter
-    //                     P[i][k] = P[i][k] + alpha * (2 * eij * Q[k][j] - beta * P[i][k])
-    //                     Q[k][j] = Q[k][j] + alpha * (2 * eij * P[i][k] - beta * Q[k][j])
-    //     eR = numpy.dot(P,Q)
-    //     e = 0
-    //     for i in range(len(R)):
-    //         for j in range(len(R[i])):
-    //             if R[i][j] > 0:
-    //                 e = e + pow(R[i][j] - numpy.dot(P[i,:],Q[:,j]), 2)
-    //                 for k in range(K):
-    //                     e = e + (beta/2) * (pow(P[i][k],2) + pow(Q[k][j],2))
-    //     # 0.001: local minimum
-    //     if e < 0.001:
-    //         break
-    // return P, Q.T
+    for (var i = 0; i < R.length; i++) {
+      for (var j = 0; j < R[i].length; j++) {
+        if (R[i][j] > 0) {
+          tempSliceP = [];
+          tempSliceQ = [];
+          for (var p = 0; p < P[i].length; p++) {
+            tempSliceP.push(P[i][p]);
+          }
+          for (var h = 0; h < Q.length; h++) {
+            tempSliceQ.push(Q[h][j]);
+          }
+          eij = R[i][j] - dot(tempSliceP, tempSliceQ);
+          for (k = 0; k < K; k++) {
+            P[i][k] = P[i][k] + alpha * (2 * eij * Q[k][j] - beta * P[i][k]);
+            Q[k][j] = Q[k][j] + alpha * (2 * eij * P[i][k] - beta * Q[k][j]);
+          }
+        }
+      }
+    }
+    eR = multiply(P, Q);
+    e = 0;
+    for (var i = 0; i < R.length; i++) {
+      for (var j = 0; i < R[i].length; j++) {
+        if (R[i][j] > 0) {
+          tempSliceP = [];
+          tempSliceQ = [];
+          for (var p = 0; p < P[i].length; p++) {
+            tempSliceP.push(P[i][p]);
+          }
+          for (var h = 0; h < Q.length; h++) {
+            tempSliceQ.push(Q[h][j]);
+          }
+          e = e + Math.pow(R[i][j] - dot(tempSliceP, tempSliceQ), 2);
+          for (var k = 0; k < K; k++) {
+            e = e + (beta / 2) * (Math.pow(P[i][k], 2) + Math.pow(Q[k][j], 2));
+          }
+        }
+      }
+    }
+    if (e < 0.001) {
+      break;
+    }
   }
 }
 
@@ -94,29 +149,42 @@ export default function Suggestions() {
   var [bidArray, setBidArray] = useState({});
   var [usersFeatures, setUsersFeatures] = useState({});
   var [auctionsFeatures, setAuctionsFeatures] = useState({});
-
+  var uniqueAuctions = [];
+  var dataArray = [];
   const fetchAllBids = async () => {
     const { data } = await Axios.get("https://localhost:5000/bid");
     var bidMap = {};
     for (let i = 0; i < data.length; i++) {
       if (bidMap[data[i].account_id] === undefined) {
         bidMap[data[i].account_id] = [data[i].auction_id];
+        uniqueAuctions.push(data[i].auction_id);
       } else {
         bidMap[data[i].account_id].push(data[i].auction_id);
+        uniqueAuctions.push(data[i].auction_id);
       }
     }
+
     setBidArray(bidMap);
+    uniqueAuctions = [...new Set(uniqueAuctions)];
 
-    let N = Object.keys(bidMap).length;
-    let M = 0;
-    let K = 20;
-    for (var account in bidMap) {
-      if (bidMap[account].length > M) {
-        M = bidMap[account].length;
+    for (let i = 0; i < data.length; i++) {
+      dataArray.push([]);
+      for (let auction of uniqueAuctions) {
+        if (bidMap[data[i].account_id] !== undefined) {
+          if (bidMap[data[i].account_id].includes(auction)) {
+            dataArray.push(1);
+          } else {
+            dataArray.push(0);
+          }
+        }else{
+          dataArray.push(0);
+        }
       }
     }
-    // console.log(N, M);
-
+    
+    let N = Object.keys(bidMap).length;
+    let M = uniqueAuctions.length;
+    let K = 20;
     setUsersFeatures(randomMatrix(N, K));
     setAuctionsFeatures(transposeMatrix(randomMatrix(M, K)));
   };
