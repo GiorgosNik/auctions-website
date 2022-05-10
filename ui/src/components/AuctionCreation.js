@@ -240,7 +240,7 @@ export default function AuctionMain() {
                       onChange={productDescriptionChangeHandler}
                     />
                   </FormControl>
-                  <Stack>
+                  <Stack style={{overflowY: 'scroll', height: '250px'}}>
                     {categories.map((category, index) => {
                       return (
                         <Checkbox

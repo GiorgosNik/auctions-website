@@ -219,7 +219,7 @@ export default function AuctionMain() {
                         onChange={productDescriptionChangeHandler}
                       />
                     </FormControl>
-                    <Stack>
+                    <Stack style={{overflowY: 'scroll', height: '300px'}}>
                       {categories.map((category, index) => {
                         return auctionCategories.includes(category.name) ? (
                           <Checkbox
@@ -462,7 +462,7 @@ export default function AuctionMain() {
                         resize="none"
                       />
                     </FormControl>
-                    <Stack>
+                    <Stack style={{overflowY: 'scroll', height: '300px'}}>
                       {categories.map((category, index) => {
                         return auctionCategories.includes(category.name) ? (
                           <Checkbox

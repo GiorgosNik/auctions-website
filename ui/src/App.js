@@ -75,7 +75,7 @@ const AppHelper = () => {
     <Router>
       <ChakraProvider>
         <NavBar approved={approved} setApproved={setApproved} />
-        {/* {approved && Object.keys(user).length !== 0 && <Notification />} */}
+         {approved && Object.keys(user).length !== 0 && <Notification />} 
         <Routes>
           <Route
             path="/"

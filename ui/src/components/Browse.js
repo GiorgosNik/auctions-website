@@ -224,7 +224,7 @@ function Filters({ setProducts }) {
         >
           Category
         </p>
-        <Stack>
+        <Stack style={{overflowY: 'scroll', height: '300px'}}>
           {categories.map((category, index) => {
             return (
               <Checkbox

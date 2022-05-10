@@ -236,7 +236,7 @@ app.get("/", async (req, res) => {
       passphrase: "YYY",
     });
 
-    for (i = 0; i < 40; i++) {
+    for (i = 0; i < 1; i++) {
       xml = fs.readFileSync(
         "../ebay-data/items-" + i.toString() + ".xml",
         "utf8"
@@ -346,7 +346,7 @@ app.get("/", async (req, res) => {
     // Loop to add users to db
     for (let user of Object.keys(users)) {
       try {
-        //await addUser(user, users[user]);
+        await addUser(user, users[user]);
       } catch {
         console.error(err.message);
       }
