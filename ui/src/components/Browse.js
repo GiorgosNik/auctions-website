@@ -27,6 +27,7 @@ import { ChevronDownIcon } from "@chakra-ui/icons";
 import React, { useState, useEffect } from "react";
 import Axios from "axios";
 import { Container, Row, Col } from "react-grid-system";
+
 const goToAuctionPage = (id) => {
   window.location.href = "/auction/" + id;
 };
@@ -385,7 +386,7 @@ function ProductCard({
               </Heading>
               <Stack direction={"row"} align={"center"}>
                 <Text fontWeight={800} fontSize={"xl"}>
-                  {price}
+                  ${price}
                 </Text>
                 <Text color={"gray.600"}>{buyoutPrice}</Text>
               </Stack>

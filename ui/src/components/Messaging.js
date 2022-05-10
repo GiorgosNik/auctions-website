@@ -85,7 +85,7 @@ export default function Messaging({ children }: { children: ReactNode }) {
     const interval = setInterval(() => {
       fetchSentMessages();
       fetchReceivedMessages();
-      console.log(receivedMessages);
+      // console.log(receivedMessages);
     }, 1000);
     return () => clearInterval(interval);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps

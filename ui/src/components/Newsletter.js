@@ -54,7 +54,7 @@ export default function CardWithIllustration() {
       align={"center"}
       justify={"center"}
       py={12}
-      bg={useColorModeValue("gray.50", "gray.800")}
+      bg={"purple.100"}
     >
       <Stack
         boxShadow={"2xl"}
