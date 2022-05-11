@@ -66,7 +66,7 @@ async function addItem(Item) {
   var description = "";
   var bidder;
   var newBid;
-  var bidAmmount
+  var bidAmmount;
   productCategs = Item["categories"];
   try {
     var startingPrice = Item["startingPrice"];
@@ -108,94 +108,96 @@ async function addItem(Item) {
       "SELECT * FROM auction WHERE auction_name = $1",
       [Item["name"]]
     );
-    var id = await client.query("SELECT * FROM account WHERE username = $1", [
+    var data = await client.query("SELECT * FROM account WHERE username = $1", [
       Item["seller"],
     ]);
-    accountId = id.rows[0]["id"];
-    if (auction.rows.length === 0) {
-      auction = await client.query(
-        "INSERT INTO auction (auction_name, account_id) VALUES($1,$2) RETURNING *",
-        [Item["name"], accountId]
-      );
-    }
-
-    if (!Item["buyPrice"]) {
-      newAuction = await client.query(
-        "INSERT INTO auction_item (item_name,account_id,description,price_start,price_curr,num_of_bids,image,auction_id, message_sent) VALUES($1,$2,$3,$4,$4,$5,$6,$7,false) RETURNING *",
-        [
-          Item["name"],
-          accountId,
-          description,
-          startingPrice,
-          0,
-          concatenated_filepaths,
-          auction.rows[0].id,
-        ]
-      );
-    } else {
-      newAuction = await client.query(
-        "INSERT INTO auction_item (item_name,account_id,description,price_start,price_curr,price_inst,num_of_bids,image,auction_id, message_sent) VALUES($1,$2,$3,$4,$4,$5,$6,$7,$8, false) RETURNING *",
-        [
-          Item["name"],
-          accountId,
-          description,
-          startingPrice,
-          buyPrice,
-          0,
-          concatenated_filepaths,
-          auction.rows[0].id,
-        ]
-      );
-    }
-
-    newAuction.rows[0]["category"] = productCategs;
-    for (let i = 0; i < productCategs.length; i++) {
-      try {
-        const categories = await client.query(
-          "SELECT * FROM category WHERE name = $1",
-          [productCategs[i]]
+    if (data.rows.length !== 0) {
+      accountId = data.rows[0]["id"];
+      if (auction.rows.length === 0) {
+        auction = await client.query(
+          "INSERT INTO auction (auction_name, account_id) VALUES($1,$2) RETURNING *",
+          [Item["name"], accountId]
         );
+      }
+
+      if (!Item["buyPrice"]) {
+        newAuction = await client.query(
+          "INSERT INTO auction_item (item_name,account_id,description,price_start,price_curr,num_of_bids,image,auction_id, message_sent) VALUES($1,$2,$3,$4,$4,$5,$6,$7,false) RETURNING *",
+          [
+            Item["name"],
+            accountId,
+            description,
+            startingPrice,
+            0,
+            concatenated_filepaths,
+            auction.rows[0].id,
+          ]
+        );
+      } else {
+        newAuction = await client.query(
+          "INSERT INTO auction_item (item_name,account_id,description,price_start,price_curr,price_inst,num_of_bids,image,auction_id, message_sent) VALUES($1,$2,$3,$4,$4,$5,$6,$7,$8, false) RETURNING *",
+          [
+            Item["name"],
+            accountId,
+            description,
+            startingPrice,
+            buyPrice,
+            0,
+            concatenated_filepaths,
+            auction.rows[0].id,
+          ]
+        );
+      }
+
+      newAuction.rows[0]["category"] = productCategs;
+      for (let i = 0; i < productCategs.length; i++) {
         try {
-          await client.query(
-            "INSERT INTO auction_category (auction_id,category_id) VALUES($1,$2)",
-            [newAuction.rows[0]["id"], categories.rows[0]["id"]]
+          const categories = await client.query(
+            "SELECT * FROM category WHERE name = $1",
+            [productCategs[i]]
           );
+          try {
+            await client.query(
+              "INSERT INTO auction_category (auction_id,category_id) VALUES($1,$2)",
+              [newAuction.rows[0]["id"], categories.rows[0]["id"]]
+            );
+          } catch (err) {
+            console.error(err.message);
+          }
         } catch (err) {
           console.error(err.message);
         }
-      } catch (err) {
-        console.error(err.message);
+      }
+
+      var numbOfBids = 0;
+      for (let bid of Item["bids"]) {
+        // Get the bidder
+        bidder = await client.query(
+          "SELECT * FROM account WHERE username = $1",
+          [bid["bidder"]]
+        );
+
+        // Add the bid to the table
+        bidAmmount = bid["ammount"].slice(1).replace(",", "");
+        newBid = await client.query(
+          "INSERT INTO bid (account_id,auction_id,amount,time) VALUES($1,$2,$3,$4) RETURNING *",
+          [
+            bidder.rows[0]["id"],
+            newAuction.rows[0]["id"],
+            bidAmmount,
+            bid["time"],
+          ]
+        );
+
+        // Increase the bid count by one
+        await client.query(
+          "UPDATE auction_item SET price_curr = $1, num_of_bids = $2 WHERE id = $3",
+          [bidAmmount, numbOfBids + 1, newAuction.rows[0]["id"]]
+        );
+        numbOfBids = numbOfBids + 1;
       }
     }
 
-    var numbOfBids = 0;
-    for (let bid of Item["bids"]) {
-      // Get the bidder
-      bidder = await client.query("SELECT * FROM account WHERE username = $1", [
-        bid["bidder"],
-      ]);
-
-      // Add the bid to the table
-      bidAmmount = bid["ammount"].slice(1).replace(",", "");
-      newBid = await client.query(
-        "INSERT INTO bid (account_id,auction_id,amount,time) VALUES($1,$2,$3,$4) RETURNING *",
-        [
-          bidder.rows[0]["id"],
-          newAuction.rows[0]["id"],
-          bidAmmount,
-          bid["time"],
-        ]
-      );
-
-      // Increase the bid count by one
-      await client.query(
-        "UPDATE auction_item SET price_curr = $1, num_of_bids = $2 WHERE id = $3",
-        [bidAmmount, numbOfBids + 1, newAuction.rows[0]["id"]]
-      );
-      numbOfBids = numbOfBids + 1;
-    }
-
-    //console.log(newAuction.rows[0]);
     return;
   } catch (err) {
     console.error(err);
@@ -238,11 +240,12 @@ app.get("/", async (req, res) => {
 
     for (i = 0; i < 1; i++) {
       xml = fs.readFileSync(
-        "../ebay-data/items-" + i.toString() + ".xml",
+        "./ebay-data/items-" + i.toString() + ".xml",
         "utf8"
       );
       obj = parse(xml);
 
+      var num = 0;
       // Loop for each item
       for (let item of obj["root"].children) {
         categories = [];
@@ -341,10 +344,19 @@ app.get("/", async (req, res) => {
 
         // Push back selller user
         users[userId] = { country: userCountry, city: userLocation };
+        num++;
+        if (num === 20) {
+          break;
+        }
       }
     }
+    num = 0;
     // Loop to add users to db
     for (let user of Object.keys(users)) {
+      num++;
+      if (num === 20) {
+        break;
+      }
       try {
         await addUser(user, users[user]);
       } catch {
@@ -355,8 +367,10 @@ app.get("/", async (req, res) => {
     var i = 0;
     for (let item of items) {
       try {
-        console.log(i);
         i = i + 1;
+        if (i === 20) {
+          break;
+        }
         await addItem(item);
       } catch {
         console.error(err);

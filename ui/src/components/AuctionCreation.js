@@ -16,9 +16,8 @@ import {
   useColorModeValue,
   Checkbox,
   Textarea,
-  Icon,
 } from "@chakra-ui/react";
-import Dropzone, { useDropzone } from "react-dropzone";
+import Dropzone from "react-dropzone";
 import React, { useState, useEffect } from "react";
 import Axios from "axios";
 import jwt from "jwt-decode";
@@ -240,7 +239,7 @@ export default function AuctionMain() {
                       onChange={productDescriptionChangeHandler}
                     />
                   </FormControl>
-                  <Stack style={{overflowY: 'scroll', height: '250px'}}>
+                  <Stack style={{ overflowY: "scroll", height: "250px" }}>
                     {categories.map((category, index) => {
                       return (
                         <Checkbox

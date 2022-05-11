@@ -39,6 +39,7 @@ export default function OpenStreetMap({ address, city }) {
   };
   useEffect(() => {
     fetchCoordinates();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {

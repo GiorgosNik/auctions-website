@@ -30,10 +30,9 @@ export default function CollectionList() {
     setCollections(data);
   };
 
-  const data = new FormData();
-
   useEffect(() => {
     fetchCollections();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   return (
     <Stack>

@@ -155,6 +155,7 @@ export default function AuctionMain() {
   useEffect(() => {
     fetchCategories();
     fetchAuction();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
@@ -219,7 +220,7 @@ export default function AuctionMain() {
                         onChange={productDescriptionChangeHandler}
                       />
                     </FormControl>
-                    <Stack style={{overflowY: 'scroll', height: '300px'}}>
+                    <Stack style={{ overflowY: "scroll", height: "300px" }}>
                       {categories.map((category, index) => {
                         return auctionCategories.includes(category.name) ? (
                           <Checkbox
@@ -462,7 +463,7 @@ export default function AuctionMain() {
                         resize="none"
                       />
                     </FormControl>
-                    <Stack style={{overflowY: 'scroll', height: '300px'}}>
+                    <Stack style={{ overflowY: "scroll", height: "300px" }}>
                       {categories.map((category, index) => {
                         return auctionCategories.includes(category.name) ? (
                           <Checkbox

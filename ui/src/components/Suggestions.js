@@ -1,10 +1,8 @@
-import React, { useState, useEffect, ReactElement } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Stack,
   Box,
   Text,
-  Icon,
-  Flex,
   SimpleGrid,
   LinkBox,
   LinkOverlay,
@@ -14,6 +12,7 @@ import {
   Image,
 } from "@chakra-ui/react";
 import Axios from "axios";
+import jwt from "jwt-decode";
 
 function getIndex(array, element) {
   for (var i = 0; i < array.length; i++) {
@@ -91,6 +90,7 @@ function matrixFactorization(
   var eR;
   var e;
   var eij;
+
   for (let step = 0; step < steps; step++) {
     for (var i = 0; i < R.length; i++) {
       for (var j = 0; j < R[i].length; j++) {
@@ -104,7 +104,7 @@ function matrixFactorization(
             tempSliceQ.push(Q[h][j]);
           }
           eij = R[i][j] - dot(tempSliceP, tempSliceQ);
-          for (k = 0; k < K; k++) {
+          for (let k = 0; k < K; k++) {
             P[i][k] = P[i][k] + alpha * (2 * eij * Q[k][j] - beta * P[i][k]);
             Q[k][j] = Q[k][j] + alpha * (2 * eij * P[i][k] - beta * Q[k][j]);
           }
@@ -114,7 +114,7 @@ function matrixFactorization(
     eR = multiply(P, Q);
     e = 0;
     for (var i = 0; i < R.length; i++) {
-      for (var j = 0; i < R[i].length; j++) {
+      for (var j = 0; j < R[i].length; j++) {
         if (R[i][j] > 0) {
           tempSliceP = [];
           tempSliceQ = [];
@@ -135,6 +135,7 @@ function matrixFactorization(
       break;
     }
   }
+  return { P, Q };
 }
 
 const Feature = () => {
@@ -149,10 +150,15 @@ export default function Suggestions() {
   var [bidArray, setBidArray] = useState({});
   var [usersFeatures, setUsersFeatures] = useState({});
   var [auctionsFeatures, setAuctionsFeatures] = useState({});
+  var [dataMatrix, setDataMatrix] = useState({});
+  var [userIndex, setUserIndex] = useState({});
+
   var uniqueAuctions = [];
-  var dataArray = [];
   const fetchAllBids = async () => {
     const { data } = await Axios.get("https://localhost:5000/bid");
+    if (data.length === 0) {
+      return -1;
+    }
     var bidMap = {};
     for (let i = 0; i < data.length; i++) {
       if (bidMap[data[i].account_id] === undefined) {
@@ -160,39 +166,145 @@ export default function Suggestions() {
         uniqueAuctions.push(data[i].auction_id);
       } else {
         bidMap[data[i].account_id].push(data[i].auction_id);
-        uniqueAuctions.push(data[i].auction_id);
+        uniqueAuctions.push(data[i].auction_id); // all auctions that have bids
       }
     }
 
-    setBidArray(bidMap);
-    uniqueAuctions = [...new Set(uniqueAuctions)];
+    uniqueAuctions = [...new Set(uniqueAuctions)]; // remove duplicates
 
+    let accounts = [];
+    let dataArray = [];
+    let index = 0;
+    let user_index = {};
     for (let i = 0; i < data.length; i++) {
-      dataArray.push([]);
-      for (let auction of uniqueAuctions) {
-        if (bidMap[data[i].account_id] !== undefined) {
-          if (bidMap[data[i].account_id].includes(auction)) {
-            dataArray.push(1);
-          } else {
-            dataArray.push(0);
+      // for every "transaction"
+      if (!accounts.includes(data[i].account_id)) {
+        user_index[data[i].account_id] = index;
+        accounts.push(data[i].account_id);
+        dataArray[index] = [];
+        for (let auction of uniqueAuctions) {
+          // for every auction that has bids
+          if (bidMap[data[i].account_id] !== undefined) {
+            if (bidMap[data[i].account_id].includes(auction)) {
+              // if this user has bidded this auction
+              dataArray[index].push(1);
+            } else {
+              dataArray[index].push(0);
+            }
           }
-        }else{
-          dataArray.push(0);
         }
+        index++;
       }
     }
-    
-    let N = Object.keys(bidMap).length;
-    let M = uniqueAuctions.length;
-    let K = 20;
+
+    if (user_index[jwt(localStorage.getItem("user")).user_id] === undefined) {
+      return -1;
+    }
+    setBidArray(bidMap);
+    setUserIndex(user_index);
+    setDataMatrix(dataArray);
+
+    let N = Object.keys(bidMap).length; // how many users
+    let M = uniqueAuctions.length; // how many auctions
+    let K = 20; // features
+    setUsersFeatures(randomMatrix(N, K));
+    setAuctionsFeatures(transposeMatrix(randomMatrix(M, K)));
+  };
+
+  const fetchProductViews = async () => {
+    const { data } = await Axios.get("https://localhost:5000/view");
+    if (data.length === 0) {
+      return;
+    }
+    var bidMap = {};
+    for (let i = 0; i < data.length; i++) {
+      if (bidMap[data[i].account_id] === undefined) {
+        bidMap[data[i].account_id] = [data[i].auction_id];
+        uniqueAuctions.push(data[i].auction_id);
+      } else {
+        bidMap[data[i].account_id].push(data[i].auction_id);
+        uniqueAuctions.push(data[i].auction_id); // all auctions that have bids
+      }
+    }
+
+    uniqueAuctions = [...new Set(uniqueAuctions)]; // remove duplicates
+
+    let accounts = [];
+    let dataArray = [];
+    let index = 0;
+    let user_index = {};
+    for (let i = 0; i < data.length; i++) {
+      // for every "transaction"
+      if (!accounts.includes(data[i].account_id)) {
+        user_index[data[i].account_id] = index;
+        accounts.push(data[i].account_id);
+        dataArray[index] = [];
+        for (let auction of uniqueAuctions) {
+          // for every auction that has bids
+          if (bidMap[data[i].account_id] !== undefined) {
+            if (bidMap[data[i].account_id].includes(auction)) {
+              // if this user has bidded this auction
+              dataArray[index].push(1);
+            } else {
+              dataArray[index].push(0);
+            }
+          }
+        }
+        index++;
+      }
+    }
+    setBidArray(bidMap);
+    setUserIndex(user_index);
+    setDataMatrix(dataArray);
+
+    let N = Object.keys(bidMap).length; // how many users
+    let M = uniqueAuctions.length; // how many auctions
+    let K = 20; // features
     setUsersFeatures(randomMatrix(N, K));
     setAuctionsFeatures(transposeMatrix(randomMatrix(M, K)));
   };
 
   useEffect(() => {
-    fetchAllBids();
+    (async () => {
+      if ((await fetchAllBids()) === -1) {
+        fetchProductViews();
+      }
+    })();
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    if (dataMatrix.length === undefined) {
+      return;
+    }
+    if (usersFeatures.length === undefined) {
+      return;
+    }
+    if (auctionsFeatures.length === undefined) {
+      return;
+    }
+
+    let { P, Q } = matrixFactorization(
+      dataMatrix,
+      usersFeatures,
+      auctionsFeatures
+    );
+    var arr = multiply(P, Q);
+    var final = [];
+    var topValues = [];
+
+    if (userIndex[jwt(localStorage.getItem("user")).user_id] !== undefined) {
+      arr.map((row, index) => {
+        topValues = row.sort((a, b) => b - a).slice(0, 5); // get indices to get the auction ids
+        final.push(topValues);
+      });
+      console.log(final);
+      console.log(final[userIndex[jwt(localStorage.getItem("user")).user_id]]);
+    }
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dataMatrix, usersFeatures, auctionsFeatures, userIndex]);
   return (
     <Box p={4}>
       <SimpleGrid padding={15} columns={{ base: 1, md: 5 }} spacing={2}>

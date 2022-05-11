@@ -61,49 +61,51 @@ app.post("/check/:id", async (req, res) => {
       "SELECT username FROM account WHERE id = $1",
       [userId]
     );
-    const receiver = buyer.rows[0]["username"];
+    if (buyer.rows.length != 0) {
+      const receiver = buyer.rows[0]["username"];
 
-    const completedAuctions = await client.query(
-      "SELECT * FROM auction_item WHERE ends < $1 AND message_sent = false",
-      [time]
-    );
-    await client.query(
-      "UPDATE auction_item SET message_sent = true WHERE ends < $1 AND message_sent = false",
-      [time]
-    );
-    for (let auction of completedAuctions.rows) {
-      sender = await client.query("SELECT * FROM account WHERE id = $1", [
-        auction.account_id,
-      ]);
+      const completedAuctions = await client.query(
+        "SELECT * FROM auction_item WHERE ends < $1 AND message_sent = false",
+        [time]
+      );
+      await client.query(
+        "UPDATE auction_item SET message_sent = true WHERE ends < $1 AND message_sent = false",
+        [time]
+      );
+      for (let auction of completedAuctions.rows) {
+        sender = await client.query("SELECT * FROM account WHERE id = $1", [
+          auction.account_id,
+        ]);
 
-      // Get all the bids
-      bids = await client.query("SELECT * FROM bid WHERE account_id = $1", [
-        userId,
-      ]);
+        // Get all the bids
+        bids = await client.query("SELECT * FROM bid WHERE account_id = $1", [
+          userId,
+        ]);
 
-      maxBid = 0;
-      // Get the max bid and max bidder
-      for (let bid of bids.rows) {
-        if (parseFloat(bid.amount) > parseFloat(maxBid)) {
-          maxBid = bid.amount;
-          maxBidder = bid.account_id;
+        maxBid = 0;
+        // Get the max bid and max bidder
+        for (let bid of bids.rows) {
+          if (parseFloat(bid.amount) > parseFloat(maxBid)) {
+            maxBid = bid.amount;
+            maxBidder = bid.account_id;
+          }
         }
-      }
 
-      if (maxBidder === parseInt(userId)) {
-        subject = "Auction Won";
-        sender = sender.rows[0]["username"];
-        message = "You won the auction on: " + auction["item_name"];
+        if (maxBidder === parseInt(userId)) {
+          subject = "Auction Won";
+          sender = sender.rows[0]["username"];
+          message = "You won the auction on: " + auction["item_name"];
 
-        const body = {
-          subject,
-          receiver,
-          message,
-        };
-        const newMessage = client.query(
-          "INSERT INTO message (subject, sender, receiver, text) VALUES($1, $2, $3, $4) RETURNING *",
-          [subject, sender, receiver, message]
-        );
+          const body = {
+            subject,
+            receiver,
+            message,
+          };
+          const newMessage = client.query(
+            "INSERT INTO message (subject, sender, receiver, text) VALUES($1, $2, $3, $4) RETURNING *",
+            [subject, sender, receiver, message]
+          );
+        }
       }
     }
     return res.json("");

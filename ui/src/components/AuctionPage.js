@@ -26,7 +26,6 @@ import {
   ModalBody,
   ModalCloseButton,
   useDisclosure,
-  useBreakpointValue,
 } from "@chakra-ui/react";
 import Axios from "axios";
 import jwt from "jwt-decode";
@@ -135,7 +134,7 @@ export default function AuctionPage() {
   };
 
   const viewCount = () => {
-    if (!flag && auction_id!= "") {
+    if (!flag && auction_id !== "") {
       const body = {
         auction_id,
         account_id,
@@ -379,9 +378,6 @@ export default function AuctionPage() {
 }
 
 function Carousel(images) {
-  const top = useBreakpointValue({ base: "90%", md: "50%" });
-  const side = useBreakpointValue({ base: "30%", md: "10px" });
-
   const cards = [];
   if (images.images) {
     var imagesArray = images.images.split(",");

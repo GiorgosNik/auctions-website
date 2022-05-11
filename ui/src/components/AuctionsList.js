@@ -47,6 +47,7 @@ export default function AuctionsList() {
   useEffect(() => {
     fetchAuctionName();
     fetchAuctions();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
