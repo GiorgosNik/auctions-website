@@ -111,12 +111,11 @@ export default function SignupCard({ onClose }) {
             setUser(res?.user);
             localStorage.setItem("user", res?.token);
             var decoded = jwt_decode(res.token);
-            console.log(decoded);
-            // console.log(decoded.username);
             if (decoded.username === "admin") {
               window.location.href = "/users";
+            } else {
+              window.location.href = "/waitingroom";
             }
-            window.location.href = "/waitingroom";
             onClose();
           }
           console.log(errorMessage);

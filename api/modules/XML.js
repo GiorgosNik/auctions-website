@@ -27,8 +27,8 @@ async function addUser(username, userDict) {
     if (rows.length != 0) {
       return;
     } else {
-      bcrypt.hash(password, 10, function (err, hash) {
-        client.query(
+      await bcrypt.hash(password, 10, async function (err, hash) {
+        await client.query(
           "INSERT INTO account (username, password, firstname, lastname, email, phone, country, city, address, postcode, taxcode, approved, sellerScore, bidderScore, sellerReviewCount, bidderReviewCount, messagecount) VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17) RETURNING *",
           [
             username,
@@ -66,7 +66,7 @@ async function addItem(Item) {
   var description = "";
   var bidder;
   var newBid;
-  var bidAmmount;
+  var bidAmount;
   productCategs = Item["categories"];
   try {
     var startingPrice = Item["startingPrice"];
@@ -104,100 +104,116 @@ async function addItem(Item) {
         }
       }
     }
-    var auction = await client.query(
+    await client.query(
       "SELECT * FROM auction WHERE auction_name = $1",
-      [Item["name"]]
-    );
-    var data = await client.query("SELECT * FROM account WHERE username = $1", [
-      Item["seller"],
-    ]);
-    if (data.rows.length !== 0) {
-      accountId = data.rows[0]["id"];
-      if (auction.rows.length === 0) {
-        auction = await client.query(
-          "INSERT INTO auction (auction_name, account_id) VALUES($1,$2) RETURNING *",
-          [Item["name"], accountId]
-        );
-      }
-
-      if (!Item["buyPrice"]) {
-        newAuction = await client.query(
-          "INSERT INTO auction_item (item_name,account_id,description,price_start,price_curr,num_of_bids,image,auction_id, message_sent) VALUES($1,$2,$3,$4,$4,$5,$6,$7,false) RETURNING *",
-          [
-            Item["name"],
-            accountId,
-            description,
-            startingPrice,
-            0,
-            concatenated_filepaths,
-            auction.rows[0].id,
-          ]
-        );
-      } else {
-        newAuction = await client.query(
-          "INSERT INTO auction_item (item_name,account_id,description,price_start,price_curr,price_inst,num_of_bids,image,auction_id, message_sent) VALUES($1,$2,$3,$4,$4,$5,$6,$7,$8, false) RETURNING *",
-          [
-            Item["name"],
-            accountId,
-            description,
-            startingPrice,
-            buyPrice,
-            0,
-            concatenated_filepaths,
-            auction.rows[0].id,
-          ]
-        );
-      }
-
-      newAuction.rows[0]["category"] = productCategs;
-      for (let i = 0; i < productCategs.length; i++) {
-        try {
-          const categories = await client.query(
-            "SELECT * FROM category WHERE name = $1",
-            [productCategs[i]]
-          );
-          try {
-            await client.query(
-              "INSERT INTO auction_category (auction_id,category_id) VALUES($1,$2)",
-              [newAuction.rows[0]["id"], categories.rows[0]["id"]]
-            );
-          } catch (err) {
-            console.error(err.message);
-          }
-        } catch (err) {
-          console.error(err.message);
-        }
-      }
-
-      var numbOfBids = 0;
-      for (let bid of Item["bids"]) {
-        // Get the bidder
-        bidder = await client.query(
-          "SELECT * FROM account WHERE username = $1",
-          [bid["bidder"]]
-        );
-
-        // Add the bid to the table
-        bidAmmount = bid["ammount"].slice(1).replace(",", "");
-        newBid = await client.query(
-          "INSERT INTO bid (account_id,auction_id,amount,time) VALUES($1,$2,$3,$4) RETURNING *",
-          [
-            bidder.rows[0]["id"],
-            newAuction.rows[0]["id"],
-            bidAmmount,
-            bid["time"],
-          ]
-        );
-
-        // Increase the bid count by one
+      [Item["name"]],
+      async function (err, auction) {
         await client.query(
-          "UPDATE auction_item SET price_curr = $1, num_of_bids = $2 WHERE id = $3",
-          [bidAmmount, numbOfBids + 1, newAuction.rows[0]["id"]]
-        );
-        numbOfBids = numbOfBids + 1;
-      }
-    }
+          "SELECT * FROM account WHERE username = $1",
+          [Item["seller"]],
 
+          async function (err, id) {
+            accountId = id.rows[0]["id"];
+            if (auction.rows.length === 0) {
+              await client.query(
+                "INSERT INTO auction (auction_name, account_id) VALUES($1,$2) RETURNING *",
+                [Item["name"], accountId],
+                async function (err, auction) {
+                  if (!Item["buyPrice"]) {
+                    newAuction = await client.query(
+                      "INSERT INTO auction_item (item_name,account_id,description,price_start,price_curr,num_of_bids,image,auction_id, message_sent) VALUES($1,$2,$3,$4,$4,$5,$6,$7,false) RETURNING *",
+                      [
+                        Item["name"],
+                        accountId,
+                        description,
+                        startingPrice,
+                        0,
+                        concatenated_filepaths,
+                        auction.rows[0].id,
+                      ]
+                    );
+                  } else {
+                    await client.query(
+                      "INSERT INTO auction_item (item_name,account_id,description,price_start,price_curr,price_inst,num_of_bids,image,auction_id, message_sent) VALUES($1,$2,$3,$4,$4,$5,$6,$7,$8, false) RETURNING *",
+                      [
+                        Item["name"],
+                        accountId,
+                        description,
+                        startingPrice,
+                        buyPrice,
+                        0,
+                        concatenated_filepaths,
+                        auction.rows[0].id,
+                      ],
+                      async function (err, newAuction) {
+                        newAuction.rows[0]["category"] = productCategs;
+                        for (let i = 0; i < productCategs.length; i++) {
+                          try {
+                            const categories = await client.query(
+                              "SELECT * FROM category WHERE name = $1",
+                              [productCategs[i]]
+                            );
+                            try {
+                              await client.query(
+                                "INSERT INTO auction_category (auction_id,category_id) VALUES($1,$2)",
+                                [
+                                  newAuction.rows[0]["id"],
+                                  categories.rows[0]["id"],
+                                ]
+                              );
+                            } catch (err) {
+                              console.error(err.message);
+                            }
+                          } catch (err) {
+                            console.error(err.message);
+                          }
+                        }
+
+                        var numbOfBids = 0;
+                        for (let bid of Item["bids"]) {
+                          // Get the bidder
+                          await client.query(
+                            "SELECT * FROM account WHERE username = $1",
+                            [bid["bidder"]],
+                            async function (err, bidder) {
+                              // Add the bid to the table
+                              bidAmount = bid["ammount"]
+                                .slice(1)
+                                .replace(",", "");
+                              newBid = await client.query(
+                                "INSERT INTO bid (account_id,auction_id,amount,time) VALUES($1,$2,$3,$4) RETURNING *",
+                                [
+                                  bidder.rows[0]["id"],
+                                  newAuction.rows[0]["id"],
+                                  bidAmount,
+                                  bid["time"],
+                                ]
+                              );
+                              // Increase the bid count by one
+                              await client.query(
+                                "UPDATE auction_item SET price_curr = $1, num_of_bids = $2 WHERE id = $3",
+                                [
+                                  bidAmount,
+                                  numbOfBids + 1,
+                                  newAuction.rows[0]["id"],
+                                ]
+                              );
+                              numbOfBids = numbOfBids + 1;
+                            }
+                          );
+                        }
+                      }
+                    );
+                  }
+                }
+              );
+            }
+          }
+        );
+      }
+    );
+
+    //console.log(newAuction.rows[0]);
     return;
   } catch (err) {
     console.error(err);
@@ -227,7 +243,7 @@ app.get("/", async (req, res) => {
     var bidderLocation;
     var bidderCountry;
     var bidTime;
-    var bidAmmount;
+    var bidAmount;
     var productBids;
     var startTime;
     var endTime;
@@ -245,7 +261,6 @@ app.get("/", async (req, res) => {
       );
       obj = parse(xml);
 
-      var num = 0;
       // Loop for each item
       for (let item of obj["root"].children) {
         categories = [];
@@ -291,7 +306,7 @@ app.get("/", async (req, res) => {
                   };
                 }
                 if (bid_attribute.name === "Amount") {
-                  bidAmmount = bid_attribute.content;
+                  bidAmount = bid_attribute.content;
                 }
                 if (bid_attribute.name === "Time") {
                   bidTime = bid_attribute.content;
@@ -300,7 +315,7 @@ app.get("/", async (req, res) => {
               productBids.push({
                 bidder: bidderName,
                 time: bidTime,
-                ammount: bidAmmount,
+                ammount: bidAmount,
               });
             }
           }
@@ -344,38 +359,41 @@ app.get("/", async (req, res) => {
 
         // Push back selller user
         users[userId] = { country: userCountry, city: userLocation };
-        num++;
-        if (num === 20) {
-          break;
-        }
       }
     }
-    num = 0;
+    const client = require("../database.js");
+
     // Loop to add users to db
-    for (let user of Object.keys(users)) {
-      num++;
-      if (num === 20) {
-        break;
-      }
-      try {
-        await addUser(user, users[user]);
-      } catch {
-        console.error(err.message);
-      }
+
+    async function addUsers() {
+      const accounts = Object.keys(users);
+      var i = 0;
+      Promise.all(
+        accounts.map(async (user) => {
+          console.log("user ", i);
+          i++;
+          await addUser(user, users[user]);
+        })
+      );
     }
-    // Loop to add items to db
-    var i = 0;
-    for (let item of items) {
-      try {
-        i = i + 1;
-        if (i === 20) {
-          break;
-        }
-        await addItem(item);
-      } catch {
-        console.error(err);
-      }
+
+    async function addItems() {
+      var number = await client.query("SELECT COUNT(*) FROM account");
+      console.log(number);
+      var i = 0;
+      Promise.all(
+        items.map(async (item) => {
+          console.log("item ", i);
+          i++;
+          await addItem(item);
+        })
+      );
     }
+
+    addUsers()
+      .then(() => addItems().catch((e) => console.error(e)))
+      .catch((e) => console.error(e));
+
     res.json("");
   } catch (err) {
     console.error(err);

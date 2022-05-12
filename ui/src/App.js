@@ -21,7 +21,7 @@ import {
   EditAuction,
   Notification,
   Browse,
-  Suggestions,
+  Recommendation,
 } from "./components";
 import CollectionList from "./components/CollectionList";
 import Axios from "axios";
@@ -83,7 +83,7 @@ const AppHelper = () => {
               <>
                 <Description />
                 <Features />
-                {Object.keys(user).length !== 0 && <Suggestions />}
+                {Object.keys(user).length !== 0 && <Recommendation />}
                 <Newsletter />
               </>
             }

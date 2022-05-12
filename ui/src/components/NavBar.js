@@ -119,7 +119,9 @@ export default function NavBar({ approved, setApproved }) {
             <img src={logo} alt="logo" width={70} height={70} />
           </Link>
           <Flex display={{ base: "none", md: "flex" }} ml={10}>
-            {loggedIn && approved && <DesktopNav itemsMap={itemsMap} />}
+            {((loggedIn && approved) || user.username === "admin") && (
+              <DesktopNav itemsMap={itemsMap} />
+            )}
             {!loggedIn && <DesktopNav itemsMap={[]} />}
           </Flex>
         </Flex>
