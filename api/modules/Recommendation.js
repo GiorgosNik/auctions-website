@@ -3,17 +3,30 @@ const app = express.Router();
 const client = require("../database.js");
 const jwt = require("jsonwebtoken");
 
-app.post("/", async (req, res) => {
-  //   try {
-  //     const { name } = req.body;
-  //     const newCat = await client.query(
-  //       "INSERT INTO category (name) VALUES($1) RETURNING *",
-  //       [name]
-  //     );
-  //     return res.status(201).json(newCat.rows[0]);
-  //   } catch (err) {
-  //     console.error(err.message);
-  //   }
+app.post("/bid", async (req, res) => {
+  try {
+    const { account_id, auction_id } = req.body;
+    const newRecommendation = await client.query(
+      "INSERT INTO recommendation_bid (account_id, auction_id) VALUES($1, $2) RETURNING *",
+      [account_id, auction_id]
+    );
+    return res.status(201).json(newRecommendation.rows[0]);
+  } catch (err) {
+    console.error(err.message);
+  }
+});
+
+app.post("/views", async (req, res) => {
+  try {
+    const { account_id, auction_id } = req.body;
+    const newRecommendation = await client.query(
+      "INSERT INTO recommendation_view (account_id, auction_id) VALUES($1, $2) RETURNING *",
+      [account_id, auction_id]
+    );
+    return res.status(201).json(newRecommendation.rows[0]);
+  } catch (err) {
+    console.error(err.message);
+  }
 });
 
 app.get("/bid/:id", async (req, res) => {

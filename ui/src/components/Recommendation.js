@@ -31,7 +31,7 @@ export default function Recommendation() {
         const { data: auction_items } = await Axios.get(
           "https://localhost:5000/auction/"
         );
-        setRecommended(auction_items.slice(1, 5));
+        setRecommended(auction_items.slice(0, 5));
       } else {
         setRecommended(data_view);
       }
