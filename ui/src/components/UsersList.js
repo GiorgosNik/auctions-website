@@ -443,7 +443,7 @@ function GetUsefulData() {
           return;
         }
       });
-
+      console.log("User: ",curr_user, " Final Size: ",final[curr_user].length);
       for (let auction_id of final[curr_user]) {
         try {
           let body = {

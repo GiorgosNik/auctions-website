@@ -242,7 +242,7 @@ export default function AuctionPage() {
               {"Starting Price: $" + auction.price_start}
             </Text>
           </Box>
-          {auction.started !== null && (
+          {(auction.started !== null && (auction.price_curr < auction.price_inst || auction.price_inst === null) && auction.message_sent === false) && (
             <FormControl id="bid_form" isRequired>
               <Stack direction={["column", "row"]}>
                 <Box>
@@ -288,7 +288,7 @@ export default function AuctionPage() {
               </Stack>
             </FormControl>
           )}
-          {auction.started === null && (
+          {(auction.started === null || (auction.price_curr >= auction.price_inst && auction.price_inst !== null)) && (
             <Text
               color={"purple.500"}
               fontSize={"2xl"}

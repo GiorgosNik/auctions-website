@@ -115,7 +115,7 @@ async function addItem(Item) {
                 async function (err, auction) {
                   if (!Item["buyPrice"]) {
                     newAuction = await client.query(
-                      "INSERT INTO auction_item (item_name,account_id,description,price_start,price_curr,num_of_bids,image,auction_id, message_sent) VALUES($1,$2,$3,$4,$4,$5,$6,$7,false) RETURNING *",
+                      "INSERT INTO auction_item (item_name,account_id,description,price_start,price_curr,num_of_bids,image,auction_id, started ,message_sent) VALUES($1,$2,$3,$4,$4,$5,$6,$7,$8,false) RETURNING *",
                       [
                         Item["name"],
                         accountId,
@@ -124,6 +124,7 @@ async function addItem(Item) {
                         0,
                         "https://localhost:5000/images/37375020.jpg",
                         auction.rows[0].id,
+                        "2022-05-14 21:53:30",
                       ],
                       async function (err, newAuction) {
                         newAuction.rows[0]["category"] = productCategs;
@@ -188,7 +189,7 @@ async function addItem(Item) {
                     );
                   } else {
                     newAuction = await client.query(
-                      "INSERT INTO auction_item (item_name,account_id,description,price_start,price_curr,price_inst,num_of_bids,image,auction_id, message_sent) VALUES($1,$2,$3,$4,$4,$5,$6,$7,$8, false) RETURNING *",
+                      "INSERT INTO auction_item (item_name,account_id,description,price_start,price_curr,price_inst,num_of_bids,image,auction_id, started, message_sent) VALUES($1,$2,$3,$4,$4,$5,$6,$7,$8,$9, false) RETURNING *",
                       [
                         Item["name"],
                         accountId,
@@ -198,6 +199,7 @@ async function addItem(Item) {
                         0,
                         "https://localhost:5000/images/37375020.jpg",
                         auction.rows[0].id,
+                        "2022-05-14 21:53:30",
                       ],
                       async function (err, newAuction) {
                         newAuction.rows[0]["category"] = productCategs;

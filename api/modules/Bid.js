@@ -62,29 +62,31 @@ app.post("/", async (req, res) => {
       );
 
       // Send message to winner if bid > buyout
-      if (auction_item.rows[0]["price_curr"] < amount) {
-        const seller = await client.query(
-          "SELECT username FROM account WHERE id = $1",
-          [auction_item.rows[0]["account_id"]]
-        );
-        console.log("HERE");
-        subject = "Auction Won";
-        receiver = user.rows[0]["username"];
-        sender = seller.rows[0]["username"];
+      if (auction_item.rows[0]["price_inst"] != null) {
+        if (auction_item.rows[0]["price_inst"] < amount) {
+          const seller = await client.query(
+            "SELECT username FROM account WHERE id = $1",
+            [auction_item.rows[0]["account_id"]]
+          );
+          subject = "Auction Won";
+          receiver = user.rows[0]["username"];
+          sender = seller.rows[0]["username"];
 
-        message =
-          "You won the auction on: " + auction_item.rows[0]["item_name"];
+          message =
+            "You won the auction on: " + auction_item.rows[0]["item_name"];
 
-        const body = {
-          subject,
-          receiver,
-          message,
-        };
-        const newMessage = client.query(
-          "INSERT INTO message (subject, sender, receiver, text) VALUES($1, $2, $3, $4) RETURNING *",
-          [subject, sender, receiver, message]
-        );
+          const body = {
+            subject,
+            receiver,
+            message,
+          };
+          const newMessage = client.query(
+            "INSERT INTO message (subject, sender, receiver, text) VALUES($1, $2, $3, $4) RETURNING *",
+            [subject, sender, receiver, message]
+          );
+        }
       }
+
       return res.status(201).json(newBid.rows[0]);
     }
   } catch (err) {

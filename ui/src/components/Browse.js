@@ -32,7 +32,7 @@ const goToAuctionPage = (id) => {
   window.location.href = "/auction/" + id;
 };
 
-const producsPerPage = 6;
+const producsPerPage = 15;
 export default function Browse() {
   const [searchTerms, setSearchTerms] = useState("");
 
@@ -79,18 +79,21 @@ export default function Browse() {
           <Col sm={2.5}>
             <Filters setProducts={setProductArrayFilter} />
             {pagesArray.map((page, index) => {
-              return (
-                <Button
-                  key={index}
-                  marginTop={40}
-                  mx={1}
-                  colorScheme="purple"
-                  variant="outline"
-                  onClick={() => pageSelectHandler(index + 1)}
-                >
-                  {index + 1}
-                </Button>
-              );
+              if(index === 0 || index === (Math.floor( productArray.length/producsPerPage)) || index === curPage || index === curPage-2 || index === curPage-1){
+                return (
+                  <Button
+                    key={index}
+                    marginTop={40}
+                    mx={1}
+                    colorScheme="purple"
+                    variant="outline"
+                    onClick={() => pageSelectHandler(index + 1)}
+                  >
+                    {index + 1}
+                  </Button>
+                );
+              }
+              
             })}
           </Col>
           <SimpleGrid columns={[1, 2, 3]} spacing={10}>

@@ -366,7 +366,7 @@ app.get("/maxprice", async (req, res) => {
   try {
     var time = moment(Date.now()).format("YYYY-MM-DD HH:mm:ss");
     const maxPrice = await client.query(
-      "SELECT MAX(price_curr) FROM (SELECT * FROM auction_item WHERE $1 < ends AND started IS NOT NULL AND (price_curr < price_inst OR price_inst IS NULL)) AS x ",
+      "SELECT MAX(price_curr) FROM (SELECT * FROM auction_item WHERE ($1 < ends OR ends IS NULL) AND started IS NOT NULL AND (price_curr < price_inst OR price_inst IS NULL)) AS x ",
       [time]
     );
     res.json(maxPrice.rows[0].max);
@@ -382,7 +382,7 @@ app.get("/search", async (req, res) => {
     var time = moment(Date.now()).format("YYYY-MM-DD HH:mm:ss");
     if (terms.length === 0) {
       auctions = await client.query(
-        "SELECT id, item_name, account_id, description, image, price_start, price_inst, price_curr, started, ends, num_of_bids FROM auction_item WHERE $1 < ends AND started IS NOT NULL AND (price_curr < price_inst OR price_inst IS NULL)",
+        "SELECT id, item_name, account_id, description, image, price_start, price_inst, price_curr, started, ends, num_of_bids FROM auction_item WHERE ($1 < ends OR ends IS NULL) AND started IS NOT NULL AND (price_curr < price_inst OR price_inst IS NULL)",
         [time]
       );
     } else {
@@ -395,7 +395,7 @@ app.get("/search", async (req, res) => {
       );
 
       auctions = await client.query(
-        "SELECT * FROM auction_item WHERE ts @@ to_tsquery('english', $1) AND $2 < ends AND started IS NOT NULL AND (price_curr < price_inst OR price_inst IS NULL)",
+        "SELECT * FROM auction_item WHERE ts @@ to_tsquery('english', $1) AND ($2 < ends OR ends IS NULL) AND started IS NOT NULL AND (price_curr < price_inst OR price_inst IS NULL)",
         [terms, time]
       );
     }
@@ -467,7 +467,7 @@ app.get("/browse", async (req, res) => {
   var locationResult = [];
   if (country) {
     const productLocation = await client.query(
-      "SELECT * FROM  account INNER JOIN auction_item ON (account.id = auction_item.account_id) WHERE country = $1 AND $2 < ends AND started IS NOT NULL AND (price_curr < price_inst OR price_inst IS NULL)",
+      "SELECT * FROM  account INNER JOIN auction_item ON (account.id = auction_item.account_id) WHERE country = $1 AND ($2 < ends OR ends IS NULL) AND started IS NOT NULL AND (price_curr < price_inst OR price_inst IS NULL)",
       [country, time]
     );
 
@@ -488,7 +488,7 @@ app.get("/browse", async (req, res) => {
   var priceResult = [];
   if (price) {
     const productPrice = await client.query(
-      "SELECT * FROM account INNER JOIN auction_item ON (account.id = auction_item.account_id) WHERE price_curr <=  $1 AND $2 < ends AND started IS NOT NULL AND (price_curr < price_inst OR price_inst IS NULL)",
+      "SELECT * FROM account INNER JOIN auction_item ON (account.id = auction_item.account_id) WHERE price_curr <=  $1 AND ($2 < ends OR ends IS NULL) AND started IS NOT NULL AND (price_curr < price_inst OR price_inst IS NULL)",
       [price, time]
     );
 
@@ -533,7 +533,7 @@ app.get("/browse", async (req, res) => {
     // get auctions of this category
     for (let i = 0; i < auctionIds.rows.length; i++) {
       var productCategories = await client.query(
-        "SELECT * FROM auction_item WHERE id =  $1 AND $2 < ends AND started IS NOT NULL AND (price_curr < price_inst OR price_inst IS NULL)",
+        "SELECT * FROM auction_item WHERE id =  $1 AND ($2 < ends OR ends IS NULL) AND started IS NOT NULL AND (price_curr < price_inst OR price_inst IS NULL)",
         [auctionIds.rows[i].auction_id, time]
       );
       categoriesResult.push(productCategories.rows);

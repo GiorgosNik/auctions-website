@@ -5,6 +5,7 @@ import {
   IconButton,
   Button,
   Stack,
+  HStack,
   Collapse,
   Link,
   Popover,
@@ -159,18 +160,21 @@ export default function NavBar({ approved, setApproved }) {
             </>
           )}
           {loggedIn && (
-            <Button
-              fontSize={"sm"}
-              fontWeight={600}
-              color={"white"}
-              bg={"purple.400"}
-              _hover={{
-                bg: "purple.300",
-              }}
-              onClick={submitHandler}
-            >
-              Logout
-            </Button>
+            <HStack>
+              <Text> {user.username}</Text>
+              <Button
+                fontSize={"sm"}
+                fontWeight={600}
+                color={"white"}
+                bg={"purple.400"}
+                _hover={{
+                  bg: "purple.300",
+                }}
+                onClick={submitHandler}
+              >
+                Logout
+              </Button>
+            </HStack>
           )}
         </Stack>
       </Flex>
