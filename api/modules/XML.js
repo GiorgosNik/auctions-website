@@ -27,30 +27,36 @@ async function addUser(username, userDict) {
     if (rows.length != 0) {
       return;
     } else {
-      await bcrypt.hash(password, 10, async function (err, hash) {
-        await client.query(
-          "INSERT INTO account (username, password, firstname, lastname, email, phone, country, city, address, postcode, taxcode, approved, sellerScore, bidderScore, sellerReviewCount, bidderReviewCount, messagecount) VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17) RETURNING *",
-          [
-            username,
-            hash,
-            firstname,
-            lastname,
-            email.toLowerCase(),
-            phone,
-            userDict["country"],
-            userDict["city"],
-            address,
-            postcode,
-            taxcode,
-            true,
-            0,
-            0,
-            0,
-            0,
-            0,
-          ]
-        );
-      });
+      const hash = await new Promise((resolve, reject) =>
+        bcrypt.hash(password, 10, async function (err, hash) {
+          if (err) {
+            reject(err);
+          }
+          resolve(hash);
+        })
+      );
+      return await client.query(
+        "INSERT INTO account (username, password, firstname, lastname, email, phone, country, city, address, postcode, taxcode, approved, sellerScore, bidderScore, sellerReviewCount, bidderReviewCount, messagecount) VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17) RETURNING *",
+        [
+          username,
+          hash,
+          firstname,
+          lastname,
+          email.toLowerCase(),
+          phone,
+          userDict["country"],
+          userDict["city"],
+          address,
+          postcode,
+          taxcode,
+          true,
+          0,
+          0,
+          0,
+          0,
+          0,
+        ]
+      );
     }
   } catch (err) {
     return;
@@ -93,29 +99,17 @@ async function addItem(Item) {
         console.error(err.message);
       }
     }
-    var concatenated_filepaths = "";
-    if (Item.files !== undefined) {
-      for (let i = 0; i < Item.files.length; i++) {
-        var filepath = `https://localhost:5000/images/${Item.files[i].originalname}`;
-        if (i === 0) {
-          concatenated_filepaths += filepath;
-        } else {
-          concatenated_filepaths += "," + filepath;
-        }
-      }
-    }
-    await client.query(
+    return await client.query(
       "SELECT * FROM auction WHERE auction_name = $1",
       [Item["name"]],
       async function (err, auction) {
-        await client.query(
+        const id = await client.query(
           "SELECT * FROM account WHERE username = $1",
           [Item["seller"]],
-
           async function (err, id) {
             accountId = id.rows[0]["id"];
             if (auction.rows.length === 0) {
-              await client.query(
+              auction = await client.query(
                 "INSERT INTO auction (auction_name, account_id) VALUES($1,$2) RETURNING *",
                 [Item["name"], accountId],
                 async function (err, auction) {
@@ -128,21 +122,7 @@ async function addItem(Item) {
                         description,
                         startingPrice,
                         0,
-                        concatenated_filepaths,
-                        auction.rows[0].id,
-                      ]
-                    );
-                  } else {
-                    await client.query(
-                      "INSERT INTO auction_item (item_name,account_id,description,price_start,price_curr,price_inst,num_of_bids,image,auction_id, message_sent) VALUES($1,$2,$3,$4,$4,$5,$6,$7,$8, false) RETURNING *",
-                      [
-                        Item["name"],
-                        accountId,
-                        description,
-                        startingPrice,
-                        buyPrice,
-                        0,
-                        concatenated_filepaths,
+                        "https://localhost:5000/images/37375020.jpg",
                         auction.rows[0].id,
                       ],
                       async function (err, newAuction) {
@@ -151,19 +131,21 @@ async function addItem(Item) {
                           try {
                             const categories = await client.query(
                               "SELECT * FROM category WHERE name = $1",
-                              [productCategs[i]]
+                              [productCategs[i]],
+                              async function (err, categories) {
+                                try {
+                                  await client.query(
+                                    "INSERT INTO auction_category (auction_id,category_id) VALUES($1,$2)",
+                                    [
+                                      newAuction.rows[0]["id"],
+                                      categories.rows[0]["id"],
+                                    ]
+                                  );
+                                } catch (err) {
+                                  console.error(err.message);
+                                }
+                              }
                             );
-                            try {
-                              await client.query(
-                                "INSERT INTO auction_category (auction_id,category_id) VALUES($1,$2)",
-                                [
-                                  newAuction.rows[0]["id"],
-                                  categories.rows[0]["id"],
-                                ]
-                              );
-                            } catch (err) {
-                              console.error(err.message);
-                            }
                           } catch (err) {
                             console.error(err.message);
                           }
@@ -172,7 +154,81 @@ async function addItem(Item) {
                         var numbOfBids = 0;
                         for (let bid of Item["bids"]) {
                           // Get the bidder
-                          await client.query(
+                          bidder = await client.query(
+                            "SELECT * FROM account WHERE username = $1",
+                            [bid["bidder"]],
+                            async function (err, bidder) {
+                              // Add the bid to the table
+                              bidAmount = bid["ammount"]
+                                .slice(1)
+                                .replace(",", "");
+                              newBid = await client.query(
+                                "INSERT INTO bid (account_id,auction_id,amount,time) VALUES($1,$2,$3,$4) RETURNING *",
+                                [
+                                  bidder.rows[0]["id"],
+                                  newAuction.rows[0]["id"],
+                                  bidAmount,
+                                  bid["time"],
+                                ]
+                              );
+                              // Increase the bid count by one
+                              await client.query(
+                                "UPDATE auction_item SET price_curr = $1, num_of_bids = $2 WHERE id = $3",
+                                [
+                                  bidAmount,
+                                  numbOfBids + 1,
+                                  newAuction.rows[0]["id"],
+                                ]
+                              );
+                              numbOfBids = numbOfBids + 1;
+                            }
+                          );
+                        }
+                      }
+                    );
+                  } else {
+                    newAuction = await client.query(
+                      "INSERT INTO auction_item (item_name,account_id,description,price_start,price_curr,price_inst,num_of_bids,image,auction_id, message_sent) VALUES($1,$2,$3,$4,$4,$5,$6,$7,$8, false) RETURNING *",
+                      [
+                        Item["name"],
+                        accountId,
+                        description,
+                        startingPrice,
+                        buyPrice,
+                        0,
+                        "https://localhost:5000/images/37375020.jpg",
+                        auction.rows[0].id,
+                      ],
+                      async function (err, newAuction) {
+                        newAuction.rows[0]["category"] = productCategs;
+                        for (let i = 0; i < productCategs.length; i++) {
+                          try {
+                            const categories = await client.query(
+                              "SELECT * FROM category WHERE name = $1",
+                              [productCategs[i]],
+                              async function (err, categories) {
+                                try {
+                                  await client.query(
+                                    "INSERT INTO auction_category (auction_id,category_id) VALUES($1,$2)",
+                                    [
+                                      newAuction.rows[0]["id"],
+                                      categories.rows[0]["id"],
+                                    ]
+                                  );
+                                } catch (err) {
+                                  console.error(err.message);
+                                }
+                              }
+                            );
+                          } catch (err) {
+                            console.error(err.message);
+                          }
+                        }
+
+                        var numbOfBids = 0;
+                        for (let bid of Item["bids"]) {
+                          // Get the bidder
+                          bidder = await client.query(
                             "SELECT * FROM account WHERE username = $1",
                             [bid["bidder"]],
                             async function (err, bidder) {
@@ -212,9 +268,6 @@ async function addItem(Item) {
         );
       }
     );
-
-    //console.log(newAuction.rows[0]);
-    return;
   } catch (err) {
     console.error(err);
     throw "Item Exists";
@@ -295,7 +348,7 @@ app.get("/", async (req, res) => {
                     bidderLocation = "unknown";
                   }
                   if (bid_attribute["children"][1] !== undefined) {
-                    bidderCountry = bid_attribute["children"][1];
+                    bidderCountry = bid_attribute["children"][1]["content"];
                   } else {
                     bidderCountry = "unknown";
                   }
@@ -320,7 +373,8 @@ app.get("/", async (req, res) => {
             }
           }
           if (attribute.name === "Category") {
-            categories.push(attribute["content"]);
+            var cat = attribute["content"];
+            categories.push(cat.replace("&amp;", "&"));
           }
           if (attribute.name === "First_Bid") {
             firstPrice = attribute["content"];
@@ -367,24 +421,18 @@ app.get("/", async (req, res) => {
 
     async function addUsers() {
       const accounts = Object.keys(users);
-      var i = 0;
-      Promise.all(
+      return Promise.all(
         accounts.map(async (user) => {
-          console.log("user ", i);
-          i++;
           await addUser(user, users[user]);
         })
       );
     }
 
     async function addItems() {
-      var number = await client.query("SELECT COUNT(*) FROM account");
-      console.log(number);
-      var i = 0;
-      Promise.all(
+      // var number = await client.query("SELECT COUNT(*) FROM account");
+      // console.log(number);
+      return Promise.all(
         items.map(async (item) => {
-          console.log("item ", i);
-          i++;
           await addItem(item);
         })
       );

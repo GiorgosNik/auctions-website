@@ -111,9 +111,10 @@ app.post("/register", async (req, res) => {
     const { rows } = await getAccounts();
 
     if (rows.length !== 0) {
-      return res
-        .status(409)
-        .json({ error: "Username taken. Please type an other username", id:rows[0].id });
+      return res.status(409).json({
+        error: "Username taken. Please type an other username",
+        id: rows[0].id,
+      });
     } else {
       bcrypt.hash(password, 10, function (err, hash) {
         client.query(
@@ -214,9 +215,7 @@ app.get("/users", async (req, res) => {
 // get users
 app.get("/locations", async (req, res) => {
   try {
-    const users = await client.query(
-      "SELECT address,city,country FROM account"
-    );
+    const users = await client.query("SELECT country FROM account");
     res.json(users.rows);
   } catch (err) {
     console.error(err.message);

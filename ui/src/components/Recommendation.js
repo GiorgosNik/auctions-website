@@ -22,22 +22,44 @@ export default function Recommendation() {
       "https://localhost:5000/recommendation/bid/" +
         jwt(localStorage.getItem("user")).user_id
     );
+    var auction_details = [];
+    for (let recommendation of data) {
+      var res = await Axios.get(
+        "https://localhost:5000/auction/" + recommendation.auction_id
+      );
+      auction_details.push(res.data[0]);
+    }
+    console.log("1.", auction_details);
+
     if (data.length === 0) {
       const { data: data_view } = await Axios.get(
         "https://localhost:5000/recommendation/views/" +
           jwt(localStorage.getItem("user")).user_id
       );
+      console.log("2.", data_view);
+      auction_details = [];
+      for (let recommendation of data_view) {
+        res = await Axios.get(
+          "https://localhost:5000/auction/" + recommendation.auction_id
+        );
+        auction_details.push(res.data[0]);
+      }
+
       if (data_view.length === 0) {
         const { data: auction_items } = await Axios.get(
           "https://localhost:5000/auction/"
         );
-        setRecommended(auction_items.slice(0, 5));
-      } else {
-        setRecommended(data_view);
+        console.log("3.", auction_items);
+        auction_details = [];
+        for (let recommendation of auction_items) {
+          res = await Axios.get(
+            "https://localhost:5000/auction/" + recommendation.auction_id
+          );
+          auction_details.push(res.data[0]);
+        }
       }
-    } else {
-      setRecommended(data);
     }
+    setRecommended(auction_details.slice(0, 5));
   };
 
   useEffect(() => {
@@ -126,8 +148,8 @@ function ProductCard({ productName, price, buyoutPrice, id, image }) {
             >
               <Image
                 rounded={"lg"}
-                height={230}
-                width={282}
+                height={180}
+                width={200}
                 objectFit={"cover"}
                 src={image}
               />

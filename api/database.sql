@@ -84,11 +84,11 @@ CREATE TABLE message(
 CREATE TABLE recommendation_view(
     id SERIAL PRIMARY KEY,
     account_id INT REFERENCES account(id) ON DELETE CASCADE,
-    auction_id INT REFERENCES auction_item(id) ON DELETE CASCADE,
+    auction_id INT REFERENCES auction_item(id) ON DELETE CASCADE
 );
 
 CREATE TABLE recommendation_bid(
     id SERIAL PRIMARY KEY,
     account_id INT REFERENCES account(id) ON DELETE CASCADE,
-    auction_id INT REFERENCES auction_item(id) ON DELETE CASCADE,
+    auction_id INT REFERENCES auction_item(id) ON DELETE CASCADE
 );

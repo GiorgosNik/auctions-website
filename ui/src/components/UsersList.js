@@ -141,6 +141,7 @@ export default function UsersList() {
   return (
     <Stack>
       <br></br>
+      <GetUsefulData />
       <Box p={50} align={"center"}>
         <TableContainer
           bg={"purple.100"}
@@ -197,7 +198,6 @@ export default function UsersList() {
           </Table>
         </TableContainer>
       </Box>
-      <GetUsefulData />
     </Stack>
   );
 }
@@ -205,14 +205,12 @@ export default function UsersList() {
 function GetUsefulData() {
   const [auctions, setAuctions] = useState(null);
   const [callRecommendation, setCallRecommendation] = useState(false);
-  const [setBidArray] = useState({});
   const [usersFeatures, setUsersFeatures] = useState({});
   const [auctionsFeatures, setAuctionsFeatures] = useState({});
   const [dataMatrix, setDataMatrix] = useState({});
   const [userIndex, setUserIndex] = useState({});
   const [itemIndex, setItemIndex] = useState({});
 
-  const [setBidArrayView] = useState({});
   const [usersFeaturesView, setUsersFeaturesView] = useState({});
   const [auctionsFeaturesView, setAuctionsFeaturesView] = useState({});
   const [dataMatrixView, setDataMatrixView] = useState({});
@@ -281,7 +279,6 @@ function GetUsefulData() {
       }
     }
 
-    setBidArray(bidMap);
     setUserIndex(user_index);
     setItemIndex(item_index);
     setDataMatrix(dataArray);
@@ -345,7 +342,6 @@ function GetUsefulData() {
         index++;
       }
     }
-    setBidArrayView(bidMap);
     setUserIndexView(user_index);
     setItemIndexView(item_index);
     setDataMatrixView(dataArray);
@@ -361,7 +357,7 @@ function GetUsefulData() {
     const data = auctions;
     const fileName = "auctions";
     const exportType = "xml";
-    console.log(data);
+    // console.log(data);
     exportFromJSON({ data, fileName, exportType });
   };
 
@@ -389,25 +385,33 @@ function GetUsefulData() {
     if (auctionsFeatures.length === undefined) {
       return;
     }
-
     let { P, Q } = matrixFactorization(
       dataMatrix,
       usersFeatures,
       auctionsFeatures
     );
-    var arr = multiply(P, Q);
+    var arr = null;
+    arr = multiply(P, Q);
+    // console.log("array = ", arr);
+    // console.log("item index = ", itemIndex);
+    const arr_copy = [];
 
-    var scores = [];
-    var topValues = [];
-    arr.forEach((row, index) => {
-      topValues = row.sort((a, b) => b - a).slice(0, 5); // get indices to get the auction ids
-      scores.push(topValues);
-    });
+    for (let row of arr) {
+      var temp = [];
+      for (let elem of row) {
+        temp.push(elem);
+      }
+      arr_copy.push(temp);
+    }
 
     var curr_user = 0;
     var account_id;
-    for (let row of scores) {
-      var itemIndexCopy = itemIndex;
+    var final = [];
+    const deleteOldRecommendations = async (id) => {
+      await Axios.delete("https://localhost:5000/recommendation/bid");
+    };
+    deleteOldRecommendations();
+    for (let row of arr_copy) {
       // sort every row of scores
       for (var i = 1; i < row.length; i++) {
         for (var j = 0; j < i; j++) {
@@ -415,15 +419,23 @@ function GetUsefulData() {
             var x = row[i];
             row[i] = row[j];
             row[j] = x;
-
-            var y = itemIndexCopy[i];
-            itemIndexCopy[i] = itemIndexCopy[j];
-            itemIndexCopy[j] = y;
           }
         }
       }
-
-      var final = Object.keys(itemIndexCopy).slice(0, 5);
+      var scores = Object.values(arr_copy[curr_user]).slice(0, 5);
+      var line = [];
+      for (let score of scores) {
+        for (i = 0; i < arr[curr_user].length; i++) {
+          if (score === arr[curr_user][i]) {
+            Object.entries(itemIndex).map(([key, value]) => {
+              if (value === i) {
+                line.push(key);
+              }
+            });
+          }
+        }
+      }
+      final.push(line);
 
       Object.entries(userIndex).forEach(([user_id, user_index]) => {
         if (user_index === curr_user) {
@@ -432,7 +444,7 @@ function GetUsefulData() {
         }
       });
 
-      for (let auction_id of final) {
+      for (let auction_id of final[curr_user]) {
         try {
           let body = {
             account_id,
@@ -449,6 +461,7 @@ function GetUsefulData() {
       }
       curr_user++;
     }
+    // console.log(final);
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dataMatrix, usersFeatures, auctionsFeatures, userIndex, itemIndex]);
@@ -471,17 +484,24 @@ function GetUsefulData() {
     );
     var arr = multiply(P, Q);
 
-    var scores = [];
-    var topValues = [];
-    arr.forEach((row, index) => {
-      topValues = row.sort((a, b) => b - a).slice(0, 5); // get indices to get the auction ids
-      scores.push(topValues);
-    });
+    const arr_copy = [];
+
+    for (let row of arr) {
+      var temp = [];
+      for (let elem of row) {
+        temp.push(elem);
+      }
+      arr_copy.push(temp);
+    }
 
     var curr_user = 0;
     var account_id;
-    for (let row of scores) {
-      var itemIndexCopy = itemIndexView;
+    var final = [];
+    const deleteOldRecommendations = async (id) => {
+      await Axios.delete("https://localhost:5000/recommendation/view");
+    };
+    deleteOldRecommendations();
+    for (let row of arr_copy) {
       // sort every row of scores
       for (var i = 1; i < row.length; i++) {
         for (var j = 0; j < i; j++) {
@@ -489,14 +509,23 @@ function GetUsefulData() {
             var x = row[i];
             row[i] = row[j];
             row[j] = x;
-
-            var y = itemIndexCopy[i];
-            itemIndexCopy[i] = itemIndexCopy[j];
-            itemIndexCopy[j] = y;
           }
         }
       }
-      var final = Object.keys(itemIndexCopy).slice(0, 5);
+      var scores = Object.values(arr_copy[curr_user]).slice(0, 5);
+      var line = [];
+      for (let score of scores) {
+        for (i = 0; i < arr[curr_user].length; i++) {
+          if (score === arr[curr_user][i]) {
+            Object.entries(itemIndexView).map(([key, value]) => {
+              if (value === i) {
+                line.push(key);
+              }
+            });
+          }
+        }
+      }
+      final.push(line);
 
       Object.entries(userIndexView).forEach(([user_id, user_index]) => {
         if (user_index === curr_user) {
@@ -505,13 +534,13 @@ function GetUsefulData() {
         }
       });
 
-      for (let auction_id of final) {
+      for (let auction_id of final[curr_user]) {
         try {
           let body = {
             account_id,
             auction_id,
           };
-          fetch("https://localhost:5000/recommendation/bid", {
+          fetch("https://localhost:5000/recommendation/view", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(body),
@@ -534,8 +563,7 @@ function GetUsefulData() {
 
   return (
     <HStack style={{ display: "flex" }}>
-      <Stack style={{ marginLeft: "auto" }}></Stack>
-      <HStack style={{ marginLeft: "auto" }}>
+      <HStack style={{ marginLeft: "auto", marginRight: "auto" }}>
         <a
           href={`data:text/json;charset=utf-8,${encodeURIComponent(
             JSON.stringify({ auctions })

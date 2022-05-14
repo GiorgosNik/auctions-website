@@ -161,7 +161,14 @@ function Filters({ setProducts }) {
   const fetchLocations = async () => {
     const { data } = await Axios.get("https://localhost:5000/auth/locations");
     const locations = data;
-    setLocations(locations);
+    let countries = [];
+    for (let location of locations) {
+      if (location.country !== "unknown") {
+        countries.push(location.country);
+      }
+    }
+    console.log([...new Set(countries)]);
+    setLocations([...new Set(countries)]);
   };
 
   const fetchProducts = async () => {
@@ -224,7 +231,7 @@ function Filters({ setProducts }) {
         >
           Category
         </p>
-        <Stack style={{overflowY: 'scroll', height: '300px'}}>
+        <Stack style={{ overflowY: "scroll", height: "300px" }}>
           {categories.map((category, index) => {
             return (
               <Checkbox
@@ -296,9 +303,9 @@ function Filters({ setProducts }) {
             return (
               <MenuItem
                 key={index}
-                onClick={() => setProductLocation(location.country)}
+                onClick={() => setProductLocation(location)}
               >
-                {location.country}
+                {location}
               </MenuItem>
             );
           })}
@@ -379,7 +386,7 @@ function ProductCard({
                 fontSize={"sm"}
                 textTransform={"uppercase"}
               >
-                {sellerUsername + " " + id}
+                {"listed by " + sellerUsername}
               </Text>
               <Heading fontSize={"2xl"} fontFamily={"body"} fontWeight={500}>
                 {productName}

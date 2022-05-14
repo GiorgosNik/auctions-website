@@ -218,7 +218,7 @@ export default function AuctionPage() {
                 fontWeight={400}
                 fontSize={"2xl"}
               >
-                {"Current Price: " + auction.price_curr}
+                {"Current Price: $" + auction.price_curr}
               </Text>
             </Stack>
             <Text
@@ -228,9 +228,9 @@ export default function AuctionPage() {
             >
               {"Auction: " + auction.auction_name}
             </Text>
-            {auction.price_inst !== "" && (
+            {auction.price_inst !== "" && auction.price_inst !== null && (
               <Text fontWeight={200} fontSize={"lg"}>
-                {"Buyout Price " + auction.price_inst}
+                {"Buyout Price: $" + auction.price_inst}
               </Text>
             )}
 
@@ -239,7 +239,7 @@ export default function AuctionPage() {
               fontWeight={200}
               fontSize={"lg"}
             >
-              {"Starting Price " + auction.price_start}
+              {"Starting Price: $" + auction.price_start}
             </Text>
           </Box>
           {auction.started !== null && (
@@ -356,7 +356,9 @@ export default function AuctionPage() {
               <SimpleGrid columns={{ base: 1, md: 2 }} spacing={10}>
                 <List spacing={2}>
                   <ListItem>{seller.username}</ListItem>
-                  <ListItem>Review Score : {review}</ListItem>
+                  {!isNaN(review) && (
+                    <ListItem>Review Score : {review}</ListItem>
+                  )}
                 </List>
                 <List spacing={2}>
                   <ListItem>
