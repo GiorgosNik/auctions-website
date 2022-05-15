@@ -50,13 +50,11 @@ export default function Recommendation() {
         );
         auction_details.push(res.data[0]);
       }
-      console.log("1.", auction_details);
     } else if (hasViewedAuctions.length !== 0) {
       const { data: data_view } = await Axios.get(
-        "https://localhost:5000/recommendation/views/" +
+        "https://localhost:5000/recommendation/view/" +
           jwt(localStorage.getItem("user")).user_id
       );
-      console.log("2.", data_view);
       auction_details = [];
       for (let recommendation of data_view) {
         res = await Axios.get(
@@ -65,17 +63,9 @@ export default function Recommendation() {
         auction_details.push(res.data[0]);
       }
     } else {
-      const { data: auction_items } = await Axios.get(
+      const { data: auction_details } = await Axios.get(
         "https://localhost:5000/auction/"
       );
-      console.log("3.", auction_items);
-      auction_details = [];
-      for (let recommendation of auction_items) {
-        res = await Axios.get(
-          "https://localhost:5000/auction/" + recommendation.auction_id
-        );
-        auction_details.push(res.data[0]);
-      }
     }
     setRecommended(auction_details.slice(0, 5));
   };

@@ -12,37 +12,58 @@ const defaultMarker = new L.icon({
 
 export default function OpenStreetMap({ address, city }) {
   const [position, setPosition] = useState([]);
-  if (address) {
-    const addressArray = address.split(" ");
-    var addressString = "";
-    for (let index = 0; index < addressArray.length; index++) {
-      if (index === 0) {
-        addressString += addressArray[index];
-      } else {
-        addressString += "+";
-        addressString += addressArray[index];
-      }
-    }
-  }
+  const [addressDetails, setAddress] = useState([]);
+  const [cityDetails, setCity] = useState([]);
 
+  const fixFormat = async () => {
+    if (address) {
+      const addressArray = address.split(" ");
+      var addressString = "";
+      for (let index = 0; index < addressArray.length; index++) {
+        if (index === 0) {
+          addressString += addressArray[index];
+        } else {
+          addressString += "+";
+          addressString += addressArray[index];
+        }
+      }
+      setAddress(addressString);
+      setCity(city);
+    }
+  };
   const fetchCoordinates = async () => {
     const { data } = await Axios.get(
       "https://nominatim.openstreetmap.org/search?q=" +
-        addressString +
+        addressDetails +
         ",+" +
-        city +
+        cityDetails +
         "&format=json&polygon=1&addressdetails=1"
     );
-    const latitude = parseFloat(data[0].lat);
-    const longitude = parseFloat(data[0].lon);
-    setPosition([latitude, longitude]);
+    if (data[0] !== undefined) {
+      const latitude = parseFloat(data[0]?.lat);
+      const longitude = parseFloat(data[0]?.lon);
+      setPosition([latitude, longitude]);
+    }
   };
-  useEffect(() => {
-    fetchCoordinates();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   useEffect(() => {
+    fixFormat();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [address, city]);
+
+  useEffect(() => {
+    if (addressDetails.length === 0 || cityDetails.length === 0) {
+      return;
+    }
+
+    fetchCoordinates();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [addressDetails, cityDetails]);
+
+  useEffect(() => {
+    if (position.length === 0) {
+      return;
+    }
     console.log(position);
   }, [position]);
 

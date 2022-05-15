@@ -62,28 +62,36 @@ The main technologies used are:
 \begin{itemize}
     \item React Framework for the frontend
     \item Express - Node.js for the backend (REST API)
-    \item PostgreSQL as the database
+    \item PostgreSQL as the relational database
 \end{itemize}
-We chose the specific technologies as they are among the most popular ones in the field, they are well documented and offer, of course, many possibilities. We created a RESTful API using HTTP requests and JSON for data interchange between frontend and backend, in order to ensure component independence and flexibility which we tested with Postman. In the following sections we will discuss in more detail all the challenges we faced and the services we implemented.
+We chose the specific technologies as they are among the most popular ones in the field, they are well documented and offer, of course, many possibilities. We created a RESTful API using HTTP requests and JSON for data interchange between frontend and backend, in order to ensure component independence and flexibility, which we tested with Postman. In the following sections we will discuss in more detail all the challenges we faced and the services we implemented.
 \section{Installation}
 \begin{itemize}
 \item sudo service postgresql start : to start the db
+\item copy and paste the queries found in api/database.sql into the Postgres console, in order to initialize the database, create the tables etc.
+\item check the api/.env file, so that these configurations match those of the host database.
 \item cd api; npm install; npm start : to install packages and start backend
 \item cd ui; npm install; npm start : to install packages and start frontend
+\item create a user with "admin" username to have access to the admin pages
+\item go to https://localhost:5000/xml to fill the database with data from the given XML files.
 \end{itemize}
 \section{Database}
 The postgreSQL database we used consists of the following tables:
 \begin{itemize}
 \item account : used to login/register/get users/get user etc
-\item auction : used to create/update/delete/see auction(s) etc
+\item auction, auction\_item : used to create/update/delete/see auction(s) etc
 \item auction\_category : intermediate table because of many to many relationship between auction and category
 \item bid : used to create bid/get bids
 \item category : used to create/delete/get category/categories
 \item message : used to send message/get inbox/sent messages
 \item newsletter : used to add an email
+\item product\_view : used to add the auctions a user has viewed, used for the recommender system
+\item recommendation\_bid : recommendations based on user's bids
+\item recommendation\_view : recommendations based on product views
 \end{itemize}
 The tables' fields can be seen in detail in api/database.sql.
-
+\section{HTTPS protocol}
+The website uses SSL/TLS certificates to ensure security of the transactions.
 \section{Authentication}
 The user can login/register in any page of the website opening the modal popup that is found in the navigation bar, in order to be able to bid or sell. When the user signs up, the password they selected is encrypted and saved in the database with the other data and a JSON Web Token is generated that is saved in the session and which is deleted when the user logs out. We tried to validate as much as we could the input of the user in the all the forms and on error we send an appropriate message to the user.
 
@@ -94,13 +102,13 @@ We created a simple Newsletter form, where a user can add their email to the dat
 The user can create an auction by filling the corresponding form, specifying the auction details. They can also edit an auction before it has been started, they can delete it, they can view it, they can start it etc. All started and non terminated auctions are displayed and can be accessed by all users, even non authenticated ones.
 
 \section{Administration}
-On the installation of the app an admin user is created, who can see all users' data, approve or delete a user registration and download in json or xml format all the auctions of the website. Only the specific user has access to the corresponding endpoints.
+On the installation of the app an admin user is created, who can see all users' data, approve or delete a user registration and download in json or xml format all the auctions of the website. Plus, the admin user pressing a button in the users' page, can trigger the recommender system calculations. Only the specific user has access to the corresponding endpoints.
 
 \section{Messaging - Notifications}
-Using conditional rendering and performing queries to the  database we get the inbox/sent/new message page. When a user receives a message it is displayed right away in the inbox, since setInterval is used to refresh the page occasionally. Notification for new messages is shown in all the pages until the user goes to their inbox. For this, we store in the account table the number of messages they have and we compare it to the new number of received messages, in order to show notifications.
+Using conditional rendering and performing queries to the  database we get the inbox/sent/new message page. When a user receives a message it is displayed right away in the inbox, since setInterval is used to refresh the page occasionally. Notification for new messages is shown in all the pages until the user goes to their inbox. For this, we store in the account table the number of messages they have and we compare it to the new number of received messages, in order to show notifications. Plus, when a user wins an auction, a message is sent to them automatically by the seller.
 
 \section{OpenStreetMap}
-For this task we make a GET call to the OpenStreetMap API using the seller's address and city data, in order to get the coordinates of the auction. The we use these coordinates in combination with the React Leaflet library to see this location in the map. 
+For this task we do a GET call to the OpenStreetMap API using the seller's address and city data, in order to get the coordinates of the auction. The we use these coordinates in combination with the React Leaflet library to see this location in the map. 
 
 \section{Filters}
 In the page where users browse through the auctions, we have added some filters, so that the user can see what they really want. So, we filter the auctions, using some db queries, according to the category, price and location. For these we used checkboxes, dropdown menu and a range slider in the user interface, where all the possible options are shown from the backend. Every time the user changes the state of one of these, a new 'select' query is created. When the user chooses many filters, the auctions shown should satisfy them all at the same time(intersection).
@@ -112,16 +120,108 @@ For the auctions export in XML format we used the exportFromJSON function with t
 \section{Search Engine}
 We created a simple search engine that helps display the auctions that match a specific description, using Postgres Full-Text Search. First of all, we tokenized and performed stemming on the description of each auction and added the result to a new column. We then created a new column with the Generalized Inverted Index and so we were able to perform queries using the user input.
 \section{Recommender System}
+We created two recommender systems, one based on users' bids and one based on users' product views, which are created when the administrator presses a button in the Users Administration Page. First of all, we create a matrix using the information given by the "Bid" table, the account ids of the bidders and the corresponding auction id of each transaction. Then, two random matrices are generated that correspond to the user features and the auction item features. Then, finding the squared distance between the prediction and the original matrix, and minimizing the RMSE, we get the final two matrices and multiplying them we get the recommended auctions for each user. We get the 5 auctions with the highest scores and display them to the user's home page. If a user has no history of bids, the recommended auctions are based on their product view history. If they have not viewed any items either, then some random products are displayed.
+
 
 \section{Challenges}
 The most challenging parts of this project were:
 \begin{itemize}
+\item inserting the data from the given xml to the website's database, since the size of them was quite large and we had to perform many queries and process the given data
 \item finding the right library/way to perform some more advanced tasks, such as creating the map, uploading images, exporting json/xml
 \item performing more advanced queries to filter the auctions shown
 \item creating the search engine
 \item restricting access in pages, hide elements from non authenticated users
 \item getting to know react hooks, handlers, asynchronous functions and conditional rendering
+\item creating the recommender system algorithm, based on either the user's bids or product views and displaying the result in the user interface. Plenty of requests had to be made and many parameters had to be taken into consideration, thus the procedure was rather complicated.
 \end{itemize}
 \section{Conclusion}
-During this assignment, we had the opportunity to do research on plenty of concepts and technologies. We familiarized with web development, coming across realistic scenarios and finding solutions using different libraries and frameworks. All in all, me managed to create a user-friendly website with all the basic and some more advanced functionalities of such an application.
+During this assignment, we had the opportunity to do research on plenty of concepts and technologies. We familiarized with web development, coming across realistic scenarios and finding solutions using different libraries and frameworks. All in all, we managed to create a user-friendly website with all the basic and some more advanced functionalities of such an application.
+\section{Screenshots}
+\begin{figure}[htp]
+    \centering
+    \includegraphics[width=100mm]{images/Capture3.PNG}
+    \caption{Home Page}
+    \label{fig:galaxy}
+\end{figure}
+
+\begin{figure}[htp]
+    \centering
+    \includegraphics[width=80mm]{images/Capture55.PNG}
+    \caption{Registration Form}
+    \label{fig:galaxy}
+\end{figure}
+
+\begin{figure}[htp]
+    \centering
+    \includegraphics[width=100mm]{images/Capture40.PNG}
+    \caption{Waiting Room}
+    \label{fig:galaxy}
+\end{figure}
+
+\begin{figure}[htp]
+    \centering
+    \includegraphics[width=100mm]{images/30.PNG}
+    \caption{Messaging}
+    \label{fig:galaxy}
+\end{figure}
+
+\begin{figure}[htp]
+    \centering
+    \includegraphics[width=100mm]{images/Capture.PNG}
+    \caption{Map}
+    \label{fig:galaxy}
+\end{figure}
+
+\begin{figure}[htp]
+    \centering
+    \includegraphics[width=100mm]{images/Capture2.PNG}
+    \caption{Users Administration Page}
+    \label{fig:galaxy}
+\end{figure}
+
+\begin{figure}[htp]
+    \centering
+    \includegraphics[width=100mm]{images/Capture50.PNG}
+    \caption{User Administration}
+    \label{fig:galaxy}
+\end{figure}
+
+\begin{figure}[htp]
+    \centering
+    \includegraphics[width=100mm]{images/Capture4.PNG}
+    \caption{Browse Auctions, Filters, Search Bar}
+    \label{fig:galaxy}
+\end{figure}
+
+\begin{figure}[htp]
+    \centering
+    \includegraphics[width=100mm]{images/Capture5.PNG}
+    \caption{Auction Creation Form}
+    \label{fig:galaxy}
+\end{figure}
+
+
+\begin{figure}[htp]
+    \centering
+    \includegraphics[width=100mm]{images/Capture10.PNG}
+    \caption{Auction View}
+    \label{fig:galaxy}
+\end{figure}
+
+\begin{figure}[htp]
+    \centering
+    \includegraphics[width=100mm]{images/Capture11.PNG}
+    \caption{Bid Confirmation}
+    \label{fig:galaxy}
+\end{figure}
+
+\begin{figure}[htp]
+    \centering
+    \includegraphics[width=100mm]{images/recommendation.PNG}
+    \caption{Recommended auctions in user's Home Page}
+    \label{fig:galaxy}
+\end{figure}
+
+
+
 \end{document}

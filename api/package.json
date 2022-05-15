@@ -9,14 +9,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/GiorgosNik/web-dev-project.git"
+    "url": "git+https://github.com/GiorgosNik/auctions-website.git"
   },
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/GiorgosNik/web-dev-project/issues"
+    "url": "https://github.com/GiorgosNik/auctions-website/issues"
   },
-  "homepage": "https://github.com/GiorgosNik/web-dev-project#readme",
+  "homepage": "https://github.com/GiorgosNik/auctions-website#readme",
   "dependencies": {
     "axios": "^0.27.2",
     "bcrypt": "^5.0.1",
@@ -24,18 +24,14 @@
     "cors": "^2.8.5",
     "dotenv": "^16.0.0",
     "express": "^4.17.3",
-    "express-fileupload": "^1.3.1",
-    "file-system": "^2.2.2",
+    "file-system": "^1.2.2",
     "jsonwebtoken": "^8.5.1",
     "jwt-decode": "^3.1.2",
     "moment": "^2.29.2",
     "moment-timezone": "^0.5.34",
     "multer": "^1.4.4",
-    "node-fetch": "^3.2.4",
     "nodemon": "^2.0.15",
     "pg": "^8.7.3",
-    "react-moment": "^1.1.2",
-    "react-xml-parser": "^1.1.8",
     "xml-parser": "^1.2.1"
   }
 }

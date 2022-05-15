@@ -97,9 +97,9 @@ export default function AuctionPage() {
 
     const auction = data;
     setAuction(auction[0]);
-    setAuctionId(auction[0].id);
-    setCategories(auction[0].categories);
-    setSeller(auction[0].user);
+    setAuctionId(auction[0]?.id);
+    setCategories(auction[0]?.categories);
+    setSeller(auction[0]?.user);
   };
   const bidAmountChangeHandler = (event) => {
     setBidAmount(event.target.value);
@@ -154,20 +154,29 @@ export default function AuctionPage() {
 
   const fetchReview = async () => {
     const { data } = await Axios.get(
-      "https://localhost:5000/auth/review/" + auction.user.id
+      "https://localhost:5000/auth/review/" + auction?.user?.id
     );
     const review = data;
-    setReview(review[0].sellerscore / review[0].sellerreviewcount);
+    setReview(review[0]?.sellerscore / review[0]?.sellerreviewcount);
   };
 
   useEffect(() => {
     fetchAuction();
-    fetchReview();
-    viewCount();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   });
 
+  useEffect(() => {
+    fetchReview();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [auction]);
+
+  useEffect(() => {
+    viewCount();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [auction_id, account_id]);
+
   const ratingChanged = (newRating) => {
-    var seller_id = auction.user.id;
+    var seller_id = auction?.user?.id;
     var score = newRating;
     const body = {
       seller_id,
@@ -242,53 +251,58 @@ export default function AuctionPage() {
               {"Starting Price: $" + auction.price_start}
             </Text>
           </Box>
-          {(auction.started !== null && (auction.price_curr < auction.price_inst || auction.price_inst === null) && auction.message_sent === false) && (
-            <FormControl id="bid_form" isRequired>
-              <Stack direction={["column", "row"]}>
-                <Box>
-                  <FormLabel color={"gray"} fontWeight={"600"}>
-                    Make a bid
-                  </FormLabel>
-                  <Stack direction={["column", "row"]}>
-                    <InputGroup>
-                      <InputLeftElement
-                        pointerEvents="none"
-                        color="gray.300"
-                        fontSize="1.2em"
-                        children="$"
-                      />
-                      <Input
-                        htmlSize={17}
-                        width="auto"
-                        type="text"
-                        onChange={bidAmountChangeHandler}
-                        onKeyPress={(event) => {
-                          if (!/[0-9]/.test(event.key)) {
-                            event.preventDefault();
-                          }
-                        }}
-                        color={"gray"}
-                        fontWeight={"500"}
-                        placeholder="Your Bid"
-                        _placeholder={{ color: "gray.500" }}
-                      />
-                      <InputRightAddon children="$" />
-                    </InputGroup>
-                    <BidConfirmation submitHandler={submitHandler} />
-                  </Stack>
-                  {errorMessage !== "" && (
-                    <span
-                      id="message"
-                      style={{ color: "red", fontSize: "15px" }}
-                    >
-                      {errorMessage}
-                    </span>
-                  )}
-                </Box>
-              </Stack>
-            </FormControl>
-          )}
-          {(auction.started === null || (auction.price_curr >= auction.price_inst && auction.price_inst !== null)) && (
+          {auction.started !== null &&
+            (auction.price_curr < auction.price_inst ||
+              auction.price_inst === null) &&
+            auction.message_sent === false && (
+              <FormControl id="bid_form" isRequired>
+                <Stack direction={["column", "row"]}>
+                  <Box>
+                    <FormLabel color={"gray"} fontWeight={"600"}>
+                      Make a bid
+                    </FormLabel>
+                    <Stack direction={["column", "row"]}>
+                      <InputGroup>
+                        <InputLeftElement
+                          pointerEvents="none"
+                          color="gray.300"
+                          fontSize="1.2em"
+                          children="$"
+                        />
+                        <Input
+                          htmlSize={17}
+                          width="auto"
+                          type="text"
+                          onChange={bidAmountChangeHandler}
+                          onKeyPress={(event) => {
+                            if (!/[0-9]/.test(event.key)) {
+                              event.preventDefault();
+                            }
+                          }}
+                          color={"gray"}
+                          fontWeight={"500"}
+                          placeholder="Your Bid"
+                          _placeholder={{ color: "gray.500" }}
+                        />
+                        <InputRightAddon children="$" />
+                      </InputGroup>
+                      <BidConfirmation submitHandler={submitHandler} />
+                    </Stack>
+                    {errorMessage !== "" && (
+                      <span
+                        id="message"
+                        style={{ color: "red", fontSize: "15px" }}
+                      >
+                        {errorMessage}
+                      </span>
+                    )}
+                  </Box>
+                </Stack>
+              </FormControl>
+            )}
+          {(auction.started === null ||
+            (auction.price_curr >= auction.price_inst &&
+              auction.price_inst !== null)) && (
             <Text
               color={"purple.500"}
               fontSize={"2xl"}
@@ -362,11 +376,11 @@ export default function AuctionPage() {
                 </List>
                 <List spacing={2}>
                   <ListItem>
-                    {seller.address +
+                    {seller?.address +
                       ", " +
-                      seller.city +
+                      seller?.city +
                       ", " +
-                      seller.country}
+                      seller?.country}
                   </ListItem>
                 </List>
               </SimpleGrid>
@@ -374,7 +388,7 @@ export default function AuctionPage() {
           </Stack>
         </Stack>
       </SimpleGrid>
-      <OpenStreetMap address={seller.address} city={seller.city} />
+      <OpenStreetMap address={seller?.address} city={seller?.city} />
     </Container>
   );
 }

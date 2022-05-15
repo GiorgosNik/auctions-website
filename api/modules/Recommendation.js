@@ -28,7 +28,7 @@ app.post("/bid", async (req, res) => {
   }
 });
 
-app.post("/views", async (req, res) => {
+app.post("/view", async (req, res) => {
   try {
     const { account_id, auction_id } = req.body;
     const getRecommendations = () =>
@@ -65,7 +65,7 @@ app.get("/bid/:id", async (req, res) => {
   }
 });
 
-app.get("/views/:id", async (req, res) => {
+app.get("/view/:id", async (req, res) => {
   try {
     const id = req.params.id;
     const recommended = await client.query(
@@ -87,7 +87,7 @@ app.delete("/bid", async (req, res) => {
   }
 });
 
-app.delete("/views", async (req, res) => {
+app.delete("/view", async (req, res) => {
   try {
     await client.query("DELETE FROM recommendation_view");
     res.json("Recommendations were deleted");

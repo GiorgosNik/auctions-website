@@ -443,19 +443,13 @@ function GetUsefulData() {
           return;
         }
       });
-      console.log(
-        "User: ",
-        curr_user,
-        " Final Size: ",
-        final[curr_user].length
-      );
       for (let auction_id of final[curr_user]) {
         try {
           let body = {
             account_id,
             auction_id,
           };
-          console.log(body);
+          // console.log(body);
           fetch("https://localhost:5000/recommendation/bid", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -489,7 +483,6 @@ function GetUsefulData() {
       auctionsFeaturesView
     );
     var arr = multiply(P, Q);
-
     const arr_copy = [];
 
     for (let row of arr) {
@@ -507,6 +500,7 @@ function GetUsefulData() {
       await Axios.delete("https://localhost:5000/recommendation/view");
     };
     deleteOldRecommendations();
+
     for (let row of arr_copy) {
       // sort every row of scores
       for (var i = 1; i < row.length; i++) {
@@ -546,6 +540,7 @@ function GetUsefulData() {
             account_id,
             auction_id,
           };
+
           fetch("https://localhost:5000/recommendation/view", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
