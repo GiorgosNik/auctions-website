@@ -102,14 +102,8 @@ dist
 # TernJS port file
 .tern-port
 
-# SSL Certificates
-*.pem
-
 ui/package-lock.json
 api/package-lock.json
 
 ui/node_modules/
 api/node_modules/
-
-
-*.pem
