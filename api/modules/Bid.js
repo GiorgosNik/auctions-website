@@ -132,4 +132,16 @@ app.get("/:id", async (req, res) => {
   }
 });
 
+app.get("/my/:id", async (req, res) => {
+  try {
+    const account_id = req.params.id;
+    const bid = await client.query("SELECT * FROM bid WHERE account_id =  $1", [
+      account_id,
+    ]);
+    res.json(bid.rows);
+  } catch (err) {
+    console.error(err.message);
+  }
+});
+
 module.exports = app;

@@ -5,7 +5,7 @@ const client = require("../database.js");
 //View
 app.post("/", async (req, res) => {
   try {
-    const { account_id, auction_id} = req.body;
+    const { account_id, auction_id } = req.body;
 
     ////////////////// validate input //////////////////
     if (!account_id) {
@@ -14,7 +14,7 @@ app.post("/", async (req, res) => {
     if (!auction_id) {
       return res.status(400).json({ error: "auction_id cannot be blank" });
     }
-    
+
     const getUser = () =>
       client.query("SELECT * FROM account WHERE id = $1", [account_id]);
     const user = await getUser();
@@ -26,7 +26,7 @@ app.post("/", async (req, res) => {
     } else if (auction_item.rows.length == 0) {
       return res.status(409).json({ error: "No such auction_item" });
     } else {
-      console.log(account_id,auction_id)
+      console.log(account_id, auction_id);
       const newView = await client.query(
         "INSERT INTO product_view (account_id,auction_id) VALUES($1,$2) RETURNING *",
         [account_id, auction_id]
@@ -70,7 +70,23 @@ app.get("/", async (req, res) => {
 app.get("/:id", async (req, res) => {
   try {
     const id = req.params.id;
-    const view = await client.query("SELECT * FROM product_view WHERE id =  $1", [id]);
+    const view = await client.query(
+      "SELECT * FROM product_view WHERE id =  $1",
+      [id]
+    );
+    res.json(view.rows);
+  } catch (err) {
+    console.error(err.message);
+  }
+});
+
+app.get("/my/:id", async (req, res) => {
+  try {
+    const id = req.params.account_id;
+    const view = await client.query(
+      "SELECT * FROM product_view WHERE account_id =  $1",
+      [id]
+    );
     res.json(view.rows);
   } catch (err) {
     console.error(err.message);

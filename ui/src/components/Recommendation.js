@@ -18,20 +18,40 @@ export default function Recommendation() {
   var [recommended, setRecommended] = useState([]);
 
   const fetchRecommendations = async () => {
-    const { data } = await Axios.get(
-      "https://localhost:5000/recommendation/bid/" +
-        jwt(localStorage.getItem("user")).user_id
-    );
-    var auction_details = [];
-    for (let recommendation of data) {
-      var res = await Axios.get(
-        "https://localhost:5000/auction/" + recommendation.auction_id
-      );
-      auction_details.push(res.data[0]);
-    }
-    console.log("1.", auction_details);
+    const params = new URLSearchParams([
+      ["account_id", jwt(localStorage.getItem("user")).user_id],
+    ]);
 
-    if (data.length === 0) {
+    const { data: hasBids } = await Axios.get(
+      "https://localhost:5000/bid/my/" +
+        jwt(localStorage.getItem("user")).user_id,
+      {
+        params,
+      }
+    );
+
+    const { data: hasViewedAuctions } = await Axios.get(
+      "https://localhost:5000/view/my/" +
+        jwt(localStorage.getItem("user")).user_id,
+      {
+        params,
+      }
+    );
+
+    if (hasBids.length !== 0) {
+      const { data } = await Axios.get(
+        "https://localhost:5000/recommendation/bid/" +
+          jwt(localStorage.getItem("user")).user_id
+      );
+      var auction_details = [];
+      for (let recommendation of data) {
+        var res = await Axios.get(
+          "https://localhost:5000/auction/" + recommendation.auction_id
+        );
+        auction_details.push(res.data[0]);
+      }
+      console.log("1.", auction_details);
+    } else if (hasViewedAuctions.length !== 0) {
       const { data: data_view } = await Axios.get(
         "https://localhost:5000/recommendation/views/" +
           jwt(localStorage.getItem("user")).user_id
@@ -44,19 +64,17 @@ export default function Recommendation() {
         );
         auction_details.push(res.data[0]);
       }
-
-      if (data_view.length === 0) {
-        const { data: auction_items } = await Axios.get(
-          "https://localhost:5000/auction/"
+    } else {
+      const { data: auction_items } = await Axios.get(
+        "https://localhost:5000/auction/"
+      );
+      console.log("3.", auction_items);
+      auction_details = [];
+      for (let recommendation of auction_items) {
+        res = await Axios.get(
+          "https://localhost:5000/auction/" + recommendation.auction_id
         );
-        console.log("3.", auction_items);
-        auction_details = [];
-        for (let recommendation of auction_items) {
-          res = await Axios.get(
-            "https://localhost:5000/auction/" + recommendation.auction_id
-          );
-          auction_details.push(res.data[0]);
-        }
+        auction_details.push(res.data[0]);
       }
     }
     setRecommended(auction_details.slice(0, 5));
