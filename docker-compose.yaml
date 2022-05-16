@@ -1,0 +1,30 @@
+version: "3"
+services:
+  react:
+    image: react
+    build:
+      context: ./ui
+    ports:
+      - 3000:3000
+    container_name: react
+  nodejs:
+    image: nodejs
+    build:
+      context: ./api
+    ports:
+      - 5000:5000
+    container_name: nodejs
+    environment:
+      DATABASE_URL: postgres://postgres:password@db:5432/bidit
+    depends_on:
+      - db
+  db:
+    image: postgres:latest
+    ports:
+      - 5432:5432
+    env_file:
+      - ./api/.env
+    container_name: db
+    restart: always
+    volumes:
+      - ./api/database.sql:/docker-entrypoint-initdb.d/init.sql

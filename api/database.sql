@@ -1,5 +1,7 @@
-CREATE DATABASE bidit;
-\c bidit
+-- CREATE USER myUser;
+-- CREATE DATABASE bidit;
+-- GRANT ALL PRIVILEGES ON DATABASE myApp_dev TO myUser;
+-- \c bidit
 CREATE TABLE account(
     id SERIAL PRIMARY KEY,
     username VARCHAR(500) NOT NULL UNIQUE,
