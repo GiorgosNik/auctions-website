@@ -252,7 +252,7 @@ export default function AuctionPage() {
             </Text>
           </Box>
           {auction.started !== null &&
-            (auction.price_curr < auction.price_inst ||
+            (Number(auction.price_curr) < Number(auction.price_inst) ||
               auction.price_inst === null) &&
             auction.message_sent === false && (
               <FormControl id="bid_form" isRequired>
@@ -301,7 +301,7 @@ export default function AuctionPage() {
               </FormControl>
             )}
           {(auction.started === null ||
-            (auction.price_curr >= auction.price_inst &&
+            (Number(auction.price_curr) >= Number(auction.price_inst) &&
               auction.price_inst !== null)) && (
             <Text
               color={"purple.500"}

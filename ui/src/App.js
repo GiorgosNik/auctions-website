@@ -140,8 +140,7 @@ const AppHelper = () => {
                 }
               />
             )}
-          {(approved || user.username === "admin") &&
-            Object.keys(user).length !== 0 && (
+          {
               <Route
                 path="/auction/:id"
                 element={
@@ -150,7 +149,7 @@ const AppHelper = () => {
                   </>
                 }
               />
-            )}
+            }
           {(approved || user.username === "admin") &&
             Object.keys(user).length !== 0 && (
               <Route
