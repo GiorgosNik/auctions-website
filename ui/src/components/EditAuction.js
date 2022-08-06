@@ -2,6 +2,7 @@ import {
   Box,
   Container,
   Stack,
+  HStack,
   Text,
   Button,
   FormControl,
@@ -220,44 +221,6 @@ export default function AuctionMain() {
                         onChange={productDescriptionChangeHandler}
                       />
                     </FormControl>
-                    <Stack style={{ overflowY: "scroll", height: "300px" }}>
-                      {categories.map((category, index) => {
-                        return auctionCategories.includes(category.name) ? (
-                          <Checkbox
-                            defaultChecked
-                            colorScheme="purple"
-                            key={index}
-                            onChange={() =>
-                              categoryChangeHandler(category.name)
-                            }
-                          >
-                            {category.name}
-                          </Checkbox>
-                        ) : (
-                          <Checkbox
-                            colorScheme="purple"
-                            key={index}
-                            onChange={() =>
-                              categoryChangeHandler(category.name)
-                            }
-                          >
-                            {category.name}
-                          </Checkbox>
-                        );
-                      })}
-                    </Stack>
-                  </Stack>
-                </Stack>
-              </Stack>
-            </Box>
-            <Box>
-              <Stack spacing={{ base: 6, md: 6 }}>
-                <Stack
-                  spacing={{ base: 4, sm: 6 }}
-                  direction={"column"}
-                  divider={<StackDivider borderColor={"gray"} />}
-                >
-                  <Stack spacing={{ base: 2, md: 2 }}>
                     <Text
                       fontSize={{ base: "16px", lg: "18px" }}
                       color={"purple.500"}
@@ -335,6 +298,45 @@ export default function AuctionMain() {
                         </Box>
                       </FormControl>
                     </Stack>
+                    
+                  </Stack>
+                </Stack>
+              </Stack>
+            </Box>
+            <Box>
+              <Stack spacing={{ base: 6, md: 6 }}>
+                <Stack
+                  spacing={{ base: 4, sm: 6 }}
+                  direction={"column"}
+                  divider={<StackDivider borderColor={"gray"} />}
+                >
+                  <Stack spacing={{ base: 2, md: 2 }}>
+                    <Stack style={{ overflowY: "scroll", height: "300px" }}>
+                      {categories.map((category, index) => {
+                        return auctionCategories.includes(category.name) ? (
+                          <Checkbox
+                            defaultChecked
+                            colorScheme="purple"
+                            key={index}
+                            onChange={() =>
+                              categoryChangeHandler(category.name)
+                            }
+                          >
+                            {category.name}
+                          </Checkbox>
+                        ) : (
+                          <Checkbox
+                            colorScheme="purple"
+                            key={index}
+                            onChange={() =>
+                              categoryChangeHandler(category.name)
+                            }
+                          >
+                            {category.name}
+                          </Checkbox>
+                        );
+                      })}
+                    </Stack>
                   </Stack>
                 </Stack>
               </Stack>
@@ -343,10 +345,11 @@ export default function AuctionMain() {
                   {errorMessage}
                 </span>
               )}
+              <HStack paddingTop="40px">
               {auction.started === null && (
                 <Button
                   w={"full"}
-                  mt={8}
+                  mt={0}
                   size={"lg"}
                   py={"7"}
                   color={"white"}
@@ -365,7 +368,7 @@ export default function AuctionMain() {
               {auction.started === null && (
                 <Button
                   w={"full"}
-                  mt={8}
+                  mt={0}
                   size={"lg"}
                   py={"7"}
                   bg={"purple.600"}
@@ -400,6 +403,7 @@ export default function AuctionMain() {
                   Start Auction
                 </Button>
               )}
+              </HStack>
             </Box>
           </SimpleGrid>
         </Stack>
@@ -463,40 +467,13 @@ export default function AuctionMain() {
                         resize="none"
                       />
                     </FormControl>
-                    <Stack style={{ overflowY: "scroll", height: "300px" }}>
-                      {categories.map((category, index) => {
-                        return auctionCategories.includes(category.name) ? (
-                          <Checkbox
-                            defaultChecked
-                            isReadOnly
-                            colorScheme="purple"
-                            key={index}
-                          >
-                            {category.name}
-                          </Checkbox>
-                        ) : (
-                          <Checkbox colorScheme="purple" key={index} isReadOnly>
-                            {category.name}
-                          </Checkbox>
-                        );
-                      })}
-                    </Stack>
-                  </Stack>
-                </Stack>
-              </Stack>
-            </Box>
-            <Box>
-              <Stack spacing={{ base: 6, md: 6 }}>
-                <Stack
-                  spacing={{ base: 4, sm: 6 }}
-                  direction={"column"}
-                  divider={<StackDivider borderColor={"gray"} />}
-                >
-                  <Stack spacing={{ base: 2, md: 2 }}>
+                    
+                    <Stack>
                     <Text
                       fontSize={{ base: "16px", lg: "18px" }}
                       color={"purple.500"}
                       fontWeight={"600"}
+                      paddingTop= {'25px'}
                       textTransform={"uppercase"}
                     >
                       Auction Details
@@ -570,6 +547,38 @@ export default function AuctionMain() {
                         </Box>
                       </FormControl>
                     </Stack>
+                    </Stack>
+                  </Stack>
+                </Stack>
+              </Stack>
+            </Box>
+            <Box>
+              <Stack spacing={{ base: 6, md: 6 }}>
+                <Stack
+                  spacing={{ base: 4, sm: 6 }}
+                  direction={"column"}
+                  divider={<StackDivider borderColor={"gray"} />}
+                >
+                  <Stack spacing={{ base: 2, md: 2 }}>
+                    <Stack style={{ overflowY: "scroll", height: "422px" }}>
+                      {categories.map((category, index) => {
+                        return auctionCategories.includes(category.name) ? (
+                          <Checkbox
+                            defaultChecked
+                            isReadOnly
+                            colorScheme="purple"
+                            key={index}
+                          >
+                            {category.name}
+                          </Checkbox>
+                        ) : (
+                          <Checkbox colorScheme="purple" key={index} isReadOnly>
+                            {category.name}
+                          </Checkbox>
+                        );
+                      })}
+                    </Stack>
+                    
                   </Stack>
                 </Stack>
               </Stack>

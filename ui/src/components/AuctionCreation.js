@@ -16,6 +16,7 @@ import {
   useColorModeValue,
   Checkbox,
   Textarea,
+  HStack,
 } from "@chakra-ui/react";
 import Dropzone from "react-dropzone";
 import React, { useState, useEffect } from "react";
@@ -190,7 +191,7 @@ export default function AuctionMain() {
                   >
                     Product Details
                   </Text>
-                  <FormControl id="auction_name" isRequired>
+                  <FormControl id="auction_name" paddingTop="20px" isRequired>
                     <FormLabel
                       color={useColorModeValue("gray.600", "gray.500")}
                       fontWeight={"600"}
@@ -207,7 +208,7 @@ export default function AuctionMain() {
                       onChange={auctionNameChangeHandler}
                     />
                   </FormControl>
-                  <FormControl id="product_name" isRequired>
+                  <FormControl id="product_name" paddingTop="20px" isRequired>
                     <FormLabel
                       color={useColorModeValue("gray.600", "gray.500")}
                       fontWeight={"600"}
@@ -223,22 +224,7 @@ export default function AuctionMain() {
                       onChange={productNameChangeHandler}
                     />
                   </FormControl>
-                  <FormControl id="product_description" isRequired>
-                    <FormLabel
-                      color={useColorModeValue("gray.600", "gray.500")}
-                      fontWeight={"600"}
-                    >
-                      Product Description
-                    </FormLabel>
-                    <Textarea
-                      name="message"
-                      placeholder="Give the buyer a good description of your product and it's features."
-                      _placeholder={{ color: "gray.500" }}
-                      rows={5}
-                      resize="none"
-                      onChange={productDescriptionChangeHandler}
-                    />
-                  </FormControl>
+                  <Stack paddingTop="20px">
                   <Stack style={{ overflowY: "scroll", height: "250px" }}>
                     {categories.map((category, index) => {
                       return (
@@ -251,6 +237,7 @@ export default function AuctionMain() {
                         </Checkbox>
                       );
                     })}
+                    </Stack>
                   </Stack>
                 </Stack>
               </Stack>
@@ -268,8 +255,24 @@ export default function AuctionMain() {
                 }
               >
                 <Stack spacing={{ base: 2, md: 2 }}>
+                <FormControl id="product_description" paddingTop= '53px' isRequired>
+                    <FormLabel
+                      color={useColorModeValue("gray.600", "gray.500")}
+                      fontWeight={"600"}
+                    >
+                      Product Description
+                    </FormLabel>
+                    <Textarea
+                      name="message"
+                      placeholder="Give the buyer a good description of your product and it's features."
+                      _placeholder={{ color: "gray.500" }}
+                      rows={5}
+                      resize="none"
+                      onChange={productDescriptionChangeHandler}
+                    />
+                  </FormControl>
                   <Stack direction={["column", "row"]}>
-                    <FormControl id="starting_price" isRequired>
+                    <FormControl id="starting_price" paddingTop="20px" isRequired>
                       <Box>
                         <Stack direction={["column"]}>
                           <FormLabel
@@ -305,7 +308,7 @@ export default function AuctionMain() {
                         </Stack>
                       </Box>
                     </FormControl>
-                    <FormControl id="buyOutPrice">
+                    <FormControl paddingTop="20px" id="buyOutPrice">
                       <Box>
                         <Stack direction={["column"]}>
                           <FormLabel
@@ -342,7 +345,7 @@ export default function AuctionMain() {
                       </Box>
                     </FormControl>
                   </Stack>
-                  <FormControl id="imageUploader">
+                  <FormControl paddingTop="20px" id="imageUploader">
                     <Box>
                       <Stack direction={["column"]}>
                         <FormLabel
@@ -376,9 +379,10 @@ export default function AuctionMain() {
                 {errorMessage}
               </span>
             )}
+            <HStack paddingTop="30px">
             <Button
               w={"full"}
-              mt={8}
+              mt={0}
               size={"lg"}
               py={"7"}
               bg={"purple.600"}
@@ -395,7 +399,7 @@ export default function AuctionMain() {
             </Button>
             <Button
               w={"full"}
-              mt={3}
+              mt={5}
               size={"lg"}
               py={"7"}
               bg={"purple.600"}
@@ -410,6 +414,8 @@ export default function AuctionMain() {
             >
               Add more items to auction
             </Button>
+            </HStack>
+            
           </Box>
         </SimpleGrid>
       </Stack>

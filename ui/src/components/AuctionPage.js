@@ -233,23 +233,26 @@ export default function AuctionPage() {
             <Text
               color={useColorModeValue("gray.900", "gray.400")}
               fontWeight={400}
+                fontSize={"2xl"}
+            >
+              {"Starting Price: $" + auction.price_start}
+            </Text>
+            {auction.price_inst !== "" && auction.price_inst !== null && (
+              <Text fontWeight={400}
+              fontSize={"2xl"}>
+                {"Buyout Price: $" + auction.price_inst}
+              </Text>
+            )}
+            <Text
+              color={useColorModeValue("gray.900", "gray.400")}
+              fontWeight={400}
               fontSize={"2xl"}
             >
               {"Auction: " + auction.auction_name}
             </Text>
-            {auction.price_inst !== "" && auction.price_inst !== null && (
-              <Text fontWeight={200} fontSize={"lg"}>
-                {"Buyout Price: $" + auction.price_inst}
-              </Text>
-            )}
+            
 
-            <Text
-              color={useColorModeValue("gray.900", "gray.400")}
-              fontWeight={200}
-              fontSize={"lg"}
-            >
-              {"Starting Price: $" + auction.price_start}
-            </Text>
+            
           </Box>
           {auction.started !== null &&
             (Number(auction.price_curr) < Number(auction.price_inst) ||
